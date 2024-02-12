@@ -33,6 +33,7 @@ Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0 \
 Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang \
 USBPD/App \
 USBPD/Target \
+USBPD \
 Utilities/GUI_INTERFACE \
 Utilities/TRACER_EMB \
 

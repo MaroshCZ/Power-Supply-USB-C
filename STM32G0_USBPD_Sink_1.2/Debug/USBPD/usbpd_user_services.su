@@ -1,0 +1,5 @@
+../USBPD/usbpd_user_services.c:208:6:USBPD_USER_SERV_StoreSRCPDO	32	static
+../USBPD/usbpd_user_services.c:231:6:USBPD_USER_SERV_EvaluateCapa	192	static
+../USBPD/usbpd_user_services.c:301:17:USER_SERV_SNK_EvaluateMatchWithSRCPDO	120	static
+../USBPD/usbpd_user_services.c:481:17:USER_SERV_FindVoltageIndex	72	static
+../USBPD/usbpd_user_services.c:621:13:USER_SERV_SNK_BuildRDOfromSelectedPDO	176	static

@@ -1,4 +1,4 @@
-USBPD/App/usbpd_user_services.o: ../USBPD/App/usbpd_user_services.c \
+USBPD/usbpd_user_services.o: ../USBPD/usbpd_user_services.c \
  ../Core/Inc/main.h ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h \
  ../Core/Inc/stm32g0xx_hal_conf.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_rcc.h \
@@ -45,9 +45,8 @@ USBPD/App/usbpd_user_services.o: ../USBPD/App/usbpd_user_services.c \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_exti.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
- ../Drivers/CMSIS/Include/cmsis_compiler.h \
- ../USBPD/App/usbpd_user_services.h ../USBPD/Target/usbpd_dpm_conf.h \
- ../USBPD/App/usbpd_pdo_defs.h \
+ ../Drivers/CMSIS/Include/cmsis_compiler.h ../USBPD/usbpd_user_services.h \
+ ../USBPD/Target/usbpd_dpm_conf.h ../USBPD/App/usbpd_pdo_defs.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
  ../USBPD/Target/usbpd_dpm_user.h ../USBPD/Target/usbpd_vdm_user.h \
  ../Utilities/GUI_INTERFACE/gui_api.h ../Core/Inc/usbpd_gui_memmap.h \
@@ -102,7 +101,7 @@ USBPD/App/usbpd_user_services.o: ../USBPD/App/usbpd_user_services.c \
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
 ../Drivers/CMSIS/Include/cmsis_compiler.h:
-../USBPD/App/usbpd_user_services.h:
+../USBPD/usbpd_user_services.h:
 ../USBPD/Target/usbpd_dpm_conf.h:
 ../USBPD/App/usbpd_pdo_defs.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:

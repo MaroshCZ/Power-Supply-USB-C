@@ -1,4 +1,3 @@
-# To tell CubeMX to include usbpd_user_services upon code generation
 
 [ProjectFiles]
 HeaderPath=
@@ -6,4 +5,5 @@ HeaderPath=
 Define=
 HALModule=
 [Groups]
-USBPD=USBPD/usbpd_user_services.c
+USBPD=USBPD\usbpd_user_services.c; USBPD\usbpd_user_services.h
+Doc = C:\ST\STM32_CubeIDE\workspace1.14\UCPD\STM32G0_USBPD_Sink_1.2\Docs

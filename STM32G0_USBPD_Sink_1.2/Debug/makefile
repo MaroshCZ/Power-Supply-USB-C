@@ -13,6 +13,7 @@ RM := rm -rf
 -include Utilities/GUI_INTERFACE/subdir.mk
 -include USBPD/Target/subdir.mk
 -include USBPD/App/subdir.mk
+-include USBPD/subdir.mk
 -include Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/subdir.mk
 -include Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/subdir.mk
 -include Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/subdir.mk
