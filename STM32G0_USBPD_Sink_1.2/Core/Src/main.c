@@ -20,12 +20,12 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "usbpd.h"
-#include <stdio.h>
-#include <string.h>
-#include "usbpd_trace.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include <stdio.h>
+#include <string.h>
+#include <usbpd_trace.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

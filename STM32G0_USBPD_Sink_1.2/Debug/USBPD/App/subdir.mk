@@ -8,19 +8,22 @@ C_SRCS += \
 ../USBPD/App/usbpd.c \
 ../USBPD/App/usbpd_dpm_core.c \
 ../USBPD/App/usbpd_pwr_if.c \
-../USBPD/App/usbpd_usb_if.c 
+../USBPD/App/usbpd_usb_if.c \
+../USBPD/App/usbpd_user_services.c 
 
 OBJS += \
 ./USBPD/App/usbpd.o \
 ./USBPD/App/usbpd_dpm_core.o \
 ./USBPD/App/usbpd_pwr_if.o \
-./USBPD/App/usbpd_usb_if.o 
+./USBPD/App/usbpd_usb_if.o \
+./USBPD/App/usbpd_user_services.o 
 
 C_DEPS += \
 ./USBPD/App/usbpd.d \
 ./USBPD/App/usbpd_dpm_core.d \
 ./USBPD/App/usbpd_pwr_if.d \
-./USBPD/App/usbpd_usb_if.d 
+./USBPD/App/usbpd_usb_if.d \
+./USBPD/App/usbpd_user_services.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -30,7 +33,7 @@ USBPD/App/%.o USBPD/App/%.su USBPD/App/%.cyclo: ../USBPD/App/%.c USBPD/App/subdi
 clean: clean-USBPD-2f-App
 
 clean-USBPD-2f-App:
-	-$(RM) ./USBPD/App/usbpd.cyclo ./USBPD/App/usbpd.d ./USBPD/App/usbpd.o ./USBPD/App/usbpd.su ./USBPD/App/usbpd_dpm_core.cyclo ./USBPD/App/usbpd_dpm_core.d ./USBPD/App/usbpd_dpm_core.o ./USBPD/App/usbpd_dpm_core.su ./USBPD/App/usbpd_pwr_if.cyclo ./USBPD/App/usbpd_pwr_if.d ./USBPD/App/usbpd_pwr_if.o ./USBPD/App/usbpd_pwr_if.su ./USBPD/App/usbpd_usb_if.cyclo ./USBPD/App/usbpd_usb_if.d ./USBPD/App/usbpd_usb_if.o ./USBPD/App/usbpd_usb_if.su
+	-$(RM) ./USBPD/App/usbpd.cyclo ./USBPD/App/usbpd.d ./USBPD/App/usbpd.o ./USBPD/App/usbpd.su ./USBPD/App/usbpd_dpm_core.cyclo ./USBPD/App/usbpd_dpm_core.d ./USBPD/App/usbpd_dpm_core.o ./USBPD/App/usbpd_dpm_core.su ./USBPD/App/usbpd_pwr_if.cyclo ./USBPD/App/usbpd_pwr_if.d ./USBPD/App/usbpd_pwr_if.o ./USBPD/App/usbpd_pwr_if.su ./USBPD/App/usbpd_usb_if.cyclo ./USBPD/App/usbpd_usb_if.d ./USBPD/App/usbpd_usb_if.o ./USBPD/App/usbpd_usb_if.su ./USBPD/App/usbpd_user_services.cyclo ./USBPD/App/usbpd_user_services.d ./USBPD/App/usbpd_user_services.o ./USBPD/App/usbpd_user_services.su
 
 .PHONY: clean-USBPD-2f-App
 

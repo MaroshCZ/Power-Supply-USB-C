@@ -36,7 +36,7 @@
 #include "stdio.h"
 #endif /* _TRACE */
 /* USER CODE BEGIN Includes */
-
+#include "usbpd_user_services.h"
 /* USER CODE END Includes */
 
 /** @addtogroup STM32_USBPD_APPLICATION
@@ -375,6 +375,10 @@ void USBPD_DPM_SetDataInfo(uint8_t PortNum, USBPD_CORE_DataInfoType_TypeDef Data
   /* Check type of information targeted by request */
   switch(DataId)
   {
+  /* Case Received Source PDO values Data information :*/
+   case USBPD_CORE_DATATYPE_RCV_SRC_PDO:         /*!< Storage of Received Source PDO values        */
+       USBPD_USER_SERV_StoreSRCPDO(PortNum, Ptr, Size);
+       break;
 //  case USBPD_CORE_DATATYPE_RDO_POSITION:      /*!< Reset the PDO position selected by the sink only */
     // break;
 //  case USBPD_CORE_DATATYPE_RCV_SRC_PDO:       /*!< Storage of Received Source PDO values        */
@@ -421,16 +425,20 @@ void USBPD_DPM_SNK_EvaluateCapabilities(uint8_t PortNum, uint32_t *PtrRequestDat
 {
 /* USER CODE BEGIN USBPD_DPM_SNK_EvaluateCapabilities */
 
-	USBPD_SNKRDO_TypeDef rdo;
+	/* Variable PDO*/
+	USBPD_USER_SERV_EvaluateCapa(PortNum, PtrRequestData, PtrPowerObjectType);
+
+	/* Fixed basic PDO */
+	//USBPD_SNKRDO_TypeDef rdo;
 	/* Initialize RDO */
-	rdo.d32 = 0;
+	//rdo.d32 = 0;
 	/* Prepare the requested pdo */
-	rdo.FixedVariableRDO.ObjectPosition = 1;
-	rdo.FixedVariableRDO.OperatingCurrentIn10mAunits = 50;
-	rdo.FixedVariableRDO.MaxOperatingCurrent10mAunits = 50;
-	rdo.FixedVariableRDO.CapabilityMismatch = 0;
-	*PtrPowerObjectType = USBPD_CORE_PDO_TYPE_FIXED;
-	*PtrRequestData = rdo.d32;
+	//rdo.FixedVariableRDO.ObjectPosition = 1;
+	//rdo.FixedVariableRDO.OperatingCurrentIn10mAunits = 50;
+	//rdo.FixedVariableRDO.MaxOperatingCurrent10mAunits = 50;
+	//rdo.FixedVariableRDO.CapabilityMismatch = 0;
+	//*PtrPowerObjectType = USBPD_CORE_PDO_TYPE_FIXED;
+	//*PtrRequestData = rdo.d32;
 
 /* USER CODE END USBPD_DPM_SNK_EvaluateCapabilities */
 }

@@ -70,8 +70,8 @@ all: main-build
 main-build: STM32G0_USBPD_Sink_1.2.elf secondary-outputs
 
 # Tool invocations
-STM32G0_USBPD_Sink_1.2.elf STM32G0_USBPD_Sink_1.2.map: $(OBJS) $(USER_OBJS) C:\ST\STM32_CubeIDE\workspace1.14\STM32G0_USBPD_Sink_1.2\STM32G0B1RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "STM32G0_USBPD_Sink_1.2.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\ST\STM32_CubeIDE\workspace1.14\STM32G0_USBPD_Sink_1.2\STM32G0B1RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32G0_USBPD_Sink_1.2.map" -Wl,--gc-sections -static -L../Middlewares/ST/STM32_USBPD_Library/Core/lib --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+STM32G0_USBPD_Sink_1.2.elf STM32G0_USBPD_Sink_1.2.map: $(OBJS) $(USER_OBJS) C:\ST\STM32_CubeIDE\workspace1.14\UCPD\STM32G0_USBPD_Sink_1.2\STM32G0B1RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "STM32G0_USBPD_Sink_1.2.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m0plus -T"C:\ST\STM32_CubeIDE\workspace1.14\UCPD\STM32G0_USBPD_Sink_1.2\STM32G0B1RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="STM32G0_USBPD_Sink_1.2.map" -Wl,--gc-sections -static -L../Middlewares/ST/STM32_USBPD_Library/Core/lib --specs=nano.specs -mfloat-abi=soft -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

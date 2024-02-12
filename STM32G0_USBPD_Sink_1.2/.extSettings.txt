@@ -1,0 +1,9 @@
+# To tell CubeMX to include usbpd_user_services upon code generation
+
+[ProjectFiles]
+HeaderPath=
+[Others]
+Define=
+HALModule=
+[Groups]
+USBPD=USBPD/usbpd_user_services.c
