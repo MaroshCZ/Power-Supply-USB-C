@@ -530,10 +530,12 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
 	if (GPIO_Pin == USER_BUTTON_Pin) /* Will display in trace the VBUS value when user button
 is pressed */
 	{
+		//Get Voltage level into TRACE
 		char _str[10];
 		BSP_PWR_VBUSGetVoltage(0);
 		sprintf(_str,"VBUS:%lu", BSP_PWR_VBUSGetVoltage(0));
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+
 	}
 }
 /* USER CODE END 4 */
@@ -573,7 +575,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-
+  USBPD_DPM_TimerCounter(); //related to PD device manager
+  GUI_TimerCounter(); //updating a graphical user interface (GUI) based on timer events.
   /* USER CODE END Callback 1 */
 }
 

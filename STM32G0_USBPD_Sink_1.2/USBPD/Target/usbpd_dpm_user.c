@@ -433,7 +433,7 @@ void USBPD_DPM_SNK_EvaluateCapabilities(uint8_t PortNum, uint32_t *PtrRequestDat
 	/* Initialize RDO */
 	rdo.d32 = 0;
 	/* Prepare the requested pdo */
-	rdo.FixedVariableRDO.ObjectPosition = 2;
+	rdo.FixedVariableRDO.ObjectPosition = 3;
 	rdo.FixedVariableRDO.OperatingCurrentIn10mAunits = 50;
 	rdo.FixedVariableRDO.MaxOperatingCurrent10mAunits = 50;
 	rdo.FixedVariableRDO.CapabilityMismatch = 0;

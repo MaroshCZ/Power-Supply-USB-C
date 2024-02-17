@@ -24,6 +24,6 @@
 ../Core/Src/main.c:456:13:MX_DMA_Init	16	static
 ../Core/Src/main.c:477:13:MX_GPIO_Init	48	static
 ../Core/Src/main.c:528:6:HAL_GPIO_EXTI_Falling_Callback	48	static
-../Core/Src/main.c:548:6:StartDefaultTask	16	static
-../Core/Src/main.c:567:6:HAL_TIM_PeriodElapsedCallback	16	static
-../Core/Src/main.c:584:6:Error_Handler	8	static,ignoring_inline_asm
+../Core/Src/main.c:555:6:StartDefaultTask	16	static
+../Core/Src/main.c:574:6:HAL_TIM_PeriodElapsedCallback	16	static
+../Core/Src/main.c:592:6:Error_Handler	8	static,ignoring_inline_asm

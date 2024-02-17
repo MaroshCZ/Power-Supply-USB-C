@@ -928,7 +928,7 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetVoltage(uint32_t Instance, uint32_t *pVoltag
 	  val = __LL_ADC_CALC_DATA_TO_VOLTAGE( VDDA_APPLI, \
 	  LL_ADC_REG_ReadConversionData12(ADC1), \
 	  LL_ADC_RESOLUTION_12B); /* mV */
-	  /* X-NUCLEO-USBPDM board is used */
+	  /* X-NUCLEO-SNK1M1 board is used */
 	  /* Value is multiplied by 5.97 (Divider R6/R7 (40.2K/200K) for VSENSE) */
 	  val *= 597;
 	  val /= 100;
@@ -957,10 +957,10 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetCurrent(uint32_t Instance, int32_t *pCurrent
   if ((Instance >= USBPD_PWR_INSTANCES_NBR) || (NULL == pCurrent))
   {
     ret = BSP_ERROR_WRONG_PARAM;
+    *pCurrent = 0;
   }
   else
   {
-    *pCurrent = 0;
     ret = BSP_ERROR_FEATURE_NOT_SUPPORTED;
   }
   /* !!!
