@@ -117,13 +117,27 @@ uint32_t PORT0_PDO_ListSNK[USBPD_MAX_NB_PDO] =
   /* PDO 3 */
         (0x0603C096U),
   /* PDO 4 */
-        (0x00000000U),
+		( ((PWR_A_10MA(1.5)) << USBPD_PDO_SRC_FIXED_MAX_CURRENT_Pos) |
+		   ((PWR_V_100MV(12)) << USBPD_PDO_SRC_FIXED_VOLTAGE_Pos)
+		),
   /* PDO 5 */
-        (0x00000000U),
+		( ((PWR_A_10MA(2.25)) << USBPD_PDO_SNK_APDO_MAX_CURRENT_Pos)    |
+	      ((PWR_V_100MV(3.3)) << USBPD_PDO_SNK_APDO_MIN_VOLTAGE_Pos) |
+		  ((PWR_V_100MV(11)) << USBPD_PDO_SNK_APDO_MAX_VOLTAGE_Pos)  |
+		  USBPD_PDO_TYPE_APDO
+		),
   /* PDO 6 */
-        (0x00000000U),
+		( ((PWR_A_10MA(3)) << USBPD_PDO_SNK_APDO_MAX_CURRENT_Pos)    |
+		  ((PWR_V_100MV(3.3)) << USBPD_PDO_SNK_APDO_MIN_VOLTAGE_Pos) |
+		  ((PWR_V_100MV(16)) << USBPD_PDO_SNK_APDO_MAX_VOLTAGE_Pos)  |
+		  USBPD_PDO_TYPE_APDO
+		),
   /* PDO 7 */
-        (0x00000000U)
+        ( ((PWR_A_10MA(2.5)) << USBPD_PDO_SNK_APDO_MAX_CURRENT_Pos)  |
+          ((PWR_V_100MV(3.3)) << USBPD_PDO_SNK_APDO_MIN_VOLTAGE_Pos) |
+          ((PWR_V_100MV(21)) << USBPD_PDO_SNK_APDO_MAX_VOLTAGE_Pos)  |
+          USBPD_PDO_TYPE_APDO
+        ),
 };
 
 #endif

@@ -426,19 +426,21 @@ void USBPD_DPM_SNK_EvaluateCapabilities(uint8_t PortNum, uint32_t *PtrRequestDat
 /* USER CODE BEGIN USBPD_DPM_SNK_EvaluateCapabilities */
 
 	/* Variable PDO*/
-	//USBPD_USER_SERV_EvaluateCapa(PortNum, PtrRequestData, PtrPowerObjectType);
+	USBPD_USER_SERV_EvaluateCapa(PortNum, PtrRequestData, PtrPowerObjectType);
+
 
 	/* Fixed basic PDO */
-	USBPD_SNKRDO_TypeDef rdo;
+	//USBPD_SNKRDO_TypeDef rdo;
 	/* Initialize RDO */
-	rdo.d32 = 0;
+	//rdo.d32 = 0;
 	/* Prepare the requested pdo */
-	rdo.FixedVariableRDO.ObjectPosition = 3;
+	/*rdo.FixedVariableRDO.ObjectPosition = 3;
 	rdo.FixedVariableRDO.OperatingCurrentIn10mAunits = 50;
 	rdo.FixedVariableRDO.MaxOperatingCurrent10mAunits = 50;
 	rdo.FixedVariableRDO.CapabilityMismatch = 0;
 	*PtrPowerObjectType = USBPD_CORE_PDO_TYPE_FIXED;
-	*PtrRequestData = rdo.d32;
+	*PtrRequestData = rdo.d32;*/
+
 
 /* USER CODE END USBPD_DPM_SNK_EvaluateCapabilities */
 }
@@ -624,8 +626,40 @@ USBPD_StatusTypeDef USBPD_DPM_RequestMessageRequest(uint8_t PortNum, uint8_t Ind
 /* USER CODE BEGIN USBPD_DPM_RequestMessageRequest */
   /* To be adapted to call the PE function */
   /*       _status = USBPD_PE_Send_Request(PortNum, rdo.d32, pdo_object);*/
-  DPM_USER_DEBUG_TRACE(PortNum, "ADVICE: update USBPD_DPM_RequestMessageRequest");
-/* USER CODE END USBPD_DPM_RequestMessageRequest */
+  //DPM_USER_DEBUG_TRACE(PortNum, "ADVICE: update USBPD_DPM_RequestMessageRequest");
+  //Function declaration so one could ask for PDO with UCPD GUI
+  //source: https://community.st.com/t5/stm32-mcus-other-solutions/message-rejected-for-this-port-configuration-on-the-stm32-x-cube/td-p/86358
+  uint32_t voltage, allowablepower;
+    USBPD_SNKRDO_TypeDef rdo;
+    USBPD_PDO_TypeDef  pdo;
+    USBPD_CORE_PDO_Type_TypeDef pdo_object;
+    USBPD_USER_SettingsTypeDef *puser = (USBPD_USER_SettingsTypeDef *)&DPM_USER_Settings[PortNum];
+    USBPD_DPM_SNKPowerRequestDetailsTypeDef request_details;
+    rdo.d32 = 0;
+
+    /* selected SRC PDO */
+    pdo.d32 = DPM_Ports[PortNum].DPM_ListOfRcvSRCPDO[(IndexSrcPDO - 1)];
+    voltage = RequestedVoltage;
+    allowablepower = (puser->DPM_SNKRequestedPower.MaxOperatingCurrentInmAunits * RequestedVoltage) / 1000U;
+
+    if (USBPD_TRUE == USER_SERV_SNK_EvaluateMatchWithSRCPDO(PortNum, pdo.d32, &voltage, &allowablepower))
+    {
+      /* Check that voltage has been correctly selected */
+      if (RequestedVoltage == voltage)
+      {
+        request_details.RequestedVoltageInmVunits    = RequestedVoltage;
+        request_details.OperatingCurrentInmAunits    = (1000U * allowablepower)/RequestedVoltage;
+        request_details.MaxOperatingCurrentInmAunits = puser->DPM_SNKRequestedPower.MaxOperatingCurrentInmAunits;
+        request_details.MaxOperatingPowerInmWunits   = puser->DPM_SNKRequestedPower.MaxOperatingPowerInmWunits;
+        request_details.OperatingPowerInmWunits      = puser->DPM_SNKRequestedPower.OperatingPowerInmWunits;
+
+        USER_SERV_SNK_BuildRDOfromSelectedPDO(PortNum, (IndexSrcPDO - 1), &request_details, &rdo, &pdo_object);
+
+        _status = USBPD_PE_Send_Request(PortNum, rdo.d32, pdo_object);
+      }
+    }
+
+  /* USER CODE END USBPD_DPM_RequestMessageRequest */
   DPM_USER_ERROR_TRACE(PortNum, _status, "REQUEST not accepted by the stack");
   return _status;
 }

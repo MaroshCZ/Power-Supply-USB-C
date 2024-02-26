@@ -126,9 +126,18 @@ void USBPD_USER_SERV_StoreSRCPDO(uint8_t PortNum, uint8_t *Ptr, uint32_t Size);
 void USBPD_USER_SERV_EvaluateCapa(uint8_t PortNum,
                                   uint32_t *PtrRequestData,
                                   USBPD_CORE_PDO_Type_TypeDef *PtrPowerObjectType);
+uint32_t  USER_SERV_SNK_EvaluateMatchWithSRCPDO(uint8_t PortNum,
+                                                      uint32_t SrcPDO,
+                                                      uint32_t *PtrRequestedVoltage,
+                                                      uint32_t *PtrRequestedPower);
+void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
+                                                      uint8_t IndexSrcPDO,
+                                                      USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
+                                                      USBPD_SNKRDO_TypeDef *Rdo,
+                                                      USBPD_CORE_PDO_Type_TypeDef *PtrPowerObject);
 #endif /* _SNK */
 /* USER CODE BEGIN Private_Variables */
-
+extern USBPD_HandleTypeDef DPM_Ports[USBPD_PORT_COUNT];
 /* USER CODE END Private_Variables */
 
 /* Exported functions --------------------------------------------------------*/

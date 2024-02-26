@@ -62,7 +62,7 @@ USBPD_HandleTypeDef                     DPM_Ports[USBPD_PORT_COUNT];
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN USBPD_USER_PRIVATE_FUNCTIONS_Prototypes */
 #if defined (_SNK)
-static uint32_t USER_SERV_SNK_EvaluateMatchWithSRCPDO(uint8_t PortNum,
+uint32_t USER_SERV_SNK_EvaluateMatchWithSRCPDO(uint8_t PortNum,
                                                       uint32_t SrcPDO,
                                                       uint32_t *PtrRequestedVoltage,
                                                       uint32_t *PtrRequestedPower);
@@ -71,7 +71,7 @@ static uint32_t USER_SERV_FindVoltageIndex(uint32_t PortNum,
                                            USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
                                            uint8_t Method);
 
-static void     USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
+void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
                                                       uint8_t IndexSrcPDO,
                                                       USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
                                                       USBPD_SNKRDO_TypeDef *Rdo,
@@ -298,7 +298,7 @@ void USBPD_USER_SERV_EvaluateCapa(uint8_t PortNum,
                                 (only valid if USBPD_TRUE is returned) in mW
   * @retval USBPD_FALSE of USBPD_TRUE (USBPD_TRUE returned in SRC PDO is considered matching with SNK profile)
   */
-static uint32_t USER_SERV_SNK_EvaluateMatchWithSRCPDO(uint8_t PortNum,
+uint32_t USER_SERV_SNK_EvaluateMatchWithSRCPDO(uint8_t PortNum,
                                                       uint32_t SrcPDO,
                                                       uint32_t *PtrRequestedVoltage,
                                                       uint32_t *PtrRequestedPower)
@@ -618,7 +618,7 @@ static uint32_t USER_SERV_FindVoltageIndex(uint32_t PortNum,
   * @param  PtrPowerObject    Pointer on the selected power object
   * @retval None
   */
-static void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
+void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
                                                   uint8_t IndexSrcPDO,
                                                   USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
                                                   USBPD_SNKRDO_TypeDef *Rdo,

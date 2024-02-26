@@ -8278,7 +8278,7 @@ Discarded input sections
                 0x0000000000000000       0x48 ./USBPD/Target/usbpd_pwr_user.o
  .text.BSP_PWR_VBUSSetVoltage_APDO
                 0x0000000000000000       0x40 ./USBPD/Target/usbpd_pwr_user.o
- .text.BSP_PWR_VBUSGetVoltage
+ .text.BSP_PWR_VBUSGetCurrent
                 0x0000000000000000       0x3c ./USBPD/Target/usbpd_pwr_user.o
  .text.BSP_PWR_VCONNInit
                 0x0000000000000000       0x3c ./USBPD/Target/usbpd_pwr_user.o
@@ -8676,19 +8676,6 @@ Discarded input sections
                 0x0000000000000000        0x7 ./USBPD/usbpd_user_services.o
  .rodata.LPUART_PRESCALER_TAB
                 0x0000000000000000       0x18 ./USBPD/usbpd_user_services.o
- .bss.USER_SERV_PDO_Sel_Method
-                0x0000000000000000        0x1 ./USBPD/usbpd_user_services.o
- .rodata        0x0000000000000000       0x7f ./USBPD/usbpd_user_services.o
- .text.USBPD_USER_SERV_EvaluateCapa
-                0x0000000000000000      0x1d0 ./USBPD/usbpd_user_services.o
- .text.USER_SERV_SNK_EvaluateMatchWithSRCPDO
-                0x0000000000000000      0x2cc ./USBPD/usbpd_user_services.o
- .text.USER_SERV_FindVoltageIndex
-                0x0000000000000000      0x1f4 ./USBPD/usbpd_user_services.o
- .rodata.USER_SERV_FindVoltageIndex
-                0x0000000000000000       0x18 ./USBPD/usbpd_user_services.o
- .text.USER_SERV_SNK_BuildRDOfromSelectedPDO
-                0x0000000000000000      0x3dc ./USBPD/usbpd_user_services.o
  .debug_macro   0x0000000000000000      0xaae ./USBPD/usbpd_user_services.o
  .debug_macro   0x0000000000000000      0x12a ./USBPD/usbpd_user_services.o
  .debug_macro   0x0000000000000000       0x2e ./USBPD/usbpd_user_services.o
@@ -9832,7 +9819,7 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
                 0x0000000008000000                g_pfnVectors
                 0x00000000080000bc                . = ALIGN (0x4)
 
-.text           0x00000000080000c0    0x18008
+.text           0x00000000080000c0    0x18ac8
                 0x00000000080000c0                . = ALIGN (0x4)
  *(.text)
  .text          0x00000000080000c0       0x48 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtbegin.o
@@ -11050,605 +11037,619 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
                 0x000000000801120c       0xbc ./USBPD/Target/usbpd_dpm_user.o
                 0x000000000801120c                USBPD_DPM_SetDataInfo
  .text.USBPD_DPM_SNK_EvaluateCapabilities
-                0x00000000080112c8       0x6c ./USBPD/Target/usbpd_dpm_user.o
+                0x00000000080112c8       0x28 ./USBPD/Target/usbpd_dpm_user.o
                 0x00000000080112c8                USBPD_DPM_SNK_EvaluateCapabilities
  .text.USBPD_DPM_ExtendedMessageReceived
-                0x0000000008011334       0x28 ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011334                USBPD_DPM_ExtendedMessageReceived
+                0x00000000080112f0       0x28 ./USBPD/Target/usbpd_dpm_user.o
+                0x00000000080112f0                USBPD_DPM_ExtendedMessageReceived
  .text.USBPD_DPM_EnterErrorRecovery
-                0x000000000801135c       0x1e ./USBPD/Target/usbpd_dpm_user.o
-                0x000000000801135c                USBPD_DPM_EnterErrorRecovery
- *fill*         0x000000000801137a        0x2 
+                0x0000000008011318       0x1e ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011318                USBPD_DPM_EnterErrorRecovery
+ *fill*         0x0000000008011336        0x2 
  .text.USBPD_DPM_EvaluateDataRoleSwap
-                0x000000000801137c       0xd4 ./USBPD/Target/usbpd_dpm_user.o
-                0x000000000801137c                USBPD_DPM_EvaluateDataRoleSwap
+                0x0000000008011338       0xd4 ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011338                USBPD_DPM_EvaluateDataRoleSwap
  .text.USBPD_DPM_IsPowerReady
-                0x0000000008011450       0x32 ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011450                USBPD_DPM_IsPowerReady
- *fill*         0x0000000008011482        0x2 
+                0x000000000801140c       0x32 ./USBPD/Target/usbpd_dpm_user.o
+                0x000000000801140c                USBPD_DPM_IsPowerReady
+ *fill*         0x000000000801143e        0x2 
  .text.USBPD_DPM_RequestHardReset
-                0x0000000008011484       0x88 ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011484                USBPD_DPM_RequestHardReset
+                0x0000000008011440       0x88 ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011440                USBPD_DPM_RequestHardReset
  .text.USBPD_DPM_RequestCableReset
-                0x000000000801150c       0x88 ./USBPD/Target/usbpd_dpm_user.o
-                0x000000000801150c                USBPD_DPM_RequestCableReset
+                0x00000000080114c8       0x88 ./USBPD/Target/usbpd_dpm_user.o
+                0x00000000080114c8                USBPD_DPM_RequestCableReset
  .text.USBPD_DPM_RequestGotoMin
-                0x0000000008011594       0x8c ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011594                USBPD_DPM_RequestGotoMin
+                0x0000000008011550       0x8c ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011550                USBPD_DPM_RequestGotoMin
  .text.USBPD_DPM_RequestPing
-                0x0000000008011620       0x8c ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011620                USBPD_DPM_RequestPing
+                0x00000000080115dc       0x8c ./USBPD/Target/usbpd_dpm_user.o
+                0x00000000080115dc                USBPD_DPM_RequestPing
  .text.USBPD_DPM_RequestMessageRequest
-                0x00000000080116ac       0xe8 ./USBPD/Target/usbpd_dpm_user.o
-                0x00000000080116ac                USBPD_DPM_RequestMessageRequest
+                0x0000000008011668      0x184 ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011668                USBPD_DPM_RequestMessageRequest
  .text.USBPD_DPM_RequestGetSourceCapability
-                0x0000000008011794       0x8c ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011794                USBPD_DPM_RequestGetSourceCapability
+                0x00000000080117ec       0x8c ./USBPD/Target/usbpd_dpm_user.o
+                0x00000000080117ec                USBPD_DPM_RequestGetSourceCapability
  .text.USBPD_DPM_RequestGetSinkCapability
-                0x0000000008011820       0x8c ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011820                USBPD_DPM_RequestGetSinkCapability
+                0x0000000008011878       0x8c ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011878                USBPD_DPM_RequestGetSinkCapability
  .text.USBPD_DPM_RequestDataRoleSwap
-                0x00000000080118ac       0x8c ./USBPD/Target/usbpd_dpm_user.o
-                0x00000000080118ac                USBPD_DPM_RequestDataRoleSwap
+                0x0000000008011904       0x8c ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011904                USBPD_DPM_RequestDataRoleSwap
  .text.USBPD_DPM_RequestPowerRoleSwap
-                0x0000000008011938       0x6c ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011938                USBPD_DPM_RequestPowerRoleSwap
+                0x0000000008011990       0x6c ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011990                USBPD_DPM_RequestPowerRoleSwap
  .text.USBPD_DPM_RequestVconnSwap
-                0x00000000080119a4       0x8c ./USBPD/Target/usbpd_dpm_user.o
-                0x00000000080119a4                USBPD_DPM_RequestVconnSwap
+                0x00000000080119fc       0x8c ./USBPD/Target/usbpd_dpm_user.o
+                0x00000000080119fc                USBPD_DPM_RequestVconnSwap
  .text.USBPD_DPM_RequestSoftReset
-                0x0000000008011a30       0x94 ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011a30                USBPD_DPM_RequestSoftReset
+                0x0000000008011a88       0x94 ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011a88                USBPD_DPM_RequestSoftReset
  .text.USBPD_DPM_RequestSourceCapability
-                0x0000000008011ac4       0x8c ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011ac4                USBPD_DPM_RequestSourceCapability
+                0x0000000008011b1c       0x8c ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011b1c                USBPD_DPM_RequestSourceCapability
  .text.USBPD_DPM_RequestAlert
-                0x0000000008011b50       0x90 ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011b50                USBPD_DPM_RequestAlert
+                0x0000000008011ba8       0x90 ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011ba8                USBPD_DPM_RequestAlert
  .text.USBPD_DPM_RequestGetSourceCapabilityExt
-                0x0000000008011be0       0x8c ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011be0                USBPD_DPM_RequestGetSourceCapabilityExt
+                0x0000000008011c38       0x8c ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011c38                USBPD_DPM_RequestGetSourceCapabilityExt
  .text.USBPD_DPM_RequestGetSinkCapabilityExt
-                0x0000000008011c6c       0x8c ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011c6c                USBPD_DPM_RequestGetSinkCapabilityExt
+                0x0000000008011cc4       0x8c ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011cc4                USBPD_DPM_RequestGetSinkCapabilityExt
  .text.USBPD_DPM_RequestGetManufacturerInfo
-                0x0000000008011cf8       0xac ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011cf8                USBPD_DPM_RequestGetManufacturerInfo
+                0x0000000008011d50       0xac ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011d50                USBPD_DPM_RequestGetManufacturerInfo
  .text.USBPD_DPM_RequestGetPPS_Status
-                0x0000000008011da4       0x8c ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011da4                USBPD_DPM_RequestGetPPS_Status
+                0x0000000008011dfc       0x8c ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011dfc                USBPD_DPM_RequestGetPPS_Status
  .text.USBPD_DPM_RequestGetStatus
-                0x0000000008011e30       0x8c ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011e30                USBPD_DPM_RequestGetStatus
+                0x0000000008011e88       0x8c ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011e88                USBPD_DPM_RequestGetStatus
  .text.USBPD_DPM_RequestFastRoleSwap
-                0x0000000008011ebc       0x8c ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011ebc                USBPD_DPM_RequestFastRoleSwap
+                0x0000000008011f14       0x8c ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011f14                USBPD_DPM_RequestFastRoleSwap
  .text.USBPD_DPM_RequestGetCountryCodes
-                0x0000000008011f48       0x8c ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011f48                USBPD_DPM_RequestGetCountryCodes
+                0x0000000008011fa0       0x8c ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008011fa0                USBPD_DPM_RequestGetCountryCodes
  .text.USBPD_DPM_RequestGetCountryInfo
-                0x0000000008011fd4       0x94 ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008011fd4                USBPD_DPM_RequestGetCountryInfo
+                0x000000000801202c       0x94 ./USBPD/Target/usbpd_dpm_user.o
+                0x000000000801202c                USBPD_DPM_RequestGetCountryInfo
  .text.USBPD_DPM_RequestGetBatteryCapability
-                0x0000000008012068       0x94 ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008012068                USBPD_DPM_RequestGetBatteryCapability
+                0x00000000080120c0       0x94 ./USBPD/Target/usbpd_dpm_user.o
+                0x00000000080120c0                USBPD_DPM_RequestGetBatteryCapability
  .text.USBPD_DPM_RequestGetBatteryStatus
-                0x00000000080120fc       0x94 ./USBPD/Target/usbpd_dpm_user.o
-                0x00000000080120fc                USBPD_DPM_RequestGetBatteryStatus
+                0x0000000008012154       0x94 ./USBPD/Target/usbpd_dpm_user.o
+                0x0000000008012154                USBPD_DPM_RequestGetBatteryStatus
  .text.USBPD_DPM_RequestSecurityRequest
-                0x0000000008012190       0x80 ./USBPD/Target/usbpd_dpm_user.o
-                0x0000000008012190                USBPD_DPM_RequestSecurityRequest
+                0x00000000080121e8       0x80 ./USBPD/Target/usbpd_dpm_user.o
+                0x00000000080121e8                USBPD_DPM_RequestSecurityRequest
  .text.LL_ADC_REG_ReadConversionData12
-                0x0000000008012210       0x1c ./USBPD/Target/usbpd_pwr_user.o
- .text.BSP_PWR_VBUSGetCurrent
-                0x000000000801222c       0x3c ./USBPD/Target/usbpd_pwr_user.o
-                0x000000000801222c                BSP_PWR_VBUSGetCurrent
+                0x0000000008012268       0x1c ./USBPD/Target/usbpd_pwr_user.o
+ .text.BSP_PWR_VBUSGetVoltage
+                0x0000000008012284       0x3c ./USBPD/Target/usbpd_pwr_user.o
+                0x0000000008012284                BSP_PWR_VBUSGetVoltage
  .text.BSP_USBPD_PWR_Init
-                0x0000000008012268       0x22 ./USBPD/Target/usbpd_pwr_user.o
-                0x0000000008012268                BSP_USBPD_PWR_Init
- *fill*         0x000000000801228a        0x2 
+                0x00000000080122c0       0x22 ./USBPD/Target/usbpd_pwr_user.o
+                0x00000000080122c0                BSP_USBPD_PWR_Init
+ *fill*         0x00000000080122e2        0x2 
  .text.BSP_USBPD_PWR_VBUSInit
-                0x000000000801228c       0x3c ./USBPD/Target/usbpd_pwr_user.o
-                0x000000000801228c                BSP_USBPD_PWR_VBUSInit
+                0x00000000080122e4       0x3c ./USBPD/Target/usbpd_pwr_user.o
+                0x00000000080122e4                BSP_USBPD_PWR_VBUSInit
  .text.BSP_USBPD_PWR_VBUSDeInit
-                0x00000000080122c8       0x3c ./USBPD/Target/usbpd_pwr_user.o
-                0x00000000080122c8                BSP_USBPD_PWR_VBUSDeInit
+                0x0000000008012320       0x3c ./USBPD/Target/usbpd_pwr_user.o
+                0x0000000008012320                BSP_USBPD_PWR_VBUSDeInit
  .text.BSP_USBPD_PWR_VBUSGetVoltage
-                0x0000000008012304       0x7c ./USBPD/Target/usbpd_pwr_user.o
-                0x0000000008012304                BSP_USBPD_PWR_VBUSGetVoltage
+                0x000000000801235c       0x7c ./USBPD/Target/usbpd_pwr_user.o
+                0x000000000801235c                BSP_USBPD_PWR_VBUSGetVoltage
  .text.BSP_USBPD_PWR_VBUSGetCurrent
-                0x0000000008012380       0x4c ./USBPD/Target/usbpd_pwr_user.o
-                0x0000000008012380                BSP_USBPD_PWR_VBUSGetCurrent
+                0x00000000080123d8       0x4c ./USBPD/Target/usbpd_pwr_user.o
+                0x00000000080123d8                BSP_USBPD_PWR_VBUSGetCurrent
  .text.USBPD_USER_SERV_StoreSRCPDO
-                0x00000000080123cc       0x80 ./USBPD/usbpd_user_services.o
-                0x00000000080123cc                USBPD_USER_SERV_StoreSRCPDO
+                0x0000000008012424       0x80 ./USBPD/usbpd_user_services.o
+                0x0000000008012424                USBPD_USER_SERV_StoreSRCPDO
+ .text.USBPD_USER_SERV_EvaluateCapa
+                0x00000000080124a4      0x1d0 ./USBPD/usbpd_user_services.o
+                0x00000000080124a4                USBPD_USER_SERV_EvaluateCapa
+ .text.USER_SERV_SNK_EvaluateMatchWithSRCPDO
+                0x0000000008012674      0x2cc ./USBPD/usbpd_user_services.o
+                0x0000000008012674                USER_SERV_SNK_EvaluateMatchWithSRCPDO
+ .text.USER_SERV_FindVoltageIndex
+                0x0000000008012940      0x1f4 ./USBPD/usbpd_user_services.o
+ .text.USER_SERV_SNK_BuildRDOfromSelectedPDO
+                0x0000000008012b34      0x3dc ./USBPD/usbpd_user_services.o
+                0x0000000008012b34                USER_SERV_SNK_BuildRDOfromSelectedPDO
  .text.BSP_GUI_LoadDataFromFlash
-                0x000000000801244c      0x44c ./Utilities/GUI_INTERFACE/bsp_gui.o
-                0x000000000801244c                BSP_GUI_LoadDataFromFlash
+                0x0000000008012f10      0x44c ./Utilities/GUI_INTERFACE/bsp_gui.o
+                0x0000000008012f10                BSP_GUI_LoadDataFromFlash
  .text.BSP_GUI_SaveDataInFlash
-                0x0000000008012898      0x4c4 ./Utilities/GUI_INTERFACE/bsp_gui.o
-                0x0000000008012898                BSP_GUI_SaveDataInFlash
+                0x000000000801335c      0x4c4 ./Utilities/GUI_INTERFACE/bsp_gui.o
+                0x000000000801335c                BSP_GUI_SaveDataInFlash
  .text.SavePDOInFlash
-                0x0000000008012d5c       0xe6 ./Utilities/GUI_INTERFACE/bsp_gui.o
+                0x0000000008013820       0xe6 ./Utilities/GUI_INTERFACE/bsp_gui.o
  .text.SaveSettingsInFlash
-                0x0000000008012e42       0xfe ./Utilities/GUI_INTERFACE/bsp_gui.o
+                0x0000000008013906       0xfe ./Utilities/GUI_INTERFACE/bsp_gui.o
  .text.LoadPDOFromFlash
-                0x0000000008012f40       0x50 ./Utilities/GUI_INTERFACE/bsp_gui.o
+                0x0000000008013a04       0x50 ./Utilities/GUI_INTERFACE/bsp_gui.o
  .text.LoadSettingsFromFlash
-                0x0000000008012f90       0x36 ./Utilities/GUI_INTERFACE/bsp_gui.o
+                0x0000000008013a54       0x36 ./Utilities/GUI_INTERFACE/bsp_gui.o
  .text.TLV_init_encode
-                0x0000000008012fc6       0xc6 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
-                0x0000000008012fc6                TLV_init_encode
- .text.TLV_add  0x000000000801308c      0x19c ./Utilities/GUI_INTERFACE/data_struct_tlv.o
-                0x000000000801308c                TLV_add
+                0x0000000008013a8a       0xc6 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+                0x0000000008013a8a                TLV_init_encode
+ .text.TLV_add  0x0000000008013b50      0x19c ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+                0x0000000008013b50                TLV_add
  .text.TLV_addValue
-                0x0000000008013228      0x128 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
-                0x0000000008013228                TLV_addValue
+                0x0000000008013cec      0x128 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+                0x0000000008013cec                TLV_addValue
  .text.TLV_deinit_encode
-                0x0000000008013350       0x24 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
-                0x0000000008013350                TLV_deinit_encode
+                0x0000000008013e14       0x24 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+                0x0000000008013e14                TLV_deinit_encode
  .text.TLV_init_decode
-                0x0000000008013374       0x58 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
-                0x0000000008013374                TLV_init_decode
- .text.TLV_get  0x00000000080133cc       0xb4 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
-                0x00000000080133cc                TLV_get
+                0x0000000008013e38       0x58 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+                0x0000000008013e38                TLV_init_decode
+ .text.TLV_get  0x0000000008013e90       0xb4 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+                0x0000000008013e90                TLV_get
  .text.TLV_deinit_decode
-                0x0000000008013480       0x1c ./Utilities/GUI_INTERFACE/data_struct_tlv.o
-                0x0000000008013480                TLV_deinit_decode
+                0x0000000008013f44       0x1c ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+                0x0000000008013f44                TLV_deinit_decode
  .text.TLV_get_string_length
-                0x000000000801349c       0x6c ./Utilities/GUI_INTERFACE/data_struct_tlv.o
-                0x000000000801349c                TLV_get_string_length
+                0x0000000008013f60       0x6c ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+                0x0000000008013f60                TLV_get_string_length
  .text.GUI_Init
-                0x0000000008013508      0x14c ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000008013508                GUI_Init
+                0x0000000008013fcc      0x14c ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008013fcc                GUI_Init
  .text.GUI_InitOS
-                0x0000000008013654       0xa0 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000008013654                GUI_InitOS
+                0x0000000008014118       0xa0 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008014118                GUI_InitOS
  .text.GUI_Start
-                0x00000000080136f4       0x18 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x00000000080136f4                GUI_Start
- .text.TaskGUI  0x000000000801370c      0x180 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x000000000801370c                TaskGUI
+                0x00000000080141b8       0x18 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x00000000080141b8                GUI_Start
+ .text.TaskGUI  0x00000000080141d0      0x180 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x00000000080141d0                TaskGUI
  .text.CheckGUITimers
-                0x000000000801388c       0x60 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008014350       0x60 ./Utilities/GUI_INTERFACE/gui_api.o
  .text.GUI_TimerCounter
-                0x00000000080138ec       0x3c ./Utilities/GUI_INTERFACE/gui_api.o
-                0x00000000080138ec                GUI_TimerCounter
+                0x00000000080143b0       0x3c ./Utilities/GUI_INTERFACE/gui_api.o
+                0x00000000080143b0                GUI_TimerCounter
  .text.GUI_CALLBACK_RX
-                0x0000000008013928       0x54 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x00000000080143ec       0x54 ./Utilities/GUI_INTERFACE/gui_api.o
  .text.GUI_RXProcess
-                0x000000000801397c       0xb2 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x000000000801397c                GUI_RXProcess
+                0x0000000008014440       0xb2 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008014440                GUI_RXProcess
  .text.GUI_FormatAndSendNotification
-                0x0000000008013a2e       0x40 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000008013a2e                GUI_FormatAndSendNotification
- *fill*         0x0000000008013a6e        0x2 
+                0x00000000080144f2       0x40 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x00000000080144f2                GUI_FormatAndSendNotification
+ *fill*         0x0000000008014532        0x2 
  .text.GUI_GetMessage
-                0x0000000008013a70      0x208 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000008013a70                GUI_GetMessage
+                0x0000000008014534      0x208 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008014534                GUI_GetMessage
  .text.GUI_SendAnswer
-                0x0000000008013c78      0x1e0 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000008013c78                GUI_SendAnswer
+                0x000000000801473c      0x1e0 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x000000000801473c                GUI_SendAnswer
  .text.GUI_SendNotification
-                0x0000000008013e58      0x810 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000008013e58                GUI_SendNotification
+                0x000000000801491c      0x810 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x000000000801491c                GUI_SendNotification
  .text.GUI_PostNotificationMessage
-                0x0000000008014668       0xd0 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000008014668                GUI_PostNotificationMessage
+                0x000000000801512c       0xd0 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x000000000801512c                GUI_PostNotificationMessage
  .text.GUI_SaveInfo
-                0x0000000008014738      0x1dc ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000008014738                GUI_SaveInfo
+                0x00000000080151fc      0x1dc ./Utilities/GUI_INTERFACE/gui_api.o
+                0x00000000080151fc                GUI_SaveInfo
  .text.Send_DpmInitCnf
-                0x0000000008014914      0x35c ./Utilities/GUI_INTERFACE/gui_api.o
+                0x00000000080153d8      0x35c ./Utilities/GUI_INTERFACE/gui_api.o
  .text.Request_MessageReq
-                0x0000000008014c70      0x680 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008015734      0x680 ./Utilities/GUI_INTERFACE/gui_api.o
  .text.Send_DpmConfigSetCnf
-                0x00000000080152f0      0x880 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008015db4      0x880 ./Utilities/GUI_INTERFACE/gui_api.o
  .text.Send_DpmConfigGetCnf
-                0x0000000008015b70      0x5c0 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008016634      0x5c0 ./Utilities/GUI_INTERFACE/gui_api.o
  .text.Send_DpmConfigGetRej
-                0x0000000008016130       0x44 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008016bf4       0x44 ./Utilities/GUI_INTERFACE/gui_api.o
  .text.Send_DpmMessageRej
-                0x0000000008016174       0x44 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008016c38       0x44 ./Utilities/GUI_INTERFACE/gui_api.o
  .text.Send_DpmRegisterReadCnf
-                0x00000000080161b8       0xbc ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008016c7c       0xbc ./Utilities/GUI_INTERFACE/gui_api.o
  .text.Send_DpmRegisterWriteCnf
-                0x0000000008016274       0x84 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008016d38       0x84 ./Utilities/GUI_INTERFACE/gui_api.o
  .text.Manage_FreeText
-                0x00000000080162f8       0x50 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008016dbc       0x50 ./Utilities/GUI_INTERFACE/gui_api.o
  .text.UpdateSNKPowerPort0
-                0x0000000008016348      0x248 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008016e0c      0x248 ./Utilities/GUI_INTERFACE/gui_api.o
  .text.TRACER_EMB_Init
-                0x0000000008016590       0x28 ./Utilities/TRACER_EMB/tracer_emb.o
-                0x0000000008016590                TRACER_EMB_Init
+                0x0000000008017054       0x28 ./Utilities/TRACER_EMB/tracer_emb.o
+                0x0000000008017054                TRACER_EMB_Init
  .text.TRACER_EMB_Add
-                0x00000000080165b8       0x88 ./Utilities/TRACER_EMB/tracer_emb.o
-                0x00000000080165b8                TRACER_EMB_Add
+                0x000000000801707c       0x88 ./Utilities/TRACER_EMB/tracer_emb.o
+                0x000000000801707c                TRACER_EMB_Add
  .text.TRACER_EMB_IRQHandlerDMA
-                0x0000000008016640        0xe ./Utilities/TRACER_EMB/tracer_emb.o
-                0x0000000008016640                TRACER_EMB_IRQHandlerDMA
+                0x0000000008017104        0xe ./Utilities/TRACER_EMB/tracer_emb.o
+                0x0000000008017104                TRACER_EMB_IRQHandlerDMA
  .text.TRACER_EMB_IRQHandlerUSART
-                0x000000000801664e        0xe ./Utilities/TRACER_EMB/tracer_emb.o
-                0x000000000801664e                TRACER_EMB_IRQHandlerUSART
+                0x0000000008017112        0xe ./Utilities/TRACER_EMB/tracer_emb.o
+                0x0000000008017112                TRACER_EMB_IRQHandlerUSART
  .text.TRACER_EMB_WriteData
-                0x000000000801665c       0x30 ./Utilities/TRACER_EMB/tracer_emb.o
-                0x000000000801665c                TRACER_EMB_WriteData
+                0x0000000008017120       0x30 ./Utilities/TRACER_EMB/tracer_emb.o
+                0x0000000008017120                TRACER_EMB_WriteData
  .text.TRACER_EMB_StartRX
-                0x000000000801668c       0x1c ./Utilities/TRACER_EMB/tracer_emb.o
-                0x000000000801668c                TRACER_EMB_StartRX
+                0x0000000008017150       0x1c ./Utilities/TRACER_EMB/tracer_emb.o
+                0x0000000008017150                TRACER_EMB_StartRX
  .text.TRACER_EMB_EnableOverFlow
-                0x00000000080166a8       0x38 ./Utilities/TRACER_EMB/tracer_emb.o
-                0x00000000080166a8                TRACER_EMB_EnableOverFlow
+                0x000000000801716c       0x38 ./Utilities/TRACER_EMB/tracer_emb.o
+                0x000000000801716c                TRACER_EMB_EnableOverFlow
  .text.TRACER_EMB_CALLBACK_TX
-                0x00000000080166e0       0x90 ./Utilities/TRACER_EMB/tracer_emb.o
-                0x00000000080166e0                TRACER_EMB_CALLBACK_TX
+                0x00000000080171a4       0x90 ./Utilities/TRACER_EMB/tracer_emb.o
+                0x00000000080171a4                TRACER_EMB_CALLBACK_TX
  .text.TRACER_EMB_Lock
-                0x0000000008016770       0x3c ./Utilities/TRACER_EMB/tracer_emb.o
-                0x0000000008016770                TRACER_EMB_Lock
+                0x0000000008017234       0x3c ./Utilities/TRACER_EMB/tracer_emb.o
+                0x0000000008017234                TRACER_EMB_Lock
  .text.TRACER_EMB_UnLock
-                0x00000000080167ac       0x3c ./Utilities/TRACER_EMB/tracer_emb.o
-                0x00000000080167ac                TRACER_EMB_UnLock
+                0x0000000008017270       0x3c ./Utilities/TRACER_EMB/tracer_emb.o
+                0x0000000008017270                TRACER_EMB_UnLock
  .text.TRACER_EMB_SendData
-                0x00000000080167e8       0xbc ./Utilities/TRACER_EMB/tracer_emb.o
-                0x00000000080167e8                TRACER_EMB_SendData
+                0x00000000080172ac       0xbc ./Utilities/TRACER_EMB/tracer_emb.o
+                0x00000000080172ac                TRACER_EMB_SendData
  .text.TRACER_EMB_AllocateBufer
-                0x00000000080168a4       0xb4 ./Utilities/TRACER_EMB/tracer_emb.o
-                0x00000000080168a4                TRACER_EMB_AllocateBufer
+                0x0000000008017368       0xb4 ./Utilities/TRACER_EMB/tracer_emb.o
+                0x0000000008017368                TRACER_EMB_AllocateBufer
  .text.TRACER_EMB_LowPowerInit
-                0x0000000008016958        0xa ./Utilities/TRACER_EMB/tracer_emb.o
-                0x0000000008016958                TRACER_EMB_LowPowerInit
+                0x000000000801741c        0xa ./Utilities/TRACER_EMB/tracer_emb.o
+                0x000000000801741c                TRACER_EMB_LowPowerInit
  .text.TRACER_EMB_LowPowerSendData
-                0x0000000008016962        0xa ./Utilities/TRACER_EMB/tracer_emb.o
-                0x0000000008016962                TRACER_EMB_LowPowerSendData
+                0x0000000008017426        0xa ./Utilities/TRACER_EMB/tracer_emb.o
+                0x0000000008017426                TRACER_EMB_LowPowerSendData
  .text.TRACER_EMB_LowPowerSendDataComplete
-                0x000000000801696c        0xa ./Utilities/TRACER_EMB/tracer_emb.o
-                0x000000000801696c                TRACER_EMB_LowPowerSendDataComplete
- *fill*         0x0000000008016976        0x2 
+                0x0000000008017430        0xa ./Utilities/TRACER_EMB/tracer_emb.o
+                0x0000000008017430                TRACER_EMB_LowPowerSendDataComplete
+ *fill*         0x000000000801743a        0x2 
  .text.__NVIC_EnableIRQ
-                0x0000000008016978       0x34 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x000000000801743c       0x34 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.__NVIC_SetPriority
-                0x00000000080169ac       0xdc ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017470       0xdc ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_DMA_EnableChannel
-                0x0000000008016a88       0x40 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x000000000801754c       0x40 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_DMA_DisableChannel
-                0x0000000008016ac8       0x40 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x000000000801758c       0x40 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_DMA_ConfigTransfer
-                0x0000000008016b08       0x4c ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x00000000080175cc       0x4c ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_DMA_GetDataTransferDirection
-                0x0000000008016b54       0x34 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017618       0x34 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_DMA_SetDataLength
-                0x0000000008016b88       0x44 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x000000000801764c       0x44 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_DMA_ConfigAddresses
-                0x0000000008016bcc       0x70 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017690       0x70 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_DMA_SetPeriphRequest
-                0x0000000008016c3c       0x58 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017700       0x58 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_DMA_IsActiveFlag_TC3
-                0x0000000008016c94       0x28 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017758       0x28 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_DMA_ClearFlag_GI3
-                0x0000000008016cbc       0x18 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017780       0x18 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_DMA_EnableIT_TC
-                0x0000000008016cd4       0x40 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017798       0x40 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_AHB1_GRP1_EnableClock
-                0x0000000008016d14       0x2c ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x00000000080177d8       0x2c ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_APB1_GRP1_EnableClock
-                0x0000000008016d40       0x2c ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017804       0x2c ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_APB1_GRP1_DisableClock
-                0x0000000008016d6c       0x24 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017830       0x24 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_IOP_GRP1_EnableClock
-                0x0000000008016d90       0x2c ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017854       0x2c ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_GPIO_SetPinMode
-                0x0000000008016dbc       0x38 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017880       0x38 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_GPIO_SetPinOutputType
-                0x0000000008016df4       0x2a ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x00000000080178b8       0x2a ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_GPIO_SetPinSpeed
-                0x0000000008016e1e       0x38 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x00000000080178e2       0x38 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_GPIO_SetPinPull
-                0x0000000008016e56       0x38 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x000000000801791a       0x38 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_GPIO_SetAFPin_0_7
-                0x0000000008016e8e       0x46 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017952       0x46 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_Enable
-                0x0000000008016ed4       0x1c ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017998       0x1c ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_Disable
-                0x0000000008016ef0       0x1e ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x00000000080179b4       0x1e ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_EnableDirectionRx
-                0x0000000008016f0e       0x3e ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x00000000080179d2       0x3e ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_IsActiveFlag_TEACK
-                0x0000000008016f4c       0x28 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017a10       0x28 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_ClearFlag_PE
-                0x0000000008016f74       0x16 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017a38       0x16 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_ClearFlag_FE
-                0x0000000008016f8a       0x16 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017a4e       0x16 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_ClearFlag_NE
-                0x0000000008016fa0       0x16 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017a64       0x16 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_ClearFlag_ORE
-                0x0000000008016fb6       0x16 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017a7a       0x16 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_ClearFlag_TC
-                0x0000000008016fcc       0x16 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017a90       0x16 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_EnableIT_RXNE_RXFNE
-                0x0000000008016fe2       0x3e ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017aa6       0x3e ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_EnableIT_TC
-                0x0000000008017020       0x3e ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017ae4       0x3e ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_EnableIT_ERROR
-                0x000000000801705e       0x3e ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017b22       0x3e ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_DisableIT_TC
-                0x000000000801709c       0x40 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017b60       0x40 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_IsEnabledIT_RXNE_RXFNE
-                0x00000000080170dc       0x22 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017ba0       0x22 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_IsEnabledIT_TC
-                0x00000000080170fe       0x22 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017bc2       0x22 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_IsEnabledIT_PE
-                0x0000000008017120       0x28 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017be4       0x28 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_IsEnabledIT_ERROR
-                0x0000000008017148       0x22 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017c0c       0x22 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_EnableDMAReq_TX
-                0x000000000801716a       0x3e ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017c2e       0x3e ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_DMA_GetRegAddr
-                0x00000000080171a8       0x28 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017c6c       0x28 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .text.LL_LPUART_ReceiveData8
-                0x00000000080171d0       0x16 ./Utilities/TRACER_EMB/tracer_emb_hw.o
- *fill*         0x00000000080171e6        0x2 
+                0x0000000008017c94       0x16 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+ *fill*         0x0000000008017caa        0x2 
  .text.HW_TRACER_EMB_Init
-                0x00000000080171e8      0x180 ./Utilities/TRACER_EMB/tracer_emb_hw.o
-                0x00000000080171e8                HW_TRACER_EMB_Init
+                0x0000000008017cac      0x180 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017cac                HW_TRACER_EMB_Init
  .text.HW_TRACER_EMB_RegisterRxCallback
-                0x0000000008017368       0x24 ./Utilities/TRACER_EMB/tracer_emb_hw.o
-                0x0000000008017368                HW_TRACER_EMB_RegisterRxCallback
+                0x0000000008017e2c       0x24 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017e2c                HW_TRACER_EMB_RegisterRxCallback
  .text.HW_TRACER_EMB_StartRX
-                0x000000000801738c       0x34 ./Utilities/TRACER_EMB/tracer_emb_hw.o
-                0x000000000801738c                HW_TRACER_EMB_StartRX
+                0x0000000008017e50       0x34 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017e50                HW_TRACER_EMB_StartRX
  .text.HW_TRACER_EMB_IRQHandlerDMA
-                0x00000000080173c0       0x30 ./Utilities/TRACER_EMB/tracer_emb_hw.o
-                0x00000000080173c0                HW_TRACER_EMB_IRQHandlerDMA
+                0x0000000008017e84       0x30 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017e84                HW_TRACER_EMB_IRQHandlerDMA
  .text.HW_TRACER_EMB_IRQHandlerUSART
-                0x00000000080173f0      0x19c ./Utilities/TRACER_EMB/tracer_emb_hw.o
-                0x00000000080173f0                HW_TRACER_EMB_IRQHandlerUSART
+                0x0000000008017eb4      0x19c ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008017eb4                HW_TRACER_EMB_IRQHandlerUSART
  .text.HW_TRACER_EMB_SendData
-                0x000000000801758c       0x6c ./Utilities/TRACER_EMB/tracer_emb_hw.o
-                0x000000000801758c                HW_TRACER_EMB_SendData
- .text.malloc   0x00000000080175f8       0x14 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-malloc.o)
-                0x00000000080175f8                malloc
+                0x0000000008018050       0x6c ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000008018050                HW_TRACER_EMB_SendData
+ .text.malloc   0x00000000080180bc       0x14 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-malloc.o)
+                0x00000000080180bc                malloc
  .text.sbrk_aligned
-                0x000000000801760c       0x44 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mallocr.o)
+                0x00000000080180d0       0x44 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mallocr.o)
  .text._malloc_r
-                0x0000000008017650      0x104 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mallocr.o)
-                0x0000000008017650                _malloc_r
+                0x0000000008018114      0x104 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mallocr.o)
+                0x0000000008018114                _malloc_r
  .text.__malloc_lock
-                0x0000000008017754       0x10 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mlock.o)
-                0x0000000008017754                __malloc_lock
+                0x0000000008018218       0x10 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mlock.o)
+                0x0000000008018218                __malloc_lock
  .text.__malloc_unlock
-                0x0000000008017764       0x10 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mlock.o)
-                0x0000000008017764                __malloc_unlock
+                0x0000000008018228       0x10 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mlock.o)
+                0x0000000008018228                __malloc_unlock
  .text.snprintf
-                0x0000000008017774       0x68 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-snprintf.o)
-                0x0000000008017774                sniprintf
-                0x0000000008017774                snprintf
- .text.sprintf  0x00000000080177dc       0x40 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-sprintf.o)
-                0x00000000080177dc                siprintf
-                0x00000000080177dc                sprintf
- .text.memset   0x000000000801781c       0x10 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memset.o)
-                0x000000000801781c                memset
+                0x0000000008018238       0x68 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-snprintf.o)
+                0x0000000008018238                sniprintf
+                0x0000000008018238                snprintf
+ .text.sprintf  0x00000000080182a0       0x40 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-sprintf.o)
+                0x00000000080182a0                siprintf
+                0x00000000080182a0                sprintf
+ .text.memset   0x00000000080182e0       0x10 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memset.o)
+                0x00000000080182e0                memset
  .text._reclaim_reent
-                0x000000000801782c       0xbc C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-reent.o)
-                0x000000000801782c                _reclaim_reent
- .text._sbrk_r  0x00000000080178e8       0x24 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-sbrkr.o)
-                0x00000000080178e8                _sbrk_r
- .text.__errno  0x000000000801790c        0xc C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-errno.o)
-                0x000000000801790c                __errno
+                0x00000000080182f0       0xbc C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-reent.o)
+                0x00000000080182f0                _reclaim_reent
+ .text._sbrk_r  0x00000000080183ac       0x24 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-sbrkr.o)
+                0x00000000080183ac                _sbrk_r
+ .text.__errno  0x00000000080183d0        0xc C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-errno.o)
+                0x00000000080183d0                __errno
  .text.__libc_init_array
-                0x0000000008017918       0x48 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-init.o)
-                0x0000000008017918                __libc_init_array
+                0x00000000080183dc       0x48 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-init.o)
+                0x00000000080183dc                __libc_init_array
  .text.__retarget_lock_acquire_recursive
-                0x0000000008017960        0x2 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-lock.o)
-                0x0000000008017960                __retarget_lock_acquire_recursive
+                0x0000000008018424        0x2 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-lock.o)
+                0x0000000008018424                __retarget_lock_acquire_recursive
  .text.__retarget_lock_release_recursive
-                0x0000000008017962        0x2 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-lock.o)
-                0x0000000008017962                __retarget_lock_release_recursive
+                0x0000000008018426        0x2 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-lock.o)
+                0x0000000008018426                __retarget_lock_release_recursive
  .text.__aeabi_memcpy
-                0x0000000008017964        0x8 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-aeabi_memcpy.o)
-                0x0000000008017964                __aeabi_memcpy4
-                0x0000000008017964                __aeabi_memcpy8
-                0x0000000008017964                __aeabi_memcpy
+                0x0000000008018428        0x8 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-aeabi_memcpy.o)
+                0x0000000008018428                __aeabi_memcpy4
+                0x0000000008018428                __aeabi_memcpy8
+                0x0000000008018428                __aeabi_memcpy
  .text.__aeabi_memset
-                0x000000000801796c        0xe C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-aeabi_memset.o)
-                0x000000000801796c                __aeabi_memset8
-                0x000000000801796c                __aeabi_memset4
-                0x000000000801796c                __aeabi_memset
+                0x0000000008018430        0xe C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-aeabi_memset.o)
+                0x0000000008018430                __aeabi_memset8
+                0x0000000008018430                __aeabi_memset4
+                0x0000000008018430                __aeabi_memset
  .text.__aeabi_memclr
-                0x000000000801797a        0xa C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-aeabi_memclr.o)
-                0x000000000801797a                __aeabi_memclr
-                0x000000000801797a                __aeabi_memclr4
-                0x000000000801797a                __aeabi_memclr8
- .text.memcpy   0x0000000008017984       0x12 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memcpy-stub.o)
-                0x0000000008017984                memcpy
- *fill*         0x0000000008017996        0x2 
- .text._free_r  0x0000000008017998       0x94 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-freer.o)
-                0x0000000008017998                _free_r
+                0x000000000801843e        0xa C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-aeabi_memclr.o)
+                0x000000000801843e                __aeabi_memclr
+                0x000000000801843e                __aeabi_memclr4
+                0x000000000801843e                __aeabi_memclr8
+ .text.memcpy   0x0000000008018448       0x12 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memcpy-stub.o)
+                0x0000000008018448                memcpy
+ *fill*         0x000000000801845a        0x2 
+ .text._free_r  0x000000000801845c       0x94 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-freer.o)
+                0x000000000801845c                _free_r
  .text.__ssputs_r
-                0x0000000008017a2c       0xc4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-svfprintf.o)
-                0x0000000008017a2c                __ssputs_r
+                0x00000000080184f0       0xc4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-svfprintf.o)
+                0x00000000080184f0                __ssputs_r
  .text._svfprintf_r
-                0x0000000008017af0      0x200 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-svfprintf.o)
-                0x0000000008017af0                _svfiprintf_r
-                0x0000000008017af0                _svfprintf_r
+                0x00000000080185b4      0x200 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-svfprintf.o)
+                0x00000000080185b4                _svfiprintf_r
+                0x00000000080185b4                _svfprintf_r
  .text._printf_common
-                0x0000000008017cf0       0xde C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-vfprintf_i.o)
-                0x0000000008017cf0                _printf_common
- *fill*         0x0000000008017dce        0x2 
+                0x00000000080187b4       0xde C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-vfprintf_i.o)
+                0x00000000080187b4                _printf_common
+ *fill*         0x0000000008018892        0x2 
  .text._printf_i
-                0x0000000008017dd0      0x220 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-vfprintf_i.o)
-                0x0000000008017dd0                _printf_i
- .text.memmove  0x0000000008017ff0       0x26 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memmove.o)
-                0x0000000008017ff0                memmove
- .text.memchr   0x0000000008018016       0x16 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memchr-stub.o)
-                0x0000000008018016                memchr
+                0x0000000008018894      0x220 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-vfprintf_i.o)
+                0x0000000008018894                _printf_i
+ .text.memmove  0x0000000008018ab4       0x26 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memmove.o)
+                0x0000000008018ab4                memmove
+ .text.memchr   0x0000000008018ada       0x16 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memchr-stub.o)
+                0x0000000008018ada                memchr
  .text._realloc_r
-                0x000000000801802c       0x5e C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-reallocr.o)
-                0x000000000801802c                _realloc_r
+                0x0000000008018af0       0x5e C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-reallocr.o)
+                0x0000000008018af0                _realloc_r
  .text._malloc_usable_size_r
-                0x000000000801808a       0x10 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-msizer.o)
-                0x000000000801808a                _malloc_usable_size_r
+                0x0000000008018b4e       0x10 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-msizer.o)
+                0x0000000008018b4e                _malloc_usable_size_r
  *(.glue_7)
- .glue_7        0x000000000801809a        0x0 linker stubs
+ .glue_7        0x0000000008018b5e        0x0 linker stubs
  *(.glue_7t)
- .glue_7t       0x000000000801809a        0x0 linker stubs
+ .glue_7t       0x0000000008018b5e        0x0 linker stubs
  *(.eh_frame)
- *fill*         0x000000000801809a        0x2 
- .eh_frame      0x000000000801809c        0x0 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtbegin.o
+ *fill*         0x0000000008018b5e        0x2 
+ .eh_frame      0x0000000008018b60        0x0 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtbegin.o
  *(.init)
- .init          0x000000000801809c        0x4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crti.o
-                0x000000000801809c                _init
- .init          0x00000000080180a0        0x8 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtn.o
+ .init          0x0000000008018b60        0x4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crti.o
+                0x0000000008018b60                _init
+ .init          0x0000000008018b64        0x8 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtn.o
  *(.fini)
- .fini          0x00000000080180a8        0x4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crti.o
-                0x00000000080180a8                _fini
- .fini          0x00000000080180ac        0x8 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtn.o
- *fill*         0x00000000080180b4        0x4 
- .fini.__stub   0x00000000080180b8       0x10 linker stubs
-                0x00000000080180c8                . = ALIGN (0x4)
-                0x00000000080180c8                _etext = .
+ .fini          0x0000000008018b6c        0x4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crti.o
+                0x0000000008018b6c                _fini
+ .fini          0x0000000008018b70        0x8 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtn.o
+ .fini.__stub   0x0000000008018b78       0x10 linker stubs
+                0x0000000008018b88                . = ALIGN (0x4)
+                0x0000000008018b88                _etext = .
 
-.vfp11_veneer   0x00000000080180c8        0x0
- .vfp11_veneer  0x00000000080180c8        0x0 linker stubs
+.vfp11_veneer   0x0000000008018b88        0x0
+ .vfp11_veneer  0x0000000008018b88        0x0 linker stubs
 
-.v4_bx          0x00000000080180c8        0x0
- .v4_bx         0x00000000080180c8        0x0 linker stubs
+.v4_bx          0x0000000008018b88        0x0
+ .v4_bx         0x0000000008018b88        0x0 linker stubs
 
-.iplt           0x00000000080180c8        0x0
- .iplt          0x00000000080180c8        0x0 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtbegin.o
+.iplt           0x0000000008018b88        0x0
+ .iplt          0x0000000008018b88        0x0 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtbegin.o
 
-.rodata         0x00000000080180c8     0x16e4
-                0x00000000080180c8                . = ALIGN (0x4)
+.rodata         0x0000000008018b88     0x174c
+                0x0000000008018b88                . = ALIGN (0x4)
  *(.rodata)
- .rodata        0x00000000080180c8       0x15 ./Core/Src/main.o
- *fill*         0x00000000080180dd        0x3 
- .rodata        0x00000000080180e0        0x6 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_phy.o
- *fill*         0x00000000080180e6        0x2 
- .rodata        0x00000000080180e8        0x5 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
- *fill*         0x00000000080180ed        0x3 
- .rodata        0x00000000080180f0        0xd ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
- *fill*         0x00000000080180fd        0x3 
- .rodata        0x0000000008018100       0x13 ./USBPD/App/usbpd.o
- *fill*         0x0000000008018113        0x1 
- .rodata        0x0000000008018114        0x9 ./USBPD/App/usbpd_dpm_core.o
- *fill*         0x000000000801811d        0x3 
- .rodata        0x0000000008018120      0x607 ./USBPD/Target/usbpd_dpm_user.o
- *fill*         0x0000000008018727        0x1 
- .rodata        0x0000000008018728      0x6e7 ./USBPD/Target/usbpd_pwr_user.o
- *fill*         0x0000000008018e0f        0x1 
- .rodata        0x0000000008018e10       0x18 ./Utilities/GUI_INTERFACE/bsp_gui.o
- .rodata        0x0000000008018e28       0x3b ./Utilities/GUI_INTERFACE/gui_api.o
- *fill*         0x0000000008018e63        0x1 
- .rodata        0x0000000008018e64       0x4c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .rodata        0x0000000008018eb0        0x2 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .rodata        0x0000000008018b88       0x15 ./Core/Src/main.o
+ *fill*         0x0000000008018b9d        0x3 
+ .rodata        0x0000000008018ba0        0x6 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_phy.o
+ *fill*         0x0000000008018ba6        0x2 
+ .rodata        0x0000000008018ba8        0x5 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
+ *fill*         0x0000000008018bad        0x3 
+ .rodata        0x0000000008018bb0        0xd ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
+ *fill*         0x0000000008018bbd        0x3 
+ .rodata        0x0000000008018bc0       0x13 ./USBPD/App/usbpd.o
+ *fill*         0x0000000008018bd3        0x1 
+ .rodata        0x0000000008018bd4        0x9 ./USBPD/App/usbpd_dpm_core.o
+ *fill*         0x0000000008018bdd        0x3 
+ .rodata        0x0000000008018be0      0x5d7 ./USBPD/Target/usbpd_dpm_user.o
+ *fill*         0x00000000080191b7        0x1 
+ .rodata        0x00000000080191b8      0x6e7 ./USBPD/Target/usbpd_pwr_user.o
+ *fill*         0x000000000801989f        0x1 
+ .rodata        0x00000000080198a0       0x7f ./USBPD/usbpd_user_services.o
+ *fill*         0x000000000801991f        0x1 
+ .rodata        0x0000000008019920       0x18 ./Utilities/GUI_INTERFACE/bsp_gui.o
+ .rodata        0x0000000008019938       0x3b ./Utilities/GUI_INTERFACE/gui_api.o
+ *fill*         0x0000000008019973        0x1 
+ .rodata        0x0000000008019974       0x4c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .rodata        0x00000000080199c0        0x2 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
  *(.rodata*)
- *fill*         0x0000000008018eb2        0x2 
+ *fill*         0x00000000080199c2        0x2 
  .rodata.CHANNEL_OFFSET_TAB
-                0x0000000008018eb4        0x7 ./Core/Src/main.o
- *fill*         0x0000000008018ebb        0x1 
+                0x00000000080199c4        0x7 ./Core/Src/main.o
+ *fill*         0x00000000080199cb        0x1 
  .rodata.defaultTask_attributes
-                0x0000000008018ebc       0x24 ./Core/Src/main.o
-                0x0000000008018ebc                defaultTask_attributes
+                0x00000000080199cc       0x24 ./Core/Src/main.o
+                0x00000000080199cc                defaultTask_attributes
  .rodata.AHBPrescTable
-                0x0000000008018ee0       0x40 ./Core/Src/system_stm32g0xx.o
-                0x0000000008018ee0                AHBPrescTable
+                0x00000000080199f0       0x40 ./Core/Src/system_stm32g0xx.o
+                0x00000000080199f0                AHBPrescTable
  .rodata.APBPrescTable
-                0x0000000008018f20       0x20 ./Core/Src/system_stm32g0xx.o
-                0x0000000008018f20                APBPrescTable
+                0x0000000008019a30       0x20 ./Core/Src/system_stm32g0xx.o
+                0x0000000008019a30                APBPrescTable
  .rodata.CHANNEL_OFFSET_TAB
-                0x0000000008018f40        0x7 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_dma.o
- *fill*         0x0000000008018f47        0x1 
+                0x0000000008019a50        0x7 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_dma.o
+ *fill*         0x0000000008019a57        0x1 
  .rodata.LPUART_PRESCALER_TAB
-                0x0000000008018f48       0x18 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_lpuart.o
+                0x0000000008019a58       0x18 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_lpuart.o
  .rodata.OverFlow_String.0
-                0x0000000008018f60       0x23 ./Middlewares/ST/STM32_USBPD_Library/Core/src/usbpd_trace.o
- *fill*         0x0000000008018f83        0x1 
+                0x0000000008019a70       0x23 ./Middlewares/ST/STM32_USBPD_Library/Core/src/usbpd_trace.o
+ *fill*         0x0000000008019a93        0x1 
  .rodata.USBPD_HW_IF_SendBuffer
-                0x0000000008018f84       0x20 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_phy_hw_if.o
+                0x0000000008019a94       0x20 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_phy_hw_if.o
  .rodata.OFFSET_TAB_CCMRx
-                0x0000000008018fa4        0x9 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_timersserver.o
- *fill*         0x0000000008018fad        0x3 
+                0x0000000008019ab4        0x9 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_timersserver.o
+ *fill*         0x0000000008019abd        0x3 
  .rodata.SHIFT_TAB_OCxx
-                0x0000000008018fb0        0x9 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_timersserver.o
- *fill*         0x0000000008018fb9        0x3 
+                0x0000000008019ac0        0x9 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_timersserver.o
+ *fill*         0x0000000008019ac9        0x3 
  .rodata.SHIFT_TAB_CCxP
-                0x0000000008018fbc        0x9 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_timersserver.o
- *fill*         0x0000000008018fc5        0x3 
+                0x0000000008019acc        0x9 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_timersserver.o
+ *fill*         0x0000000008019ad5        0x3 
  .rodata.prvProcessReceivedCommands
-                0x0000000008018fc8       0x28 ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
+                0x0000000008019ad8       0x28 ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
  .rodata.CAD_cbs.1
-                0x0000000008018ff0        0x8 ./USBPD/App/usbpd_dpm_core.o
+                0x0000000008019b00        0x8 ./USBPD/App/usbpd_dpm_core.o
  .rodata.dpmCallbacks.0
-                0x0000000008018ff8       0x40 ./USBPD/App/usbpd_dpm_core.o
+                0x0000000008019b08       0x40 ./USBPD/App/usbpd_dpm_core.o
+ .rodata.USER_SERV_FindVoltageIndex
+                0x0000000008019b48       0x18 ./USBPD/usbpd_user_services.o
  .rodata.GUI_GetMessage
-                0x0000000008019038       0x14 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008019b60       0x14 ./Utilities/GUI_INTERFACE/gui_api.o
  .rodata.GUI_SendAnswer
-                0x000000000801904c       0x44 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008019b74       0x44 ./Utilities/GUI_INTERFACE/gui_api.o
  .rodata.GUI_SendNotification
-                0x0000000008019090       0xf0 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008019bb8       0xf0 ./Utilities/GUI_INTERFACE/gui_api.o
  .rodata.GUI_SaveInfo
-                0x0000000008019180       0x50 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008019ca8       0x50 ./Utilities/GUI_INTERFACE/gui_api.o
  .rodata.Request_MessageReq
-                0x00000000080191d0       0xb0 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008019cf8       0xb0 ./Utilities/GUI_INTERFACE/gui_api.o
  .rodata.Send_DpmConfigSetCnf
-                0x0000000008019280       0x74 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008019da8       0x74 ./Utilities/GUI_INTERFACE/gui_api.o
  .rodata.Send_DpmConfigGetCnf
-                0x00000000080192f4       0x74 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008019e1c       0x74 ./Utilities/GUI_INTERFACE/gui_api.o
  .rodata.Send_DpmRegisterReadCnf
-                0x0000000008019368      0x204 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000008019e90      0x204 ./Utilities/GUI_INTERFACE/gui_api.o
  .rodata.Send_DpmRegisterWriteCnf
-                0x000000000801956c      0x204 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x000000000801a094      0x204 ./Utilities/GUI_INTERFACE/gui_api.o
  .rodata.CHANNEL_OFFSET_TAB
-                0x0000000008019770        0x7 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x000000000801a298        0x7 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .rodata._svfprintf_r.str1.1
-                0x0000000008019777       0x11 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-svfprintf.o)
+                0x000000000801a29f       0x11 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-svfprintf.o)
  .rodata._printf_i.str1.1
-                0x0000000008019788       0x22 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-vfprintf_i.o)
-                0x00000000080197ac                . = ALIGN (0x4)
- *fill*         0x00000000080197aa        0x2 
+                0x000000000801a2b0       0x22 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-vfprintf_i.o)
+                0x000000000801a2d4                . = ALIGN (0x4)
+ *fill*         0x000000000801a2d2        0x2 
 
-.ARM.extab      0x00000000080197ac        0x0
-                0x00000000080197ac                . = ALIGN (0x4)
+.ARM.extab      0x000000000801a2d4        0x0
+                0x000000000801a2d4                . = ALIGN (0x4)
  *(.ARM.extab* .gnu.linkonce.armextab.*)
-                0x00000000080197ac                . = ALIGN (0x4)
+                0x000000000801a2d4                . = ALIGN (0x4)
 
-.ARM            0x00000000080197ac        0x8
-                0x00000000080197ac                . = ALIGN (0x4)
-                0x00000000080197ac                __exidx_start = .
+.ARM            0x000000000801a2d4        0x8
+                0x000000000801a2d4                . = ALIGN (0x4)
+                0x000000000801a2d4                __exidx_start = .
  *(.ARM.exidx*)
- .ARM.exidx     0x00000000080197ac        0x8 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp\libgcc.a(_udivmoddi4.o)
-                0x00000000080197b4                __exidx_end = .
-                0x00000000080197b4                . = ALIGN (0x4)
+ .ARM.exidx     0x000000000801a2d4        0x8 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp\libgcc.a(_udivmoddi4.o)
+                0x000000000801a2dc                __exidx_end = .
+                0x000000000801a2dc                . = ALIGN (0x4)
 
-.rel.dyn        0x00000000080197b4        0x0
- .rel.iplt      0x00000000080197b4        0x0 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtbegin.o
+.rel.dyn        0x000000000801a2dc        0x0
+ .rel.iplt      0x000000000801a2dc        0x0 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtbegin.o
 
-.preinit_array  0x00000000080197b4        0x0
-                0x00000000080197b4                . = ALIGN (0x4)
-                0x00000000080197b4                PROVIDE (__preinit_array_start = .)
+.preinit_array  0x000000000801a2dc        0x0
+                0x000000000801a2dc                . = ALIGN (0x4)
+                0x000000000801a2dc                PROVIDE (__preinit_array_start = .)
  *(.preinit_array*)
-                0x00000000080197b4                PROVIDE (__preinit_array_end = .)
-                0x00000000080197b4                . = ALIGN (0x4)
+                0x000000000801a2dc                PROVIDE (__preinit_array_end = .)
+                0x000000000801a2dc                . = ALIGN (0x4)
 
-.init_array     0x00000000080197b4        0x4
-                0x00000000080197b4                . = ALIGN (0x4)
-                0x00000000080197b4                PROVIDE (__init_array_start = .)
+.init_array     0x000000000801a2dc        0x4
+                0x000000000801a2dc                . = ALIGN (0x4)
+                0x000000000801a2dc                PROVIDE (__init_array_start = .)
  *(SORT_BY_NAME(.init_array.*))
  *(.init_array*)
- .init_array    0x00000000080197b4        0x4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtbegin.o
-                0x00000000080197b8                PROVIDE (__init_array_end = .)
-                0x00000000080197b8                . = ALIGN (0x4)
+ .init_array    0x000000000801a2dc        0x4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtbegin.o
+                0x000000000801a2e0                PROVIDE (__init_array_end = .)
+                0x000000000801a2e0                . = ALIGN (0x4)
 
-.fini_array     0x00000000080197b8        0x4
-                0x00000000080197b8                . = ALIGN (0x4)
+.fini_array     0x000000000801a2e0        0x4
+                0x000000000801a2e0                . = ALIGN (0x4)
                 [!provide]                        PROVIDE (__fini_array_start = .)
  *(SORT_BY_NAME(.fini_array.*))
  *(.fini_array*)
- .fini_array    0x00000000080197b8        0x4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtbegin.o
+ .fini_array    0x000000000801a2e0        0x4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtbegin.o
                 [!provide]                        PROVIDE (__fini_array_end = .)
-                0x00000000080197bc                . = ALIGN (0x4)
-                0x00000000080197bc                _sidata = LOADADDR (.data)
+                0x000000000801a2e4                . = ALIGN (0x4)
+                0x000000000801a2e4                _sidata = LOADADDR (.data)
 
-.data           0x0000000020000000      0x194 load address 0x00000000080197bc
+.data           0x0000000020000000      0x194 load address 0x000000000801a2e4
                 0x0000000020000000                . = ALIGN (0x4)
                 0x0000000020000000                _sdata = .
  *(.data)
@@ -11694,11 +11695,11 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
                 0x0000000020000194                . = ALIGN (0x4)
                 0x0000000020000194                _edata = .
 
-.igot.plt       0x0000000020000194        0x0 load address 0x0000000008019950
+.igot.plt       0x0000000020000194        0x0 load address 0x000000000801a478
  .igot.plt      0x0000000020000194        0x0 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp/crtbegin.o
                 0x0000000020000194                . = ALIGN (0x4)
 
-.bss            0x0000000020000194     0x3328 load address 0x0000000008019950
+.bss            0x0000000020000194     0x332c load address 0x000000000801a478
                 0x0000000020000194                _sbss = .
                 0x0000000020000194                __bss_start__ = _sbss
  *(.bss)
@@ -11841,90 +11842,93 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .bss.DPM_GUI_SaveInfo
                 0x0000000020002c58        0x4 ./USBPD/Target/usbpd_dpm_user.o
                 0x0000000020002c58                DPM_GUI_SaveInfo
+ .bss.USER_SERV_PDO_Sel_Method
+                0x0000000020002c5c        0x1 ./USBPD/usbpd_user_services.o
+                0x0000000020002c5c                USER_SERV_PDO_Sel_Method
+ *fill*         0x0000000020002c5d        0x3 
  .bss.DPM_Ports
-                0x0000000020002c5c       0x50 ./USBPD/usbpd_user_services.o
-                0x0000000020002c5c                DPM_Ports
+                0x0000000020002c60       0x50 ./USBPD/usbpd_user_services.o
+                0x0000000020002c60                DPM_Ports
  .bss.GUI_TimerMeasReport
-                0x0000000020002cac        0x2 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002cac                GUI_TimerMeasReport
- *fill*         0x0000000020002cae        0x2 
+                0x0000000020002cb0        0x2 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000020002cb0                GUI_TimerMeasReport
+ *fill*         0x0000000020002cb2        0x2 
  .bss.GUI_USER_Params
-                0x0000000020002cb0        0x6 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002cb0                GUI_USER_Params
- *fill*         0x0000000020002cb6        0x2 
+                0x0000000020002cb4        0x6 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000020002cb4                GUI_USER_Params
+ *fill*         0x0000000020002cba        0x2 
  .bss.PtrDataRx
-                0x0000000020002cb8      0x100 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002cb8                PtrDataRx
+                0x0000000020002cbc      0x100 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000020002cbc                PtrDataRx
  .bss.Processed
-                0x0000000020002db8      0x100 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002db8                Processed
+                0x0000000020002dbc      0x100 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000020002dbc                Processed
  .bss.GUI_State
-                0x0000000020002eb8        0x1 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002eb8                GUI_State
+                0x0000000020002ebc        0x1 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000020002ebc                GUI_State
  .bss.GUI_OriginalSettings
-                0x0000000020002eb9        0x1 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002eb9                GUI_OriginalSettings
- *fill*         0x0000000020002eba        0x2 
+                0x0000000020002ebd        0x1 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000020002ebd                GUI_OriginalSettings
+ *fill*         0x0000000020002ebe        0x2 
  .bss.GUIMsgBox
-                0x0000000020002ebc        0x4 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002ebc                GUIMsgBox
- .bss.GUI_ThreadID
                 0x0000000020002ec0        0x4 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002ec0                GUI_ThreadID
- .bss.pCB_HWBoardVersion
+                0x0000000020002ec0                GUIMsgBox
+ .bss.GUI_ThreadID
                 0x0000000020002ec4        0x4 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002ec4                pCB_HWBoardVersion
- .bss.pCB_HWPDType
+                0x0000000020002ec4                GUI_ThreadID
+ .bss.pCB_HWBoardVersion
                 0x0000000020002ec8        0x4 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002ec8                pCB_HWPDType
- .bss.pCB_GetVoltage
+                0x0000000020002ec8                pCB_HWBoardVersion
+ .bss.pCB_HWPDType
                 0x0000000020002ecc        0x4 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002ecc                pCB_GetVoltage
- .bss.pCB_GetCurrent
+                0x0000000020002ecc                pCB_HWPDType
+ .bss.pCB_GetVoltage
                 0x0000000020002ed0        0x4 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002ed0                pCB_GetCurrent
- .bss.pCB_FreeText
+                0x0000000020002ed0                pCB_GetVoltage
+ .bss.pCB_GetCurrent
                 0x0000000020002ed4        0x4 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002ed4                pCB_FreeText
+                0x0000000020002ed4                pCB_GetCurrent
+ .bss.pCB_FreeText
+                0x0000000020002ed8        0x4 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000020002ed8                pCB_FreeText
  .bss.GUI_SaveInformation
-                0x0000000020002ed8       0x70 ./Utilities/GUI_INTERFACE/gui_api.o
-                0x0000000020002ed8                GUI_SaveInformation
- .bss._init.4   0x0000000020002f48        0x1 ./Utilities/GUI_INTERFACE/gui_api.o
- *fill*         0x0000000020002f49        0x1 
- .bss.cursor.3  0x0000000020002f4a        0x2 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000020002edc       0x70 ./Utilities/GUI_INTERFACE/gui_api.o
+                0x0000000020002edc                GUI_SaveInformation
+ .bss._init.4   0x0000000020002f4c        0x1 ./Utilities/GUI_INTERFACE/gui_api.o
+ *fill*         0x0000000020002f4d        0x1 
+ .bss.cursor.3  0x0000000020002f4e        0x2 ./Utilities/GUI_INTERFACE/gui_api.o
  .bss.counter.2
-                0x0000000020002f4c        0x2 ./Utilities/GUI_INTERFACE/gui_api.o
- .bss.Rstate.1  0x0000000020002f4e        0x1 ./Utilities/GUI_INTERFACE/gui_api.o
- *fill*         0x0000000020002f4f        0x1 
- .bss.currentSize.0
                 0x0000000020002f50        0x2 ./Utilities/GUI_INTERFACE/gui_api.o
- *fill*         0x0000000020002f52        0x2 
+ .bss.Rstate.1  0x0000000020002f52        0x1 ./Utilities/GUI_INTERFACE/gui_api.o
+ *fill*         0x0000000020002f53        0x1 
+ .bss.currentSize.0
+                0x0000000020002f54        0x2 ./Utilities/GUI_INTERFACE/gui_api.o
+ *fill*         0x0000000020002f56        0x2 
  .bss.TracerContext
-                0x0000000020002f54      0x41c ./Utilities/TRACER_EMB/tracer_emb.o
- .bss.fptr_rx   0x0000000020003370        0x4 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+                0x0000000020002f58      0x41c ./Utilities/TRACER_EMB/tracer_emb.o
+ .bss.fptr_rx   0x0000000020003374        0x4 ./Utilities/TRACER_EMB/tracer_emb_hw.o
  .bss.__malloc_free_list
-                0x0000000020003374        0x4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mallocr.o)
-                0x0000000020003374                __malloc_free_list
- .bss.__malloc_sbrk_start
                 0x0000000020003378        0x4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mallocr.o)
-                0x0000000020003378                __malloc_sbrk_start
- .bss.__sf      0x000000002000337c      0x138 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-findfp.o)
-                0x000000002000337c                __sf
- .bss.errno     0x00000000200034b4        0x4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-reent.o)
-                0x00000000200034b4                errno
+                0x0000000020003378                __malloc_free_list
+ .bss.__malloc_sbrk_start
+                0x000000002000337c        0x4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mallocr.o)
+                0x000000002000337c                __malloc_sbrk_start
+ .bss.__sf      0x0000000020003380      0x138 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-findfp.o)
+                0x0000000020003380                __sf
+ .bss.errno     0x00000000200034b8        0x4 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-reent.o)
+                0x00000000200034b8                errno
  .bss.__lock___malloc_recursive_mutex
-                0x00000000200034b8        0x1 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-lock.o)
-                0x00000000200034b8                __lock___malloc_recursive_mutex
+                0x00000000200034bc        0x1 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-lock.o)
+                0x00000000200034bc                __lock___malloc_recursive_mutex
  *(COMMON)
-                0x00000000200034bc                . = ALIGN (0x4)
- *fill*         0x00000000200034b9        0x3 
-                0x00000000200034bc                _ebss = .
-                0x00000000200034bc                __bss_end__ = _ebss
+                0x00000000200034c0                . = ALIGN (0x4)
+ *fill*         0x00000000200034bd        0x3 
+                0x00000000200034c0                _ebss = .
+                0x00000000200034c0                __bss_end__ = _ebss
 
 ._user_heap_stack
-                0x00000000200034bc     0x1004 load address 0x0000000008019950
+                0x00000000200034c0     0x1000 load address 0x000000000801a478
                 0x00000000200034c0                . = ALIGN (0x8)
- *fill*         0x00000000200034bc        0x4 
                 [!provide]                        PROVIDE (end = .)
                 0x00000000200034c0                PROVIDE (_end = .)
                 0x00000000200040c0                . = (. + _Min_Heap_Size)
@@ -12229,7 +12233,7 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .iar_vfe_header
                 0x0000000000000020        0x4 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
 
-.debug_info     0x0000000000000000    0x2e058
+.debug_info     0x0000000000000000    0x2e69e
  .debug_info    0x0000000000000000     0x235d ./Core/Src/main.o
  .debug_info    0x000000000000235d      0xc38 ./Core/Src/stm32g0xx_hal_msp.o
  .debug_info    0x0000000000002f95      0xbf9 ./Core/Src/stm32g0xx_hal_timebase_tim.o
@@ -12272,16 +12276,16 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_info    0x0000000000020b20      0x374 ./USBPD/App/usbpd.o
  .debug_info    0x0000000000020e94     0x1ba1 ./USBPD/App/usbpd_dpm_core.o
  .debug_info    0x0000000000022a35      0x6cf ./USBPD/App/usbpd_pwr_if.o
- .debug_info    0x0000000000023104     0x25e9 ./USBPD/Target/usbpd_dpm_user.o
- .debug_info    0x00000000000256ed      0xff4 ./USBPD/Target/usbpd_pwr_user.o
- .debug_info    0x00000000000266e1     0x1792 ./USBPD/usbpd_user_services.o
- .debug_info    0x0000000000027e73      0xe89 ./Utilities/GUI_INTERFACE/bsp_gui.o
- .debug_info    0x0000000000028cfc      0x3cf ./Utilities/GUI_INTERFACE/data_struct_tlv.o
- .debug_info    0x00000000000290cb     0x334a ./Utilities/GUI_INTERFACE/gui_api.o
- .debug_info    0x000000000002c415      0x6fa ./Utilities/TRACER_EMB/tracer_emb.o
- .debug_info    0x000000000002cb0f     0x1549 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+ .debug_info    0x0000000000023104     0x2c1e ./USBPD/Target/usbpd_dpm_user.o
+ .debug_info    0x0000000000025d22      0xff4 ./USBPD/Target/usbpd_pwr_user.o
+ .debug_info    0x0000000000026d16     0x17a3 ./USBPD/usbpd_user_services.o
+ .debug_info    0x00000000000284b9      0xe89 ./Utilities/GUI_INTERFACE/bsp_gui.o
+ .debug_info    0x0000000000029342      0x3cf ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+ .debug_info    0x0000000000029711     0x334a ./Utilities/GUI_INTERFACE/gui_api.o
+ .debug_info    0x000000000002ca5b      0x6fa ./Utilities/TRACER_EMB/tracer_emb.o
+ .debug_info    0x000000000002d155     0x1549 ./Utilities/TRACER_EMB/tracer_emb_hw.o
 
-.debug_abbrev   0x0000000000000000     0x7638
+.debug_abbrev   0x0000000000000000     0x7656
  .debug_abbrev  0x0000000000000000      0x3ed ./Core/Src/main.o
  .debug_abbrev  0x00000000000003ed      0x1bf ./Core/Src/stm32g0xx_hal_msp.o
  .debug_abbrev  0x00000000000005ac      0x20f ./Core/Src/stm32g0xx_hal_timebase_tim.o
@@ -12324,14 +12328,14 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_abbrev  0x00000000000057a5      0x154 ./USBPD/App/usbpd.o
  .debug_abbrev  0x00000000000058f9      0x3c9 ./USBPD/App/usbpd_dpm_core.o
  .debug_abbrev  0x0000000000005cc2      0x232 ./USBPD/App/usbpd_pwr_if.o
- .debug_abbrev  0x0000000000005ef4      0x36b ./USBPD/Target/usbpd_dpm_user.o
- .debug_abbrev  0x000000000000625f      0x1d1 ./USBPD/Target/usbpd_pwr_user.o
- .debug_abbrev  0x0000000000006430      0x2e7 ./USBPD/usbpd_user_services.o
- .debug_abbrev  0x0000000000006717      0x300 ./Utilities/GUI_INTERFACE/bsp_gui.o
- .debug_abbrev  0x0000000000006a17      0x162 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
- .debug_abbrev  0x0000000000006b79      0x479 ./Utilities/GUI_INTERFACE/gui_api.o
- .debug_abbrev  0x0000000000006ff2      0x34a ./Utilities/TRACER_EMB/tracer_emb.o
- .debug_abbrev  0x000000000000733c      0x2fc ./Utilities/TRACER_EMB/tracer_emb_hw.o
+ .debug_abbrev  0x0000000000005ef4      0x35f ./USBPD/Target/usbpd_dpm_user.o
+ .debug_abbrev  0x0000000000006253      0x1d1 ./USBPD/Target/usbpd_pwr_user.o
+ .debug_abbrev  0x0000000000006424      0x311 ./USBPD/usbpd_user_services.o
+ .debug_abbrev  0x0000000000006735      0x300 ./Utilities/GUI_INTERFACE/bsp_gui.o
+ .debug_abbrev  0x0000000000006a35      0x162 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+ .debug_abbrev  0x0000000000006b97      0x479 ./Utilities/GUI_INTERFACE/gui_api.o
+ .debug_abbrev  0x0000000000007010      0x34a ./Utilities/TRACER_EMB/tracer_emb.o
+ .debug_abbrev  0x000000000000735a      0x2fc ./Utilities/TRACER_EMB/tracer_emb_hw.o
 
 .debug_aranges  0x0000000000000000     0x29a8
  .debug_aranges
@@ -12644,59 +12648,59 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_macro   0x000000000000c1fe      0x328 ./Utilities/TRACER_EMB/tracer_emb.o
  .debug_macro   0x000000000000c526      0x32b ./Utilities/TRACER_EMB/tracer_emb_hw.o
 
-.debug_line     0x0000000000000000    0x2f5ec
- .debug_line    0x0000000000000000     0x12ce ./Core/Src/main.o
- .debug_line    0x00000000000012ce      0x8c3 ./Core/Src/stm32g0xx_hal_msp.o
- .debug_line    0x0000000000001b91      0x81e ./Core/Src/stm32g0xx_hal_timebase_tim.o
- .debug_line    0x00000000000023af      0xb39 ./Core/Src/stm32g0xx_it.o
- .debug_line    0x0000000000002ee8      0x583 ./Core/Src/sysmem.o
- .debug_line    0x000000000000346b      0x818 ./Core/Src/system_stm32g0xx.o
- .debug_line    0x0000000000003c83       0x7b ./Core/Startup/startup_stm32g0b1retx.o
- .debug_line    0x0000000000003cfe      0xb7e ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.o
- .debug_line    0x000000000000487c     0x197e ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.o
- .debug_line    0x00000000000061fa      0xb06 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc_ex.o
- .debug_line    0x0000000000006d00      0xbfd ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.o
- .debug_line    0x00000000000078fd      0xaed ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash.o
- .debug_line    0x00000000000083ea     0x1069 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash_ex.o
- .debug_line    0x0000000000009453      0xbcf ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.o
- .debug_line    0x000000000000a022      0xc33 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.o
- .debug_line    0x000000000000ac55      0xfe8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.o
- .debug_line    0x000000000000bc3d     0x11d3 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.o
- .debug_line    0x000000000000ce10     0x3d76 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.o
- .debug_line    0x0000000000010b86     0x1d1a ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.o
- .debug_line    0x00000000000128a0      0xaf6 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_dma.o
- .debug_line    0x0000000000013396      0x964 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_gpio.o
- .debug_line    0x0000000000013cfa      0x941 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_lpuart.o
- .debug_line    0x000000000001463b     0x1315 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_rcc.o
- .debug_line    0x0000000000015950      0x8cf ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_ucpd.o
- .debug_line    0x000000000001621f      0xaae ./Middlewares/ST/STM32_USBPD_Library/Core/src/usbpd_trace.o
- .debug_line    0x0000000000016ccd      0xf76 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_cad_hw_if.o
- .debug_line    0x0000000000017c43      0xa24 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_hw.o
- .debug_line    0x0000000000018667      0xd5d ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_hw_if_it.o
- .debug_line    0x00000000000193c4      0xb28 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_phy.o
- .debug_line    0x0000000000019eec     0x10f8 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_phy_hw_if.o
- .debug_line    0x000000000001afe4      0xade ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_pwr_hw_if.o
- .debug_line    0x000000000001bac2      0xd96 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_timersserver.o
- .debug_line    0x000000000001c858     0x2451 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
- .debug_line    0x000000000001eca9      0x7a0 ./Middlewares/Third_Party/FreeRTOS/Source/list.o
- .debug_line    0x000000000001f449     0x14af ./Middlewares/Third_Party/FreeRTOS/Source/queue.o
- .debug_line    0x00000000000208f8     0x1b59 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
- .debug_line    0x0000000000022451      0xcea ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
- .debug_line    0x000000000002313b      0x829 ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/port.o
- .debug_line    0x0000000000023964      0x990 ./Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.o
- .debug_line    0x00000000000242f4      0xa81 ./USBPD/App/usbpd.o
- .debug_line    0x0000000000024d75      0xe82 ./USBPD/App/usbpd_dpm_core.o
- .debug_line    0x0000000000025bf7      0xd3a ./USBPD/App/usbpd_pwr_if.o
- .debug_line    0x0000000000026931     0x1529 ./USBPD/Target/usbpd_dpm_user.o
- .debug_line    0x0000000000027e5a     0x1054 ./USBPD/Target/usbpd_pwr_user.o
- .debug_line    0x0000000000028eae      0xf4a ./USBPD/usbpd_user_services.o
- .debug_line    0x0000000000029df8     0x118f ./Utilities/GUI_INTERFACE/bsp_gui.o
- .debug_line    0x000000000002af87      0x99e ./Utilities/GUI_INTERFACE/data_struct_tlv.o
- .debug_line    0x000000000002b925     0x1f3e ./Utilities/GUI_INTERFACE/gui_api.o
- .debug_line    0x000000000002d863      0xcff ./Utilities/TRACER_EMB/tracer_emb.o
- .debug_line    0x000000000002e562     0x108a ./Utilities/TRACER_EMB/tracer_emb_hw.o
+.debug_line     0x0000000000000000    0x2f61c
+ .debug_line    0x0000000000000000     0x12cc ./Core/Src/main.o
+ .debug_line    0x00000000000012cc      0x8c3 ./Core/Src/stm32g0xx_hal_msp.o
+ .debug_line    0x0000000000001b8f      0x81e ./Core/Src/stm32g0xx_hal_timebase_tim.o
+ .debug_line    0x00000000000023ad      0xb39 ./Core/Src/stm32g0xx_it.o
+ .debug_line    0x0000000000002ee6      0x583 ./Core/Src/sysmem.o
+ .debug_line    0x0000000000003469      0x818 ./Core/Src/system_stm32g0xx.o
+ .debug_line    0x0000000000003c81       0x7b ./Core/Startup/startup_stm32g0b1retx.o
+ .debug_line    0x0000000000003cfc      0xb7e ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal.o
+ .debug_line    0x000000000000487a     0x197e ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc.o
+ .debug_line    0x00000000000061f8      0xb06 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_adc_ex.o
+ .debug_line    0x0000000000006cfe      0xbfd ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_cortex.o
+ .debug_line    0x00000000000078fb      0xaed ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash.o
+ .debug_line    0x00000000000083e8     0x1069 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_flash_ex.o
+ .debug_line    0x0000000000009451      0xbcf ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_gpio.o
+ .debug_line    0x000000000000a020      0xc33 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.o
+ .debug_line    0x000000000000ac53      0xfe8 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc.o
+ .debug_line    0x000000000000bc3b     0x11d3 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_rcc_ex.o
+ .debug_line    0x000000000000ce0e     0x3d76 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim.o
+ .debug_line    0x0000000000010b84     0x1d1a ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_tim_ex.o
+ .debug_line    0x000000000001289e      0xaf6 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_dma.o
+ .debug_line    0x0000000000013394      0x964 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_gpio.o
+ .debug_line    0x0000000000013cf8      0x941 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_lpuart.o
+ .debug_line    0x0000000000014639     0x1315 ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_rcc.o
+ .debug_line    0x000000000001594e      0x8cf ./Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_ll_ucpd.o
+ .debug_line    0x000000000001621d      0xaae ./Middlewares/ST/STM32_USBPD_Library/Core/src/usbpd_trace.o
+ .debug_line    0x0000000000016ccb      0xf76 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_cad_hw_if.o
+ .debug_line    0x0000000000017c41      0xa24 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_hw.o
+ .debug_line    0x0000000000018665      0xd5d ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_hw_if_it.o
+ .debug_line    0x00000000000193c2      0xb28 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_phy.o
+ .debug_line    0x0000000000019eea     0x10f8 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_phy_hw_if.o
+ .debug_line    0x000000000001afe2      0xade ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_pwr_hw_if.o
+ .debug_line    0x000000000001bac0      0xd96 ./Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/usbpd_timersserver.o
+ .debug_line    0x000000000001c856     0x2451 ./Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.o
+ .debug_line    0x000000000001eca7      0x7a0 ./Middlewares/Third_Party/FreeRTOS/Source/list.o
+ .debug_line    0x000000000001f447     0x14af ./Middlewares/Third_Party/FreeRTOS/Source/queue.o
+ .debug_line    0x00000000000208f6     0x1b59 ./Middlewares/Third_Party/FreeRTOS/Source/tasks.o
+ .debug_line    0x000000000002244f      0xcea ./Middlewares/Third_Party/FreeRTOS/Source/timers.o
+ .debug_line    0x0000000000023139      0x829 ./Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/port.o
+ .debug_line    0x0000000000023962      0x990 ./Middlewares/Third_Party/FreeRTOS/Source/portable/MemMang/heap_4.o
+ .debug_line    0x00000000000242f2      0xa81 ./USBPD/App/usbpd.o
+ .debug_line    0x0000000000024d73      0xe82 ./USBPD/App/usbpd_dpm_core.o
+ .debug_line    0x0000000000025bf5      0xd3a ./USBPD/App/usbpd_pwr_if.o
+ .debug_line    0x000000000002692f     0x155b ./USBPD/Target/usbpd_dpm_user.o
+ .debug_line    0x0000000000027e8a     0x1054 ./USBPD/Target/usbpd_pwr_user.o
+ .debug_line    0x0000000000028ede      0xf4a ./USBPD/usbpd_user_services.o
+ .debug_line    0x0000000000029e28     0x118f ./Utilities/GUI_INTERFACE/bsp_gui.o
+ .debug_line    0x000000000002afb7      0x99e ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+ .debug_line    0x000000000002b955     0x1f3e ./Utilities/GUI_INTERFACE/gui_api.o
+ .debug_line    0x000000000002d893      0xcff ./Utilities/TRACER_EMB/tracer_emb.o
+ .debug_line    0x000000000002e592     0x108a ./Utilities/TRACER_EMB/tracer_emb_hw.o
 
-.debug_str      0x0000000000000000    0xe9dc6
+.debug_str      0x0000000000000000    0xe9df7
  .debug_str     0x0000000000000000    0xd23f1 ./Core/Src/main.o
                                       0xd39e3 (size before relaxing)
  .debug_str     0x00000000000d23f1       0x84 ./Core/Src/stm32g0xx_hal_msp.o
@@ -12780,24 +12784,24 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
                                       0xcf38c (size before relaxing)
  .debug_str     0x00000000000e46c9      0x2b5 ./USBPD/App/usbpd_pwr_if.o
                                       0xcde79 (size before relaxing)
- .debug_str     0x00000000000e497e     0x114b ./USBPD/Target/usbpd_dpm_user.o
-                                      0xcfa35 (size before relaxing)
- .debug_str     0x00000000000e5ac9      0x650 ./USBPD/Target/usbpd_pwr_user.o
+ .debug_str     0x00000000000e497e     0x170e ./USBPD/Target/usbpd_dpm_user.o
+                                      0xd004e (size before relaxing)
+ .debug_str     0x00000000000e608c      0x650 ./USBPD/Target/usbpd_pwr_user.o
                                       0xc7eb4 (size before relaxing)
- .debug_str     0x00000000000e6119      0x8d5 ./USBPD/usbpd_user_services.o
+ .debug_str     0x00000000000e66dc      0x343 ./USBPD/usbpd_user_services.o
                                       0xc939f (size before relaxing)
- .debug_str     0x00000000000e69ee      0x18c ./Utilities/GUI_INTERFACE/bsp_gui.o
+ .debug_str     0x00000000000e6a1f      0x18c ./Utilities/GUI_INTERFACE/bsp_gui.o
                                       0xca47e (size before relaxing)
- .debug_str     0x00000000000e6b7a      0x21c ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+ .debug_str     0x00000000000e6bab      0x21c ./Utilities/GUI_INTERFACE/data_struct_tlv.o
                                        0x73d2 (size before relaxing)
- .debug_str     0x00000000000e6d96     0x248c ./Utilities/GUI_INTERFACE/gui_api.o
+ .debug_str     0x00000000000e6dc7     0x248c ./Utilities/GUI_INTERFACE/gui_api.o
                                       0xd31c4 (size before relaxing)
- .debug_str     0x00000000000e9222      0x3c1 ./Utilities/TRACER_EMB/tracer_emb.o
+ .debug_str     0x00000000000e9253      0x3c1 ./Utilities/TRACER_EMB/tracer_emb.o
                                       0xbfae6 (size before relaxing)
- .debug_str     0x00000000000e95e3      0x7e3 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+ .debug_str     0x00000000000e9614      0x7e3 ./Utilities/TRACER_EMB/tracer_emb_hw.o
                                       0xbd632 (size before relaxing)
 
-.debug_frame    0x0000000000000000     0xa918
+.debug_frame    0x0000000000000000     0xa91c
  .debug_frame   0x0000000000000000      0x3a8 ./Core/Src/main.o
  .debug_frame   0x00000000000003a8       0x70 ./Core/Src/stm32g0xx_hal_msp.o
  .debug_frame   0x0000000000000418       0x6c ./Core/Src/stm32g0xx_hal_timebase_tim.o
@@ -12839,171 +12843,171 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_frame   0x0000000000007718       0x64 ./USBPD/App/usbpd.o
  .debug_frame   0x000000000000777c      0x168 ./USBPD/App/usbpd_dpm_core.o
  .debug_frame   0x00000000000078e4      0x188 ./USBPD/App/usbpd_pwr_if.o
- .debug_frame   0x0000000000007a6c      0x6a0 ./USBPD/Target/usbpd_dpm_user.o
- .debug_frame   0x000000000000810c      0x590 ./USBPD/Target/usbpd_pwr_user.o
- .debug_frame   0x000000000000869c       0xc0 ./USBPD/usbpd_user_services.o
- .debug_frame   0x000000000000875c       0xfc ./Utilities/GUI_INTERFACE/bsp_gui.o
- .debug_frame   0x0000000000008858      0x130 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
- .debug_frame   0x0000000000008988      0x384 ./Utilities/GUI_INTERFACE/gui_api.o
- .debug_frame   0x0000000000008d0c      0x1f4 ./Utilities/TRACER_EMB/tracer_emb.o
- .debug_frame   0x0000000000008f00      0x624 ./Utilities/TRACER_EMB/tracer_emb_hw.o
- .debug_frame   0x0000000000009524       0x20 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
- .debug_frame   0x0000000000009544       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
- .debug_frame   0x0000000000009570       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
- .debug_frame   0x0000000000009580       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
- .debug_frame   0x000000000000959d       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
- .debug_frame   0x00000000000095b4       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
- .debug_frame   0x00000000000095cb       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
- .debug_frame   0x00000000000095e0       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
- .debug_frame   0x00000000000095f7       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
- .debug_frame   0x000000000000960c       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
- .debug_frame   0x000000000000961c       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009639       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009665       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009675       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009690       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000096a7       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000096b7       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000096cc       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000096e1       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000096fc       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x000000000000970c       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009721       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009736       0x24 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x000000000000975a       0x20 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x000000000000977a       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009795       0x24 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000097b9       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000097d2       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000097e2       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000097fb       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009814       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x000000000000982b       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x000000000000983b       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x000000000000984b       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009866       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x000000000000987f       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x000000000000988f       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000098a8       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000098c1       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000098d6       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000098ef       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x000000000000990a       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009921       0x16 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009937       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009950       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009969       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009982       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x000000000000999b       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000099ab       0x25 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000099d0       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x00000000000099e9       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009a00       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009a15       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009a2c       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009a41       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009a51       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009a6a       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009a81       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
- .debug_frame   0x0000000000009a98       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_lib.o)
- .debug_frame   0x0000000000009aa8       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_lib.o)
- .debug_frame   0x0000000000009ad4       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_lib.o)
- .debug_frame   0x0000000000009ae4       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_lib.o)
- .debug_frame   0x0000000000009afb       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_lib.o)
- .debug_frame   0x0000000000009b0b       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
- .debug_frame   0x0000000000009b28       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
- .debug_frame   0x0000000000009b54       0x26 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
- .debug_frame   0x0000000000009b7a       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
- .debug_frame   0x0000000000009b97       0x26 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
- .debug_frame   0x0000000000009bbd       0x25 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
- .debug_frame   0x0000000000009be2       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
- .debug_frame   0x0000000000009bf7       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
- .debug_frame   0x0000000000009c14       0x1c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
- .debug_frame   0x0000000000009c30       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
- .debug_frame   0x0000000000009c4d       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
- .debug_frame   0x0000000000009c64       0x27 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_snk.o)
- .debug_frame   0x0000000000009c8b       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_snk.o)
- .debug_frame   0x0000000000009cb7       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_snk.o)
- .debug_frame   0x0000000000009cd4       0x27 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_src.o)
- .debug_frame   0x0000000000009cfb       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_src.o)
- .debug_frame   0x0000000000009d27       0x21 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_src.o)
- .debug_frame   0x0000000000009d48       0x25 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vconn.o)
- .debug_frame   0x0000000000009d6d       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vconn.o)
- .debug_frame   0x0000000000009d99       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vconn.o)
- .debug_frame   0x0000000000009db6       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vconn.o)
- .debug_frame   0x0000000000009dcf       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009dec       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009e18       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009e33       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009e50       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009e6d       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009e8a       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009ea7       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009ec0       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009edb       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009ef6       0x25 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009f1b       0x21 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009f3c       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009f59       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009f76       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009f93       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
- .debug_frame   0x0000000000009fac       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x0000000000009fbc       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x0000000000009fe8       0x20 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a008       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a018       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a031       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a041       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a051       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a061       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a071       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a081       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a096       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a0ad       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a0c2       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a0d7       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a0ec       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a101       0x25 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a126       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a143       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a158       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a16d       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a188       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a19d       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a1ad       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a1c2       0x25 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a1e7       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a204       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a214       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a229       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a244       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- .debug_frame   0x000000000000a25f       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
- *fill*         0x000000000000a276        0x2 
- .debug_frame   0x000000000000a278       0x40 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-malloc.o)
- .debug_frame   0x000000000000a2b8       0x50 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mallocr.o)
- .debug_frame   0x000000000000a308       0x40 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mlock.o)
- .debug_frame   0x000000000000a348      0x138 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-findfp.o)
- .debug_frame   0x000000000000a480       0x50 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-snprintf.o)
- .debug_frame   0x000000000000a4d0       0x48 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-sprintf.o)
- .debug_frame   0x000000000000a518       0x20 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memset.o)
- .debug_frame   0x000000000000a538       0x2c C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-reent.o)
- .debug_frame   0x000000000000a564       0x2c C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-sbrkr.o)
- .debug_frame   0x000000000000a590       0x20 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-errno.o)
- .debug_frame   0x000000000000a5b0       0x2c C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-init.o)
- .debug_frame   0x000000000000a5dc       0xb0 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-lock.o)
- .debug_frame   0x000000000000a68c       0x28 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-aeabi_memcpy.o)
- .debug_frame   0x000000000000a6b4       0x28 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-aeabi_memset.o)
- .debug_frame   0x000000000000a6dc       0x28 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-aeabi_memclr.o)
- .debug_frame   0x000000000000a704       0x28 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memcpy-stub.o)
- .debug_frame   0x000000000000a72c       0x2c C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-freer.o)
- .debug_frame   0x000000000000a758       0x74 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-svfprintf.o)
- .debug_frame   0x000000000000a7cc       0x54 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-vfprintf_i.o)
- .debug_frame   0x000000000000a820       0x28 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memmove.o)
- .debug_frame   0x000000000000a848       0x20 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memchr-stub.o)
- .debug_frame   0x000000000000a868       0x34 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-reallocr.o)
- .debug_frame   0x000000000000a89c       0x20 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-msizer.o)
- .debug_frame   0x000000000000a8bc       0x20 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp\libgcc.a(_udivsi3.o)
- .debug_frame   0x000000000000a8dc       0x3c C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp\libgcc.a(_udivmoddi4.o)
+ .debug_frame   0x0000000000007a6c      0x6a4 ./USBPD/Target/usbpd_dpm_user.o
+ .debug_frame   0x0000000000008110      0x590 ./USBPD/Target/usbpd_pwr_user.o
+ .debug_frame   0x00000000000086a0       0xc0 ./USBPD/usbpd_user_services.o
+ .debug_frame   0x0000000000008760       0xfc ./Utilities/GUI_INTERFACE/bsp_gui.o
+ .debug_frame   0x000000000000885c      0x130 ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+ .debug_frame   0x000000000000898c      0x384 ./Utilities/GUI_INTERFACE/gui_api.o
+ .debug_frame   0x0000000000008d10      0x1f4 ./Utilities/TRACER_EMB/tracer_emb.o
+ .debug_frame   0x0000000000008f04      0x624 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+ .debug_frame   0x0000000000009528       0x20 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
+ .debug_frame   0x0000000000009548       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
+ .debug_frame   0x0000000000009574       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
+ .debug_frame   0x0000000000009584       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
+ .debug_frame   0x00000000000095a1       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
+ .debug_frame   0x00000000000095b8       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
+ .debug_frame   0x00000000000095cf       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
+ .debug_frame   0x00000000000095e4       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
+ .debug_frame   0x00000000000095fb       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
+ .debug_frame   0x0000000000009610       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_cad.o)
+ .debug_frame   0x0000000000009620       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x000000000000963d       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009669       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009679       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009694       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000096ab       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000096bb       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000096d0       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000096e5       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009700       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009710       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009725       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x000000000000973a       0x24 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x000000000000975e       0x20 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x000000000000977e       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009799       0x24 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000097bd       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000097d6       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000097e6       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000097ff       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009818       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x000000000000982f       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x000000000000983f       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x000000000000984f       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x000000000000986a       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009883       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009893       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000098ac       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000098c5       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000098da       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000098f3       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x000000000000990e       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009925       0x16 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x000000000000993b       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009954       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x000000000000996d       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009986       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x000000000000999f       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000099af       0x25 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000099d4       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x00000000000099ed       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009a04       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009a19       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009a30       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009a45       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009a55       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009a6e       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009a85       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe.o)
+ .debug_frame   0x0000000000009a9c       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_lib.o)
+ .debug_frame   0x0000000000009aac       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_lib.o)
+ .debug_frame   0x0000000000009ad8       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_lib.o)
+ .debug_frame   0x0000000000009ae8       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_lib.o)
+ .debug_frame   0x0000000000009aff       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_lib.o)
+ .debug_frame   0x0000000000009b0f       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
+ .debug_frame   0x0000000000009b2c       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
+ .debug_frame   0x0000000000009b58       0x26 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
+ .debug_frame   0x0000000000009b7e       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
+ .debug_frame   0x0000000000009b9b       0x26 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
+ .debug_frame   0x0000000000009bc1       0x25 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
+ .debug_frame   0x0000000000009be6       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
+ .debug_frame   0x0000000000009bfb       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
+ .debug_frame   0x0000000000009c18       0x1c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
+ .debug_frame   0x0000000000009c34       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
+ .debug_frame   0x0000000000009c51       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_msg.o)
+ .debug_frame   0x0000000000009c68       0x27 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_snk.o)
+ .debug_frame   0x0000000000009c8f       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_snk.o)
+ .debug_frame   0x0000000000009cbb       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_snk.o)
+ .debug_frame   0x0000000000009cd8       0x27 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_src.o)
+ .debug_frame   0x0000000000009cff       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_src.o)
+ .debug_frame   0x0000000000009d2b       0x21 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_src.o)
+ .debug_frame   0x0000000000009d4c       0x25 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vconn.o)
+ .debug_frame   0x0000000000009d71       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vconn.o)
+ .debug_frame   0x0000000000009d9d       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vconn.o)
+ .debug_frame   0x0000000000009dba       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vconn.o)
+ .debug_frame   0x0000000000009dd3       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009df0       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009e1c       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009e37       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009e54       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009e71       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009e8e       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009eab       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009ec4       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009edf       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009efa       0x25 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009f1f       0x21 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009f40       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009f5d       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009f7a       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009f97       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_pe_vdm.o)
+ .debug_frame   0x0000000000009fb0       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x0000000000009fc0       0x2c ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x0000000000009fec       0x20 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a00c       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a01c       0x19 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a035       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a045       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a055       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a065       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a075       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a085       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a09a       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a0b1       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a0c6       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a0db       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a0f0       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a105       0x25 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a12a       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a147       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a15c       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a171       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a18c       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a1a1       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a1b1       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a1c6       0x25 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a1eb       0x1d ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a208       0x10 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a218       0x15 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a22d       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a248       0x1b ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ .debug_frame   0x000000000000a263       0x17 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
+ *fill*         0x000000000000a27a        0x2 
+ .debug_frame   0x000000000000a27c       0x40 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-malloc.o)
+ .debug_frame   0x000000000000a2bc       0x50 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mallocr.o)
+ .debug_frame   0x000000000000a30c       0x40 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-mlock.o)
+ .debug_frame   0x000000000000a34c      0x138 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-findfp.o)
+ .debug_frame   0x000000000000a484       0x50 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-snprintf.o)
+ .debug_frame   0x000000000000a4d4       0x48 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-sprintf.o)
+ .debug_frame   0x000000000000a51c       0x20 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memset.o)
+ .debug_frame   0x000000000000a53c       0x2c C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-reent.o)
+ .debug_frame   0x000000000000a568       0x2c C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-sbrkr.o)
+ .debug_frame   0x000000000000a594       0x20 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-errno.o)
+ .debug_frame   0x000000000000a5b4       0x2c C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-init.o)
+ .debug_frame   0x000000000000a5e0       0xb0 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-lock.o)
+ .debug_frame   0x000000000000a690       0x28 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-aeabi_memcpy.o)
+ .debug_frame   0x000000000000a6b8       0x28 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-aeabi_memset.o)
+ .debug_frame   0x000000000000a6e0       0x28 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-aeabi_memclr.o)
+ .debug_frame   0x000000000000a708       0x28 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memcpy-stub.o)
+ .debug_frame   0x000000000000a730       0x2c C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-freer.o)
+ .debug_frame   0x000000000000a75c       0x74 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-svfprintf.o)
+ .debug_frame   0x000000000000a7d0       0x54 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-nano-vfprintf_i.o)
+ .debug_frame   0x000000000000a824       0x28 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memmove.o)
+ .debug_frame   0x000000000000a84c       0x20 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-memchr-stub.o)
+ .debug_frame   0x000000000000a86c       0x34 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-reallocr.o)
+ .debug_frame   0x000000000000a8a0       0x20 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/../../../../arm-none-eabi/lib/thumb/v6-m/nofp\libc_nano.a(libc_a-msizer.o)
+ .debug_frame   0x000000000000a8c0       0x20 C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp\libgcc.a(_udivsi3.o)
+ .debug_frame   0x000000000000a8e0       0x3c C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.11.3.rel1.win32_1.1.100.202309141235/tools/bin/../lib/gcc/arm-none-eabi/11.3.1/thumb/v6-m/nofp\libgcc.a(_udivmoddi4.o)
 
 .debug_line_str
                 0x0000000000000000       0x67

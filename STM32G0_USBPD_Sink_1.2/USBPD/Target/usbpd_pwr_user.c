@@ -957,10 +957,10 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetCurrent(uint32_t Instance, int32_t *pCurrent
   if ((Instance >= USBPD_PWR_INSTANCES_NBR) || (NULL == pCurrent))
   {
     ret = BSP_ERROR_WRONG_PARAM;
-    *pCurrent = 0;
   }
   else
   {
+	*pCurrent = 0;
     ret = BSP_ERROR_FEATURE_NOT_SUPPORTED;
   }
   /* !!!
