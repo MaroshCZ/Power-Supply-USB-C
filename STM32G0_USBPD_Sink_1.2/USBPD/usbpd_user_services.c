@@ -426,16 +426,34 @@ uint32_t USER_SERV_SNK_EvaluateMatchWithSRCPDO(uint8_t PortNum,
 
             /* Match if SNK APDO voltage overlaps with the SRC APDO voltage range */
             if (((srcminvoltage100mv <= snkmaxvoltage100mv) && (srcminvoltage100mv >= snkminvoltage100mv)) ||
-                ((snkminvoltage100mv <= srcmaxvoltage100mv) && (snkminvoltage100mv >= srcminvoltage100mv)))
-            {
-              if (snkmaxcurrent50ma <= srcmaxcurrent50ma)
-              {
-                *PtrRequestedVoltage = MIN(PWR_DECODE_100MV(srcmaxvoltage100mv),
-                                           PWR_DECODE_100MV(snkmaxvoltage100mv));
-                currentrequestedpower = (*PtrRequestedVoltage * PWR_DECODE_50MA(snkmaxcurrent50ma)) / 1000U; /* mW */
-                currentrequestedvoltage = (*PtrRequestedVoltage / 50U);
-              }
-            }
+				((snkminvoltage100mv <= srcmaxvoltage100mv) && (snkminvoltage100mv >= srcminvoltage100mv)))
+			{
+			  if (snkmaxcurrent50ma <= srcmaxcurrent50ma)
+			  {
+				if (0U != *PtrRequestedPower)
+				{
+				  /* A specific voltage was requested, verify it */
+				  if ((PWR_DECODE_100MV(snkminvoltage100mv) <= (*PtrRequestedVoltage)) &&
+					 ((*PtrRequestedVoltage) <= PWR_DECODE_100MV(snkmaxvoltage100mv)))
+				  {
+					currentrequestedpower = (*PtrRequestedVoltage * PWR_DECODE_50MA(snkmaxcurrent50ma))
+											/ 1000U; /* mW */
+					currentrequestedvoltage = (*PtrRequestedVoltage / 50U);
+				  }
+				}
+				else
+				{
+				  /* No specific voltage was requested, take the maximum possible voltage:
+					 min between the source max and Sink max */
+				  *PtrRequestedVoltage = MIN(PWR_DECODE_100MV(srcmaxvoltage100mv),
+											 PWR_DECODE_100MV(snkmaxvoltage100mv));
+
+				  currentrequestedpower = (*PtrRequestedVoltage * PWR_DECODE_50MA(snkmaxcurrent50ma))
+										  / 1000U; /* mW */
+				  currentrequestedvoltage = (*PtrRequestedVoltage / 50U);
+				}
+			  }
+			}
           }
           break;
 
