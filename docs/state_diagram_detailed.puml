@@ -1,0 +1,138 @@
+@startuml
+title USB-C PPS State diagram
+legend
+    Format PlantUML code: Alt+Shift+F
+    Preview diagram: Alt+D
+    Change all instances: ctrl+shift+L
+end legend
+[*] --> OFF
+
+OFF --> INIT: PwrBtn press
+INIT --> IDLE
+IDLE -up-> OFF: PwrBtn press
+OFF: general off state
+INIT: system init
+INIT: display init
+INIT: lockState = 0
+INIT: lastState = "IDLE"
+INIT: show source limits with timeout()
+
+
+state IDLE {
+    IDLE: **entry**/ display set values
+    IDLE: **entry**/ output off
+    IDLE: depending on temperature, fan on
+    IDLE: set Voltage/Current
+    IDLE: **exit**/ lastState = "IDLE"
+    IDLE --> IDLE: [LockBtnPressTime > 2000]/ lockState = !isLocked 
+}
+IDLE --> DisplayShow: [ShowBtn press && !isLocked]
+DisplayShow --> IDLE: [timeout() && lastState == "IDLE"]
+
+IDLE --> OCPToggle: [OCPBtn press && !isLocked]
+OCPToggle --> IDLE: [timeout() && !isLocked && lastState == "IDLE"]
+
+IDLE -down-> ACTIVE: [OffOnBtn press && !isLocked]
+ACTIVE -down-> IDLE: [OffOnBtn press && !isLocked]
+
+IDLE --> SetValues: [SetBtn press && !isLocked]
+SetValues --> IDLE: [(SetBtn press || (elapsedTime > 4000)) && lastState == "IDLE"]
+
+state ACTIVE {
+    ACTIVE -up-> OFF: PwrBtn press
+    ACTIVE: **entry**/ display ShowMeasured
+    ACTIVE: **entry**/ output on
+    ACTIVE: set Voltage/Current
+    ACTIVE: **exit**/ lastState = "ACTIVE"
+    ACTIVE --> ACTIVE: [LockBtnPressTime > 2000]/ lockState = !isLocked 
+}
+ACTIVE --> DisplayShow: [ShowBtn press && !isLocked]
+DisplayShow --> ACTIVE: [timeout() && lastState == "ACTIVE"]
+
+ACTIVE --> OCPToggle: [OCPBtn press && !isLocked]
+OCPToggle --> ACTIVE: [timeout() && !isLocked && lastState == "ACTIVE"]
+
+ACTIVE --> SetValues: [SetBtn press && !isLocked]
+SetValues --> ACTIVE: [(SetBtn press || (elapsedTime > 4000)) && lastState == "ACTIVE"]
+
+state DisplayShow {
+    DisplayShow: entry / timeCounter = 0
+    [*] --> ShowLimits
+    ShowLimits --> ShowSet: ShowBtn press
+    ShowSet --> ShowMeasured: ShowBtn press
+    ShowMeasured --> ShowLimits: ShowBtn press
+    ShowLimits: display source limits
+    ShowSet: display user settings
+    ShowMeasured: display measured values
+
+}
+
+state OCPToggle {
+    [*] --> OCPOn
+    OCPOn --> OCPOff: OCPBtn press
+    OCPOff --> OCPOn: OCPBtn press
+    OCPOn: **entry**/ OCPLedON(),OCPON()
+    OCPOff: **entry**/ OCPLedOff(), OCPOFF()
+}
+
+state SetValues {
+    [*] --> VOLTAGE
+    VOLTAGE --> CURRENT: SetBtn press
+    CURRENT --> VOLTAGE: SetBtn press
+    SetValues: **entry**/ show set values
+    SetValues: **entry**/ counter = 0
+
+    state VOLTAGE {
+        [*] --> ONESv
+        ONESv --> TENTHSv: DigitBtn press
+        TENTHSv --> HUNDRETHSv: DigitBtn press
+        HUNDRETHSv --> ONESv: DigitBtn press
+
+
+        VOLTAGE: **entry**/ blink voltage
+        VOLTAGE: **exit**/ set desired voltage to PPS
+        ONESv: entry/digitIndex = 1
+        ONESv: do/ blinkDigitOnes()
+        TENTHSv: entry/ digitIndex = 2
+        TENTHSv: do/ blinkDigitTenths()
+        HUNDRETHSv: entry/ digitIndex = 3
+        HUNDRETHSv: do/ blinkDigitHundreths()
+    }
+
+    state c1 <<choice>>
+    VOLTAGE --> c1: knob_interrupt [voltage_l_lim < voltageVal < voltage_h_lim]
+    c1 --> VOLTAGE: [readCLK() == 1]/voltage(digitIndex,1)
+    c1 --> VOLTAGE: [readCLK() == 0]/voltage(digitIndex,-1)
+    
+
+    state CURRENT {
+        CURRENT: **entry**/ blink current
+         [*] --> ONESc
+        ONESc --> TENTHSc: DigitBtn press
+        TENTHSc --> HUNDRETHSc: DigitBtn press
+        HUNDRETHSc --> ONESc: DigitBtn press
+
+        ONESc: entry/digitIndex = 1
+        ONESc: do/ blinkDigitOnes()
+        TENTHSc: entry/ digitIndex = 2
+        TENTHSc: do/ blinkDigitTenths()
+        HUNDRETHSc: entry/ digitIndex = 3
+        HUNDRETHSc: do/ blinkDigitHundreths()
+    }
+
+    state c2 <<choice>>
+    CURRENT --> c2: knob_interrupt [current_l_lim < currentVal < current_h_lim]
+    c2 --> CURRENT: [readCLK() == 1]/current(digitIndex,1)
+    c2 --> CURRENT: [readCLK() == 0]/current(digitIndex,-1)
+}
+
+state ERROR {
+    ERROR: entry/ display error ID
+    ERROR: entry/ Aoutput off
+}
+
+IDLE --> ERROR: errorInterrupt/getErrorID() 
+ACTIVE --> ERROR: errorInterrupt/getErrorID() 
+ERROR --> IDLE: btn press
+ERROR --> OFF: PwrBtn press
+@enduml

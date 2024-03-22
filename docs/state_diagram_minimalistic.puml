@@ -1,0 +1,37 @@
+@startuml
+title USB-C PPS State diagram
+legend
+    Format PlantUML code: Alt+Shift+F
+    Preview diagram: Alt +D
+end legend
+
+[*] --> OFF
+OFF -down-> IDLE: PwrBtn
+IDLE -up-> OFF: PwrBtn
+OFF : general OFF state
+IDLE: entry/ show source limits
+IDLE: entry/ empty output
+IDLE: depending on temperature, fan on
+IDLE: toggle OCP/OVP
+IDLE: set Voltage/Current
+IDLE: toggle display
+
+IDLE -down-> OUTPUT: OffOnBtn
+OUTPUT -down-> IDLE: OffOnBtn || OCPtrigger
+OUTPUT -up-> OFF: PwrBtn
+OUTPUT: entry/output on
+OUTPUT: do/ display measured voltage and current
+OUTPUT: toggle OCP/OVP
+OUTPUT: set Voltage/Current
+OUTPUT: toggle display
+
+IDLE --> LOCK: LckBtn(1s)
+LOCK --> IDLE: LckBtn(2s) || OCPtrigger
+OUTPUT --> LOCK: LckBtn(1s)
+LOCK --> OUTPUT: LckBtn(2s)
+LOCK --> OFF: PwrBtn
+LOCK: display buttons not working
+LOCK: only LckBtn and PwrBtn works
+
+
+@enduml
