@@ -6,10 +6,12 @@ legend
 end legend
 
 [*] --> OFF
+
 ON -up-> OFF: PwrBtnPress()
 OFF -down-> INIT: PwrBtnPress()
 ON -up-> ERROR: [errorTrigger()]
 ERROR -up-> OFF: PwrBtnPress()
+
 
 OFF: general off state
 INIT: system init
@@ -20,6 +22,7 @@ ERROR: **do**/ display error number
 
 
 state ON {
+
 
     state DEFAULT {
         state IDLE {
@@ -43,7 +46,6 @@ state ON {
 
         }
     }
-
     state LOCK {
         LOCK: display buttons not working
         LOCK: only LckBtn and PwrBtn works
@@ -54,6 +56,7 @@ state ON {
     c1 --> IDLE: [lastState == "IDLE"]
     c1 --> ACTIVE: [lastState == "ACTIVE"]
     DEFAULT --> LOCK: [LckBtnHold() > 1500]
+
 
     state DisplayToggle {
         DisplayToggle: **entry** / timeCounter = 0
