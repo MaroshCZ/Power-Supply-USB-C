@@ -2,137 +2,127 @@
 title USB-C PPS State diagram
 legend
     Format PlantUML code: Alt+Shift+F
-    Preview diagram: Alt+D
-    Change all instances: ctrl+shift+L
+    Preview diagram: Alt +D
 end legend
 [*] --> OFF
 
-OFF --> INIT: PwrBtn press
-INIT --> IDLE
-IDLE -up-> OFF: PwrBtn press
+ON -up-> OFF: PwrBtnPress()
+OFF -down-> INIT: PwrBtnPress()
+ON -up-> ERROR: [errorTrigger()]
+ERROR -up-> OFF: PwrBtnPress()
+
+
 OFF: general off state
 INIT: system init
 INIT: display init
-INIT: lockState = 0
-INIT: lastState = "IDLE"
-INIT: show source limits with timeout()
+INIT: initialization of variables
+INIT: show source limits
+ERROR: **do**/ display error number
 
 
-state IDLE {
-    IDLE: **entry**/ display set values
-    IDLE: **entry**/ output off
-    IDLE: depending on temperature, fan on
-    IDLE: set Voltage/Current
-    IDLE: **exit**/ lastState = "IDLE"
-    IDLE --> IDLE: [LockBtnPressTime > 2000]/ lockState = !isLocked 
-}
-IDLE --> DisplayShow: [ShowBtn press && !isLocked]
-DisplayShow --> IDLE: [timeout() && lastState == "IDLE"]
-
-IDLE --> OCPToggle: [OCPBtn press && !isLocked]
-OCPToggle --> IDLE: [timeout() && !isLocked && lastState == "IDLE"]
-
-IDLE -down-> ACTIVE: [OffOnBtn press && !isLocked]
-ACTIVE -down-> IDLE: [OffOnBtn press && !isLocked]
-
-IDLE --> SetValues: [SetBtn press && !isLocked]
-SetValues --> IDLE: [(SetBtn press || (elapsedTime > 4000)) && lastState == "IDLE"]
-
-state ACTIVE {
-    ACTIVE -up-> OFF: PwrBtn press
-    ACTIVE: **entry**/ display ShowMeasured
-    ACTIVE: **entry**/ output on
-    ACTIVE: set Voltage/Current
-    ACTIVE: **exit**/ lastState = "ACTIVE"
-    ACTIVE --> ACTIVE: [LockBtnPressTime > 2000]/ lockState = !isLocked 
-}
-ACTIVE --> DisplayShow: [ShowBtn press && !isLocked]
-DisplayShow --> ACTIVE: [timeout() && lastState == "ACTIVE"]
-
-ACTIVE --> OCPToggle: [OCPBtn press && !isLocked]
-OCPToggle --> ACTIVE: [timeout() && !isLocked && lastState == "ACTIVE"]
-
-ACTIVE --> SetValues: [SetBtn press && !isLocked]
-SetValues --> ACTIVE: [(SetBtn press || (elapsedTime > 4000)) && lastState == "ACTIVE"]
-
-state DisplayShow {
-    DisplayShow: entry / timeCounter = 0
-    [*] --> ShowLimits
-    ShowLimits --> ShowSet: ShowBtn press
-    ShowSet --> ShowMeasured: ShowBtn press
-    ShowMeasured --> ShowLimits: ShowBtn press
-    ShowLimits: display source limits
-    ShowSet: display user settings
-    ShowMeasured: display measured values
-
-}
-
-state OCPToggle {
-    [*] --> OCPOn
-    OCPOn --> OCPOff: OCPBtn press
-    OCPOff --> OCPOn: OCPBtn press
-    OCPOn: **entry**/ OCPLedON(),OCPON()
-    OCPOff: **entry**/ OCPLedOff(), OCPOFF()
-}
-
-state SetValues {
-    [*] --> VOLTAGE
-    VOLTAGE --> CURRENT: SetBtn press
-    CURRENT --> VOLTAGE: SetBtn press
-    SetValues: **entry**/ show set values
-    SetValues: **entry**/ counter = 0
-
-    state VOLTAGE {
-        [*] --> ONESv
-        ONESv --> TENTHSv: DigitBtn press
-        TENTHSv --> HUNDRETHSv: DigitBtn press
-        HUNDRETHSv --> ONESv: DigitBtn press
+state ON {
 
 
-        VOLTAGE: **entry**/ blink voltage
-        VOLTAGE: **exit**/ set desired voltage to PPS
-        ONESv: entry/digitIndex = 1
-        ONESv: do/ blinkDigitOnes()
-        TENTHSv: entry/ digitIndex = 2
-        TENTHSv: do/ blinkDigitTenths()
-        HUNDRETHSv: entry/ digitIndex = 3
-        HUNDRETHSv: do/ blinkDigitHundreths()
+    state DEFAULT {
+        state IDLE {
+            IDLE: **entry**/ display set values
+            IDLE: **entry**/ output off
+            IDLE: depending on temperature, fan on
+            IDLE: **exit**/ lastState = "IDLE"
+        }
+
+
+        IDLE -down-> ACTIVE: OffOnBtnPress()
+        ACTIVE -down-> IDLE: [OffOnBtnPress() || OCPTrigger]
+        INIT -down-> IDLE
+
+        state ACTIVE {
+            ACTIVE: **entry**/ display measured voltage and current
+            ACTIVE: **entry**/ output on
+            ACTIVE: set OCP/OVP
+            ACTIVE: set Voltage/Current
+            ACTIVE: **exit**/ lastState = "ACTIVE"
+
+        }
+    }
+
+
+    state LOCK {
+        LOCK: display buttons not working
+        LOCK: only LckBtn and PwrBtn works
     }
 
     state c1 <<choice>>
-    VOLTAGE --> c1: knob_interrupt [voltage_l_lim < voltageVal < voltage_h_lim]
-    c1 --> VOLTAGE: [readCLK() == 1]/voltage(digitIndex,1)
-    c1 --> VOLTAGE: [readCLK() == 0]/voltage(digitIndex,-1)
-    
+    LOCK --> c1: [LckBtnHold() > 2000]
+    c1 --> IDLE: [lastState == "IDLE"]
+    c1 --> ACTIVE: [lastState == "ACTIVE"]
+    DEFAULT --> LOCK: [LckBtnHold() > 1500]
 
-    state CURRENT {
-        CURRENT: **entry**/ blink current
-         [*] --> ONESc
-        ONESc --> TENTHSc: DigitBtn press
-        TENTHSc --> HUNDRETHSc: DigitBtn press
-        HUNDRETHSc --> ONESc: DigitBtn press
+    state DisplayToggle {
+        DisplayToggle: **entry** / timeCounter = 0
+        ShowLimits: display source limits
+        ShowSet: display user settings
+        ShowMeasured: display measured values
 
-        ONESc: entry/digitIndex = 1
-        ONESc: do/ blinkDigitOnes()
-        TENTHSc: entry/ digitIndex = 2
-        TENTHSc: do/ blinkDigitTenths()
-        HUNDRETHSc: entry/ digitIndex = 3
-        HUNDRETHSc: do/ blinkDigitHundreths()
+        [*] --> ShowLimits
+        ShowLimits --> ShowSet: ShowBtnPress()
+        ShowSet --> ShowMeasured: ShowBtnPress()
+        ShowMeasured --> ShowLimits: ShowBtnPress()
+    }
+
+    DEFAULT --> DisplayToggle: ShowBtnPress()
+
+    DisplayToggle --> c1: [timeCounter > 2000]
+
+
+    state OCPToggle {
+        OCPToggle: **entry**/ timeCounter = 0
+
+        [*] --> OCPOn
+        OCPOn --> OCPOff: OCPBtnPress()
+        OCPOff --> OCPOn: OCPBtnPress()
+        OCPOn: **entry**/ OCPLedON(),OCPON()
+        OCPOff: **entry**/ OCPLedOff(), OCPOFF()
+    }
+
+    DEFAULT --> OCPToggle: OCPBtnPress()
+
+    OCPToggle --> c1: [timeCounter > 500]
+
+
+    state SetValues {
+        [*] --> VOLTAGE
+        VOLTAGE --> CURRENT: SetBtnPress()
+        CURRENT --> VOLTAGE: SetBtnPress()
+        SetValues: **entry**/ show set values
+        SetValues: **entry**/ timeCounter = 0
+        SetValues: **entry**/ digit = 0 (range 0-3)
+
+        state VOLTAGE {
+            VOLTAGE: **entry**/ setState = "Voltage"
+            VOLTAGE: **do**/ blink digit
+            VOLTAGE: **do**/ on rotaryBtnPress() toggle digit
+        }
+
+        state CURRENT {
+            CURRENT: **entry**/ setState = "Current"
+            CURRENT: **do**/ blink digit
+            CURRENT: **do**/ on rotaryBtnPress() toggle digit
+        }
+
+
     }
 
     state c2 <<choice>>
-    CURRENT --> c2: knob_interrupt [current_l_lim < currentVal < current_h_lim]
-    c2 --> CURRENT: [readCLK() == 1]/current(digitIndex,1)
-    c2 --> CURRENT: [readCLK() == 0]/current(digitIndex,-1)
-}
+    SetValues -right-> c2: rotaryInterrupt()
 
-state ERROR {
-    ERROR: entry/ display error ID
-    ERROR: entry/ Aoutput off
-}
+    state c3 <<choice>>
+    c2 -down-> c3: [readCLK() == 1]/setFlag = "increment"
+    c2 -down-> c3: [readCLK() == 0]/setFlag = "decrement"
 
-IDLE --> ERROR: errorInterrupt/getErrorID() 
-ACTIVE --> ERROR: errorInterrupt/getErrorID() 
-ERROR --> IDLE: btn press
-ERROR --> OFF: PwrBtn press
-@enduml
+    c3 -left-> VOLTAGE: [setState == "Voltage"]/ changeValue(setState, setFlag, digit)
+    c3 -left-> CURRENT: [setState == "Current"]/ changeValue(setState, setFlag, digit)
+
+    DEFAULT --> SetValues: SetBtnPress()
+    SetValues --> c1: [timeCounter > 4000]
+}
