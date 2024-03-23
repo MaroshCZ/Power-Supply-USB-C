@@ -4,13 +4,12 @@ legend
     Format PlantUML code: Alt+Shift+F
     Preview diagram: Alt +D
 end legend
-[*] --> OFF
 
+[*] --> OFF
 ON -up-> OFF: PwrBtnPress()
 OFF -down-> INIT: PwrBtnPress()
 ON -up-> ERROR: [errorTrigger()]
 ERROR -up-> OFF: PwrBtnPress()
-
 
 OFF: general off state
 INIT: system init
@@ -21,7 +20,6 @@ ERROR: **do**/ display error number
 
 
 state ON {
-
 
     state DEFAULT {
         state IDLE {
@@ -45,7 +43,6 @@ state ON {
 
         }
     }
-
 
     state LOCK {
         LOCK: display buttons not working
@@ -71,7 +68,6 @@ state ON {
     }
 
     DEFAULT --> DisplayToggle: ShowBtnPress()
-
     DisplayToggle --> c1: [timeCounter > 2000]
 
 
@@ -86,7 +82,6 @@ state ON {
     }
 
     DEFAULT --> OCPToggle: OCPBtnPress()
-
     OCPToggle --> c1: [timeCounter > 500]
 
 
@@ -109,8 +104,6 @@ state ON {
             CURRENT: **do**/ blink digit
             CURRENT: **do**/ on rotaryBtnPress() toggle digit
         }
-
-
     }
 
     state c2 <<choice>>
