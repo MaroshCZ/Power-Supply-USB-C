@@ -10,6 +10,7 @@
 
 //Variables declaration
 int encoderVal = 0;
+int encoderPress = 0;
 int g = 0;
 
 /*
@@ -33,7 +34,16 @@ void app_encoder_loop(void){
 /**
  * Button interrupt service routine
  */
-void button_isr(void){}
+void button_isr(void){
+	if (encoderPress < 4){
+		encoderPress++;
+	}
+	else {
+		encoderPress = 0;
+	}
+	//Erase btn (PC3) interrupt flag
+    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_3);
+}
 
 /*
  * Timer interrupt routine
