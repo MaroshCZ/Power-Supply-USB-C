@@ -29,6 +29,6 @@
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:803:6:HAL_PWREx_EnableLowPowerRunMode	1
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:818:19:HAL_PWREx_DisableLowPowerRunMode	3
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:860:6:HAL_PWREx_EnterSHUTDOWNMode	1
-../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:884:6:HAL_PWREx_PVD_PVM_IRQHandler	5
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:931:13:HAL_PWREx_PVD_PVM_Rising_Callback	1
 ../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:942:13:HAL_PWREx_PVD_PVM_Falling_Callback	1
+../Drivers/STM32G0xx_HAL_Driver/Src/stm32g0xx_hal_pwr_ex.c:884:6:HAL_PWREx_PVD_PVM_IRQHandler	5

@@ -6,19 +6,29 @@
  */
 
 #include "main.h"
+#include "app_encoder.h"
 
 //Variables declaration
-
+int encoderVal = 0;
+int g = 0;
 
 /*
  * Initialization function
  */
-void app_encoder_init(void){}
+void app_encoder_init(void){
+	//HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
+}
 
 /*
  * Loop function
  */
-void app_encoder_loop(void){}
+void app_encoder_loop(void){
+	encoderVal = (TIM2 -> CNT) >> 2;
+	if (g < 1000) {
+		g++;
+	}
+	HAL_Delay(100);
+}
 
 /**
  * Button interrupt service routine
