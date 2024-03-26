@@ -11,12 +11,12 @@
 
 
 /*
- * Inicialization function
+ * Initialization function
  */
 void app_encoder_init(void){}
 
 /*
- * Inicialization function
+ * Loop function
  */
 void app_encoder_loop(void){}
 
