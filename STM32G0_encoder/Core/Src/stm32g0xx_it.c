@@ -170,6 +170,20 @@ void TIM6_DAC_LPTIM1_IRQHandler(void)
   /* USER CODE END TIM6_DAC_LPTIM1_IRQn 1 */
 }
 
+/**
+  * @brief This function handles TIM7 and LPTIM2 global Interrupt.
+  */
+void TIM7_LPTIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM7_LPTIM2_IRQn 0 */
+	button_timer_isr();
+  /* USER CODE END TIM7_LPTIM2_IRQn 0 */
+
+  /* USER CODE BEGIN TIM7_LPTIM2_IRQn 1 */
+
+  /* USER CODE END TIM7_LPTIM2_IRQn 1 */
+}
+
 /* USER CODE BEGIN 1 */
 
 /* USER CODE END 1 */

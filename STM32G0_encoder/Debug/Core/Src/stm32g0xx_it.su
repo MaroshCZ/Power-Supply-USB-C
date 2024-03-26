@@ -5,3 +5,4 @@
 ../Core/Src/stm32g0xx_it.c:127:6:SysTick_Handler	0	static
 ../Core/Src/stm32g0xx_it.c:148:6:EXTI2_3_IRQHandler	8	static
 ../Core/Src/stm32g0xx_it.c:162:6:TIM6_DAC_LPTIM1_IRQHandler	8	static
+../Core/Src/stm32g0xx_it.c:176:6:TIM7_LPTIM2_IRQHandler	8	static
