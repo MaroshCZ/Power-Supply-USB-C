@@ -263,11 +263,11 @@ static void MX_GPIO_Init(void)
  800023e:	9a00      	ldr	r2, [sp, #0]
   __HAL_RCC_GPIOA_CLK_ENABLE();
  8000240:	6b5a      	ldr	r2, [r3, #52]	; 0x34
- 8000242:	2501      	movs	r5, #1
- 8000244:	432a      	orrs	r2, r5
+ 8000242:	2401      	movs	r4, #1
+ 8000244:	4322      	orrs	r2, r4
  8000246:	635a      	str	r2, [r3, #52]	; 0x34
  8000248:	6b5a      	ldr	r2, [r3, #52]	; 0x34
- 800024a:	402a      	ands	r2, r5
+ 800024a:	4022      	ands	r2, r4
  800024c:	9201      	str	r2, [sp, #4]
  800024e:	9a01      	ldr	r2, [sp, #4]
   __HAL_RCC_GPIOB_CLK_ENABLE();
@@ -303,28 +303,28 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pin = GPIO_PIN_3;
  800027e:	2308      	movs	r3, #8
  8000280:	9303      	str	r3, [sp, #12]
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
- 8000282:	2388      	movs	r3, #136	; 0x88
- 8000284:	035b      	lsls	r3, r3, #13
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+ 8000282:	2384      	movs	r3, #132	; 0x84
+ 8000284:	039b      	lsls	r3, r3, #14
  8000286:	9304      	str	r3, [sp, #16]
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
- 8000288:	2400      	movs	r4, #0
- 800028a:	9405      	str	r4, [sp, #20]
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+ 8000288:	9405      	str	r4, [sp, #20]
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
- 800028c:	a903      	add	r1, sp, #12
- 800028e:	0030      	movs	r0, r6
- 8000290:	f000 fa5a 	bl	8000748 <HAL_GPIO_Init>
+ 800028a:	a903      	add	r1, sp, #12
+ 800028c:	0030      	movs	r0, r6
+ 800028e:	f000 fa5b 	bl	8000748 <HAL_GPIO_Init>
 
   /*Configure GPIO pin : DB_OUT_Pin */
   GPIO_InitStruct.Pin = DB_OUT_Pin;
- 8000294:	2340      	movs	r3, #64	; 0x40
- 8000296:	9303      	str	r3, [sp, #12]
+ 8000292:	2340      	movs	r3, #64	; 0x40
+ 8000294:	9303      	str	r3, [sp, #12]
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
- 8000298:	9504      	str	r5, [sp, #16]
+ 8000296:	9404      	str	r4, [sp, #16]
   GPIO_InitStruct.Pull = GPIO_NOPULL;
- 800029a:	9405      	str	r4, [sp, #20]
+ 8000298:	2500      	movs	r5, #0
+ 800029a:	9505      	str	r5, [sp, #20]
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
- 800029c:	9406      	str	r4, [sp, #24]
+ 800029c:	9506      	str	r5, [sp, #24]
   HAL_GPIO_Init(DB_OUT_GPIO_Port, &GPIO_InitStruct);
  800029e:	a903      	add	r1, sp, #12
  80002a0:	4640      	mov	r0, r8
@@ -334,11 +334,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pin = VCC_OUT_Pin;
  80002a6:	9703      	str	r7, [sp, #12]
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
- 80002a8:	9504      	str	r5, [sp, #16]
+ 80002a8:	9404      	str	r4, [sp, #16]
   GPIO_InitStruct.Pull = GPIO_NOPULL;
- 80002aa:	9405      	str	r4, [sp, #20]
+ 80002aa:	9505      	str	r5, [sp, #20]
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
- 80002ac:	9406      	str	r4, [sp, #24]
+ 80002ac:	9506      	str	r5, [sp, #24]
   HAL_GPIO_Init(VCC_OUT_GPIO_Port, &GPIO_InitStruct);
  80002ae:	a903      	add	r1, sp, #12
  80002b0:	0030      	movs	r0, r6
