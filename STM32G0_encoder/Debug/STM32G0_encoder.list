@@ -417,8 +417,8 @@ __STATIC_INLINE void __NVIC_SetPriority(IRQn_Type IRQn, uint32_t priority)
   TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
  8000316:	2300      	movs	r3, #0
  8000318:	606b      	str	r3, [r5, #4]
-  TIM_InitStruct.Autoreload = 100;
- 800031a:	3364      	adds	r3, #100	; 0x64
+  TIM_InitStruct.Autoreload = 150;
+ 800031a:	3396      	adds	r3, #150	; 0x96
  800031c:	60ab      	str	r3, [r5, #8]
   LL_TIM_Init(TIM7, &TIM_InitStruct);
  800031e:	4c0d      	ldr	r4, [pc, #52]	; (8000354 <MX_TIM7_Init+0x78>)
