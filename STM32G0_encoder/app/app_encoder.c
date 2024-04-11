@@ -7,11 +7,24 @@
 
 #include "main.h"
 #include "app_encoder.h"
+#include "max7219.h"
+#include "math.h"
 
 //Variables declaration
 int encoderVal = 0;
-int encoderPress = 0;
+int encoderValPrev = 0;
+int encoderPress = 4;
+double voltage = 00.00;
+double voltageTemp = 00.00;
+double val;
+double voltageMin = 0;
+double voltageMax = 22;
 int g = 0;
+int integer_part;
+int num_digits;
+float result1;
+float result2;
+float result3;
 
 /*
  * Initialization function
@@ -22,6 +35,10 @@ void app_encoder_init(void){
 	//TIM7 initialization
 	LL_TIM_EnableIT_UPDATE(TIM7); //Enable interrupt generation when timer goes to max value and UPDATE event flag is set
 	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER6
+
+	//Init 7 segment display
+	max7219_Init( 7 );
+	max7219_Decode_On();
 }
 
 /*
@@ -29,10 +46,12 @@ void app_encoder_init(void){
  */
 void app_encoder_loop(void){
 	encoderVal = (TIM2 -> CNT) >> 2;
+
 	if (g < 1000) {
 		g++;
 	}
-	HAL_Delay(100);
+
+	encoderValPrev = encoderVal;
 }
 
 /**
@@ -46,11 +65,11 @@ void button_isr(void){
 	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
 	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
 
-	if (encoderPress < 4){
-		encoderPress++;
+	if (encoderPress > 1){
+		encoderPress--;
 	}
 	else {
-		encoderPress = 0;
+		encoderPress = 4;
 	}
 
 	//Erase btn (PC3) interrupt flag

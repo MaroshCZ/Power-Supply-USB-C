@@ -68,6 +68,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define CS_MAX7219_Pin GPIO_PIN_0
+#define CS_MAX7219_GPIO_Port GPIOB
 #define DB_OUT_Pin GPIO_PIN_6
 #define DB_OUT_GPIO_Port GPIOB
 #define VCC_OUT_Pin GPIO_PIN_10

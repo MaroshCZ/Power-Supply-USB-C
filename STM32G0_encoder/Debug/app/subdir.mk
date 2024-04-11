@@ -5,13 +5,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../app/app_encoder.c 
+../app/app_encoder.c \
+../app/max7219.c 
 
 OBJS += \
-./app/app_encoder.o 
+./app/app_encoder.o \
+./app/max7219.o 
 
 C_DEPS += \
-./app/app_encoder.d 
+./app/app_encoder.d \
+./app/max7219.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
@@ -21,7 +24,7 @@ app/%.o app/%.su app/%.cyclo: ../app/%.c app/subdir.mk
 clean: clean-app
 
 clean-app:
-	-$(RM) ./app/app_encoder.cyclo ./app/app_encoder.d ./app/app_encoder.o ./app/app_encoder.su
+	-$(RM) ./app/app_encoder.cyclo ./app/app_encoder.d ./app/app_encoder.o ./app/app_encoder.su ./app/max7219.cyclo ./app/max7219.d ./app/max7219.o ./app/max7219.su
 
 .PHONY: clean-app
 
