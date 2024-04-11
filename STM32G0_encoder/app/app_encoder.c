@@ -47,6 +47,37 @@ void app_encoder_init(void){
 void app_encoder_loop(void){
 	encoderVal = (TIM2 -> CNT) >> 2;
 
+	if (encoderVal != encoderValPrev){
+			switch (encoderPress) {
+				case 1:
+					val = 0.01;
+					break;
+				case 2:
+					val = 0.1;
+					break;
+				case 3:
+					val = 1;
+					break;
+				case 4:
+					val = 10;
+					break;
+			}
+
+			//Get direction of encoder turning
+			if (encoderVal > encoderValPrev) {
+				voltageTemp += val;
+			} else {
+				voltageTemp -= val;
+			}
+
+			//If required temp value within limits, assign it to voltage
+			if (voltageMin <= voltageTemp && voltageTemp <= voltageMax) {
+				voltage = ceilf(100*voltageTemp)/100;
+			} else {
+				voltageTemp = voltage;
+			}
+		}
+
 	if (g < 1000) {
 		g++;
 	}
