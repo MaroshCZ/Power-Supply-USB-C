@@ -82,6 +82,23 @@ void app_encoder_loop(void){
 		g++;
 	}
 
+	// Get number of int numbers of voltage
+	integer_part = (int)voltage;
+	num_digits = 0;
+
+	while (integer_part) {
+		integer_part = integer_part/10;
+		num_digits++;
+	}
+
+	//Print the voltage to the display
+	if (num_digits == 2) {
+		max7219_PrintFtos(4, voltage , 2);
+	} else {
+		max7219_PrintItos(4, 0);
+		max7219_PrintFtos(3, voltage , 2);
+	}
+
 	encoderValPrev = encoderVal;
 }
 
