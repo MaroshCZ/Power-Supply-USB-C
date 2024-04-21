@@ -14,11 +14,11 @@
 int encoderVal = 0;
 int encoderValPrev = 0;
 int encoderPress = 4;
-double voltage = 00.00;
-double voltageTemp = 00.00;
-double val;
-double voltageMin = 0;
-double voltageMax = 22;
+int voltage = 0;
+int voltageTemp = 0;
+int val;
+int voltageMin = 0;
+int voltageMax = 2200;
 int g = 0;
 int integer_part;
 int num_digits;
@@ -50,16 +50,16 @@ void app_encoder_loop(void){
 	if (encoderVal != encoderValPrev){
 			switch (encoderPress) {
 				case 1:
-					val = 0.01;
-					break;
-				case 2:
-					val = 0.1;
-					break;
-				case 3:
 					val = 1;
 					break;
-				case 4:
+				case 2:
 					val = 10;
+					break;
+				case 3:
+					val = 100;
+					break;
+				case 4:
+					val = 1000;
 					break;
 			}
 
@@ -72,7 +72,7 @@ void app_encoder_loop(void){
 
 			//If required temp value within limits, assign it to voltage
 			if (voltageMin <= voltageTemp && voltageTemp <= voltageMax) {
-				voltage = ceilf(100*voltageTemp)/100;
+				voltage = voltageTemp;
 			} else {
 				voltageTemp = voltage;
 			}
@@ -92,12 +92,13 @@ void app_encoder_loop(void){
 	}
 
 	//Print the voltage to the display
-	if (num_digits == 2) {
-		max7219_PrintFtos(4, voltage , 2);
-	} else {
-		max7219_PrintItos(4, 0);
-		max7219_PrintFtos(3, voltage , 2);
+	max7219_PrintItos(num_digits, voltage);
+
+	//Print starting zeroes if voltage has less than 4 digits
+	for (int i= 4; i > num_digits; i--) {
+		max7219_PrintItos(i, 0);
 	}
+
 
 	encoderValPrev = encoderVal;
 }
@@ -113,11 +114,11 @@ void button_isr(void){
 	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
 	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
 
-	if (encoderPress > 1){
+	if (encoderPress > 0){
 		encoderPress--;
 	}
 	else {
-		encoderPress = 4;
+		encoderPress = 3;
 	}
 
 	//Erase btn (PC3) interrupt flag
