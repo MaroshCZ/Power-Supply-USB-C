@@ -92,13 +92,14 @@ void app_encoder_loop(void){
 	}
 
 	//Print the voltage to the display
-	max7219_PrintItos(num_digits, voltage);
+	max7219_PrintItos(num_digits, voltage, 3);
 
 	//Print starting zeroes if voltage has less than 4 digits
+	/*
 	for (int i= 4; i > num_digits; i--) {
-		max7219_PrintItos(i, 0);
+		max7219_PrintItos(i, 0, 0);
 	}
-
+	*/
 
 	encoderValPrev = encoderVal;
 }

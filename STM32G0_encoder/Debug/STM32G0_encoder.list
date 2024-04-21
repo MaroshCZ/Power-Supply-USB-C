@@ -5,49 +5,49 @@ Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
   0 .isr_vector   000000bc  08000000  08000000  00010000  2**0
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  1 .text         000021ec  080000bc  080000bc  000100bc  2**2
+  1 .text         00002214  080000bc  080000bc  000100bc  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .rodata       00000070  080022a8  080022a8  000122a8  2**2
+  2 .rodata       00000070  080022d0  080022d0  000122d0  2**2
                   CONTENTS, ALLOC, LOAD, READONLY, DATA
-  3 .ARM.extab    00000000  08002318  08002318  00020014  2**0
+  3 .ARM.extab    00000000  08002340  08002340  00020014  2**0
                   CONTENTS
-  4 .ARM          00000000  08002318  08002318  00020014  2**0
+  4 .ARM          00000000  08002340  08002340  00020014  2**0
                   CONTENTS
-  5 .preinit_array 00000000  08002318  08002318  00020014  2**0
+  5 .preinit_array 00000000  08002340  08002340  00020014  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  6 .init_array   00000004  08002318  08002318  00012318  2**2
+  6 .init_array   00000004  08002340  08002340  00012340  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  7 .fini_array   00000004  0800231c  0800231c  0001231c  2**2
+  7 .fini_array   00000004  08002344  08002344  00012344  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  8 .data         00000014  20000000  08002320  00020000  2**2
+  8 .data         00000014  20000000  08002348  00020000  2**2
                   CONTENTS, ALLOC, LOAD, DATA
-  9 .bss          00000144  20000014  08002334  00020014  2**2
+  9 .bss          00000144  20000014  0800235c  00020014  2**2
                   ALLOC
- 10 ._user_heap_stack 00000600  20000158  08002334  00020158  2**0
+ 10 ._user_heap_stack 00000600  20000158  0800235c  00020158  2**0
                   ALLOC
  11 .ARM.attributes 00000028  00000000  00000000  00020014  2**0
                   CONTENTS, READONLY
  12 .comment      00000043  00000000  00000000  0002003c  2**0
                   CONTENTS, READONLY
- 13 .debug_info   00012643  00000000  00000000  0002007f  2**0
+ 13 .debug_info   000125fa  00000000  00000000  0002007f  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 14 .debug_abbrev 000026d3  00000000  00000000  000326c2  2**0
+ 14 .debug_abbrev 000026eb  00000000  00000000  00032679  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 15 .debug_loclists 0000878e  00000000  00000000  00034d95  2**0
+ 15 .debug_loclists 000087b4  00000000  00000000  00034d64  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_aranges 00000e40  00000000  00000000  0003d528  2**3
+ 16 .debug_aranges 00000e40  00000000  00000000  0003d518  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_rnglists 00000b85  00000000  00000000  0003e368  2**0
+ 17 .debug_rnglists 00000b85  00000000  00000000  0003e358  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_macro  0001dbf5  00000000  00000000  0003eeed  2**0
+ 18 .debug_macro  0001dbf5  00000000  00000000  0003eedd  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_line   00014cb6  00000000  00000000  0005cae2  2**0
+ 19 .debug_line   00014ccf  00000000  00000000  0005cad2  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_str    000c1819  00000000  00000000  00071798  2**0
+ 20 .debug_str    000c1821  00000000  00000000  000717a1  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_frame  000024d4  00000000  00000000  00132fb4  2**2
+ 21 .debug_frame  000024e0  00000000  00000000  00132fc4  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 22 .debug_line_str 00000065  00000000  00000000  00135488  2**0
+ 22 .debug_line_str 00000065  00000000  00000000  001354a4  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -69,7 +69,7 @@ Disassembly of section .text:
  80000d6:	bd10      	pop	{r4, pc}
  80000d8:	20000014 	.word	0x20000014
  80000dc:	00000000 	.word	0x00000000
- 80000e0:	08002290 	.word	0x08002290
+ 80000e0:	080022b8 	.word	0x080022b8
 
 080000e4 <frame_dummy>:
  80000e4:	4b04      	ldr	r3, [pc, #16]	; (80000f8 <frame_dummy+0x14>)
@@ -84,7 +84,7 @@ Disassembly of section .text:
  80000f6:	46c0      	nop			; (mov r8, r8)
  80000f8:	00000000 	.word	0x00000000
  80000fc:	20000018 	.word	0x20000018
- 8000100:	08002290 	.word	0x08002290
+ 8000100:	080022b8 	.word	0x080022b8
 
 08000104 <__udivsi3>:
  8000104:	2200      	movs	r2, #0
@@ -483,7 +483,7 @@ static void MX_GPIO_Init(void)
  80003f8:	2214      	movs	r2, #20
  80003fa:	2100      	movs	r1, #0
  80003fc:	a803      	add	r0, sp, #12
- 80003fe:	f001 ff1b 	bl	8002238 <memset>
+ 80003fe:	f001 ff2f 	bl	8002260 <memset>
 /* USER CODE BEGIN MX_GPIO_Init_1 */
 /* USER CODE END MX_GPIO_Init_1 */
 
@@ -612,7 +612,7 @@ static void MX_GPIO_Init(void)
  80004b6:	2214      	movs	r2, #20
  80004b8:	2100      	movs	r1, #0
  80004ba:	0028      	movs	r0, r5
- 80004bc:	f001 febc 	bl	8002238 <memset>
+ 80004bc:	f001 fed0 	bl	8002260 <memset>
   * @retval None
   */
 __STATIC_INLINE void LL_APB1_GRP1_EnableClock(uint32_t Periphs)
@@ -755,12 +755,12 @@ void Error_Handler(void)
  800054c:	2224      	movs	r2, #36	; 0x24
  800054e:	2100      	movs	r1, #0
  8000550:	a803      	add	r0, sp, #12
- 8000552:	f001 fe71 	bl	8002238 <memset>
+ 8000552:	f001 fe85 	bl	8002260 <memset>
   TIM_MasterConfigTypeDef sMasterConfig = {0};
  8000556:	220c      	movs	r2, #12
  8000558:	2100      	movs	r1, #0
  800055a:	4668      	mov	r0, sp
- 800055c:	f001 fe6c 	bl	8002238 <memset>
+ 800055c:	f001 fe80 	bl	8002260 <memset>
   htim2.Instance = TIM2;
  8000560:	4813      	ldr	r0, [pc, #76]	; (80005b0 <MX_TIM2_Init+0x68>)
  8000562:	2380      	movs	r3, #128	; 0x80
@@ -882,12 +882,12 @@ void Error_Handler(void)
  800060c:	223c      	movs	r2, #60	; 0x3c
  800060e:	2100      	movs	r1, #0
  8000610:	a805      	add	r0, sp, #20
- 8000612:	f001 fe11 	bl	8002238 <memset>
+ 8000612:	f001 fe25 	bl	8002260 <memset>
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
  8000616:	2210      	movs	r2, #16
  8000618:	2100      	movs	r1, #0
  800061a:	a801      	add	r0, sp, #4
- 800061c:	f001 fe0c 	bl	8002238 <memset>
+ 800061c:	f001 fe20 	bl	8002260 <memset>
   HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE1);
  8000620:	2080      	movs	r0, #128	; 0x80
  8000622:	0080      	lsls	r0, r0, #2
@@ -1049,7 +1049,7 @@ void HAL_SPI_MspInit(SPI_HandleTypeDef* hspi)
  80006f6:	2214      	movs	r2, #20
  80006f8:	2100      	movs	r1, #0
  80006fa:	a803      	add	r0, sp, #12
- 80006fc:	f001 fd9c 	bl	8002238 <memset>
+ 80006fc:	f001 fdb0 	bl	8002260 <memset>
   if(hspi->Instance==SPI1)
  8000700:	6822      	ldr	r2, [r4, #0]
  8000702:	4b10      	ldr	r3, [pc, #64]	; (8000744 <HAL_SPI_MspInit+0x54>)
@@ -1113,7 +1113,7 @@ void HAL_TIM_Encoder_MspInit(TIM_HandleTypeDef* htim_encoder)
  8000752:	2214      	movs	r2, #20
  8000754:	2100      	movs	r1, #0
  8000756:	a803      	add	r0, sp, #12
- 8000758:	f001 fd6e 	bl	8002238 <memset>
+ 8000758:	f001 fd82 	bl	8002260 <memset>
   if(htim_encoder->Instance==TIM2)
  800075c:	6822      	ldr	r2, [r4, #0]
  800075e:	2380      	movs	r3, #128	; 0x80
@@ -1344,7 +1344,7 @@ void EXTI2_3_IRQHandler(void)
  800084e:	b510      	push	{r4, lr}
   /* USER CODE BEGIN EXTI2_3_IRQn 0 */
   button_isr(); //button (press) interrupt routine
- 8000850:	f001 fbc4 	bl	8001fdc <button_isr>
+ 8000850:	f001 fbb6 	bl	8001fc0 <button_isr>
   /* USER CODE END EXTI2_3_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_3);
  8000854:	2008      	movs	r0, #8
@@ -1387,7 +1387,7 @@ void TIM7_LPTIM2_IRQHandler(void)
  800086c:	b510      	push	{r4, lr}
   /* USER CODE BEGIN TIM7_LPTIM2_IRQn 0 */
 	button_timer_isr();
- 800086e:	f001 fbd9 	bl	8002024 <button_timer_isr>
+ 800086e:	f001 fbcb 	bl	8002008 <button_timer_isr>
   /* USER CODE END TIM7_LPTIM2_IRQn 0 */
 
   /* USER CODE BEGIN TIM7_LPTIM2_IRQn 1 */
@@ -1481,7 +1481,7 @@ LoopFillZerobss:
 
 /* Call static constructors */
   bl __libc_init_array
- 80008a6:	f001 fccf 	bl	8002248 <__libc_init_array>
+ 80008a6:	f001 fce3 	bl	8002270 <__libc_init_array>
 /* Call the application s entry point.*/
   bl main
  80008aa:	f7ff feed 	bl	8000688 <main>
@@ -1498,7 +1498,7 @@ LoopForever:
   ldr r1, =_edata
  80008b8:	20000014 	.word	0x20000014
   ldr r2, =_sidata
- 80008bc:	08002320 	.word	0x08002320
+ 80008bc:	08002348 	.word	0x08002348
   ldr r2, =_sbss
  80008c0:	20000014 	.word	0x20000014
   ldr r4, =_ebss
@@ -3416,7 +3416,7 @@ uint32_t HAL_RCC_GetSysClockFreq(void)
  8001300:	fffff0ff 	.word	0xfffff0ff
  8001304:	00001388 	.word	0x00001388
  8001308:	ffff8fff 	.word	0xffff8fff
- 800130c:	080022a8 	.word	0x080022a8
+ 800130c:	080022d0 	.word	0x080022d0
  8001310:	20000000 	.word	0x20000000
  8001314:	20000008 	.word	0x20000008
 
@@ -3466,7 +3466,7 @@ __STATIC_INLINE uint32_t LL_RCC_GetAPB1Prescaler(void)
  8001340:	bd10      	pop	{r4, pc}
  8001342:	46c0      	nop			; (mov r8, r8)
  8001344:	40021000 	.word	0x40021000
- 8001348:	080022e8 	.word	0x080022e8
+ 8001348:	08002310 	.word	0x08002310
 
 0800134c <HAL_RCC_GetClockConfig>:
   *                           will be configured.
@@ -5550,9 +5550,9 @@ void app_encoder_init(void){
 	//Init 7 segment display
 	max7219_Init( 7 );
  8001ea2:	2007      	movs	r0, #7
- 8001ea4:	f000 f926 	bl	80020f4 <max7219_Init>
+ 8001ea4:	f000 f918 	bl	80020d8 <max7219_Init>
 	max7219_Decode_On();
- 8001ea8:	f000 f932 	bl	8002110 <max7219_Decode_On>
+ 8001ea8:	f000 f924 	bl	80020f4 <max7219_Decode_On>
 }
  8001eac:	bd10      	pop	{r4, pc}
  8001eae:	46c0      	nop			; (mov r8, r8)
@@ -5570,16 +5570,16 @@ void app_encoder_loop(void){
  8001eb8:	05db      	lsls	r3, r3, #23
  8001eba:	6a5b      	ldr	r3, [r3, #36]	; 0x24
  8001ebc:	089b      	lsrs	r3, r3, #2
- 8001ebe:	4a3c      	ldr	r2, [pc, #240]	; (8001fb0 <app_encoder_loop+0xfc>)
+ 8001ebe:	4a35      	ldr	r2, [pc, #212]	; (8001f94 <app_encoder_loop+0xe0>)
  8001ec0:	6013      	str	r3, [r2, #0]
 
 	if (encoderVal != encoderValPrev){
- 8001ec2:	4a3c      	ldr	r2, [pc, #240]	; (8001fb4 <app_encoder_loop+0x100>)
+ 8001ec2:	4a35      	ldr	r2, [pc, #212]	; (8001f98 <app_encoder_loop+0xe4>)
  8001ec4:	6811      	ldr	r1, [r2, #0]
  8001ec6:	428b      	cmp	r3, r1
  8001ec8:	d03a      	beq.n	8001f40 <app_encoder_loop+0x8c>
 			switch (encoderPress) {
- 8001eca:	4a3b      	ldr	r2, [pc, #236]	; (8001fb8 <app_encoder_loop+0x104>)
+ 8001eca:	4a34      	ldr	r2, [pc, #208]	; (8001f9c <app_encoder_loop+0xe8>)
  8001ecc:	6812      	ldr	r2, [r2, #0]
  8001ece:	2a03      	cmp	r2, #3
  8001ed0:	d027      	beq.n	8001f22 <app_encoder_loop+0x6e>
@@ -5593,7 +5593,7 @@ void app_encoder_loop(void){
 					break;
 				case 2:
 					val = 10;
- 8001edc:	4a37      	ldr	r2, [pc, #220]	; (8001fbc <app_encoder_loop+0x108>)
+ 8001edc:	4a30      	ldr	r2, [pc, #192]	; (8001fa0 <app_encoder_loop+0xec>)
  8001ede:	200a      	movs	r0, #10
  8001ee0:	6010      	str	r0, [r2, #0]
 					break;
@@ -5606,14 +5606,14 @@ void app_encoder_loop(void){
 					break;
 				case 4:
 					val = 1000;
- 8001ee8:	4a34      	ldr	r2, [pc, #208]	; (8001fbc <app_encoder_loop+0x108>)
+ 8001ee8:	4a2d      	ldr	r2, [pc, #180]	; (8001fa0 <app_encoder_loop+0xec>)
  8001eea:	20fa      	movs	r0, #250	; 0xfa
  8001eec:	0080      	lsls	r0, r0, #2
  8001eee:	6010      	str	r0, [r2, #0]
 					break;
  8001ef0:	e002      	b.n	8001ef8 <app_encoder_loop+0x44>
 					val = 1;
- 8001ef2:	4a32      	ldr	r2, [pc, #200]	; (8001fbc <app_encoder_loop+0x108>)
+ 8001ef2:	4a2b      	ldr	r2, [pc, #172]	; (8001fa0 <app_encoder_loop+0xec>)
  8001ef4:	2001      	movs	r0, #1
  8001ef6:	6010      	str	r0, [r2, #0]
 			}
@@ -5623,8 +5623,8 @@ void app_encoder_loop(void){
  8001ef8:	428b      	cmp	r3, r1
  8001efa:	dd16      	ble.n	8001f2a <app_encoder_loop+0x76>
 				voltageTemp += val;
- 8001efc:	4930      	ldr	r1, [pc, #192]	; (8001fc0 <app_encoder_loop+0x10c>)
- 8001efe:	4a2f      	ldr	r2, [pc, #188]	; (8001fbc <app_encoder_loop+0x108>)
+ 8001efc:	4929      	ldr	r1, [pc, #164]	; (8001fa4 <app_encoder_loop+0xf0>)
+ 8001efe:	4a28      	ldr	r2, [pc, #160]	; (8001fa0 <app_encoder_loop+0xec>)
  8001f00:	680b      	ldr	r3, [r1, #0]
  8001f02:	6812      	ldr	r2, [r2, #0]
  8001f04:	189b      	adds	r3, r3, r2
@@ -5635,29 +5635,29 @@ void app_encoder_loop(void){
 
 			//If required temp value within limits, assign it to voltage
 			if (voltageMin <= voltageTemp && voltageTemp <= voltageMax) {
- 8001f08:	4b2e      	ldr	r3, [pc, #184]	; (8001fc4 <app_encoder_loop+0x110>)
+ 8001f08:	4b27      	ldr	r3, [pc, #156]	; (8001fa8 <app_encoder_loop+0xf4>)
  8001f0a:	681a      	ldr	r2, [r3, #0]
- 8001f0c:	4b2c      	ldr	r3, [pc, #176]	; (8001fc0 <app_encoder_loop+0x10c>)
+ 8001f0c:	4b25      	ldr	r3, [pc, #148]	; (8001fa4 <app_encoder_loop+0xf0>)
  8001f0e:	681b      	ldr	r3, [r3, #0]
  8001f10:	429a      	cmp	r2, r3
  8001f12:	dc11      	bgt.n	8001f38 <app_encoder_loop+0x84>
- 8001f14:	4a2c      	ldr	r2, [pc, #176]	; (8001fc8 <app_encoder_loop+0x114>)
+ 8001f14:	4a25      	ldr	r2, [pc, #148]	; (8001fac <app_encoder_loop+0xf8>)
  8001f16:	6812      	ldr	r2, [r2, #0]
  8001f18:	4293      	cmp	r3, r2
  8001f1a:	dc0d      	bgt.n	8001f38 <app_encoder_loop+0x84>
 				voltage = voltageTemp;
- 8001f1c:	4a2b      	ldr	r2, [pc, #172]	; (8001fcc <app_encoder_loop+0x118>)
+ 8001f1c:	4a24      	ldr	r2, [pc, #144]	; (8001fb0 <app_encoder_loop+0xfc>)
  8001f1e:	6013      	str	r3, [r2, #0]
  8001f20:	e00e      	b.n	8001f40 <app_encoder_loop+0x8c>
 					val = 100;
- 8001f22:	4a26      	ldr	r2, [pc, #152]	; (8001fbc <app_encoder_loop+0x108>)
+ 8001f22:	4a1f      	ldr	r2, [pc, #124]	; (8001fa0 <app_encoder_loop+0xec>)
  8001f24:	2064      	movs	r0, #100	; 0x64
  8001f26:	6010      	str	r0, [r2, #0]
 					break;
  8001f28:	e7e6      	b.n	8001ef8 <app_encoder_loop+0x44>
 				voltageTemp -= val;
- 8001f2a:	4925      	ldr	r1, [pc, #148]	; (8001fc0 <app_encoder_loop+0x10c>)
- 8001f2c:	4a23      	ldr	r2, [pc, #140]	; (8001fbc <app_encoder_loop+0x108>)
+ 8001f2a:	491e      	ldr	r1, [pc, #120]	; (8001fa4 <app_encoder_loop+0xf0>)
+ 8001f2c:	4a1c      	ldr	r2, [pc, #112]	; (8001fa0 <app_encoder_loop+0xec>)
  8001f2e:	680b      	ldr	r3, [r1, #0]
  8001f30:	6812      	ldr	r2, [r2, #0]
  8001f32:	1a9b      	subs	r3, r3, r2
@@ -5665,34 +5665,34 @@ void app_encoder_loop(void){
  8001f36:	e7e7      	b.n	8001f08 <app_encoder_loop+0x54>
 			} else {
 				voltageTemp = voltage;
- 8001f38:	4b21      	ldr	r3, [pc, #132]	; (8001fc0 <app_encoder_loop+0x10c>)
- 8001f3a:	4a24      	ldr	r2, [pc, #144]	; (8001fcc <app_encoder_loop+0x118>)
+ 8001f38:	4b1a      	ldr	r3, [pc, #104]	; (8001fa4 <app_encoder_loop+0xf0>)
+ 8001f3a:	4a1d      	ldr	r2, [pc, #116]	; (8001fb0 <app_encoder_loop+0xfc>)
  8001f3c:	6812      	ldr	r2, [r2, #0]
  8001f3e:	601a      	str	r2, [r3, #0]
 			}
 		}
 
 	if (g < 1000) {
- 8001f40:	4b23      	ldr	r3, [pc, #140]	; (8001fd0 <app_encoder_loop+0x11c>)
+ 8001f40:	4b1c      	ldr	r3, [pc, #112]	; (8001fb4 <app_encoder_loop+0x100>)
  8001f42:	681b      	ldr	r3, [r3, #0]
  8001f44:	22fa      	movs	r2, #250	; 0xfa
  8001f46:	0092      	lsls	r2, r2, #2
  8001f48:	4293      	cmp	r3, r2
  8001f4a:	da02      	bge.n	8001f52 <app_encoder_loop+0x9e>
 		g++;
- 8001f4c:	4a20      	ldr	r2, [pc, #128]	; (8001fd0 <app_encoder_loop+0x11c>)
+ 8001f4c:	4a19      	ldr	r2, [pc, #100]	; (8001fb4 <app_encoder_loop+0x100>)
  8001f4e:	3301      	adds	r3, #1
  8001f50:	6013      	str	r3, [r2, #0]
 	}
 
 	// Get number of int numbers of voltage
 	integer_part = (int)voltage;
- 8001f52:	4b1e      	ldr	r3, [pc, #120]	; (8001fcc <app_encoder_loop+0x118>)
+ 8001f52:	4b17      	ldr	r3, [pc, #92]	; (8001fb0 <app_encoder_loop+0xfc>)
  8001f54:	681c      	ldr	r4, [r3, #0]
- 8001f56:	4b1f      	ldr	r3, [pc, #124]	; (8001fd4 <app_encoder_loop+0x120>)
+ 8001f56:	4b18      	ldr	r3, [pc, #96]	; (8001fb8 <app_encoder_loop+0x104>)
  8001f58:	601c      	str	r4, [r3, #0]
 	num_digits = 0;
- 8001f5a:	4b1f      	ldr	r3, [pc, #124]	; (8001fd8 <app_encoder_loop+0x124>)
+ 8001f5a:	4b18      	ldr	r3, [pc, #96]	; (8001fbc <app_encoder_loop+0x108>)
  8001f5c:	2200      	movs	r2, #0
  8001f5e:	601a      	str	r2, [r3, #0]
 
@@ -5701,514 +5701,532 @@ void app_encoder_loop(void){
 		integer_part = integer_part/10;
  8001f62:	210a      	movs	r1, #10
  8001f64:	f7fe f958 	bl	8000218 <__divsi3>
- 8001f68:	4b1a      	ldr	r3, [pc, #104]	; (8001fd4 <app_encoder_loop+0x120>)
+ 8001f68:	4b13      	ldr	r3, [pc, #76]	; (8001fb8 <app_encoder_loop+0x104>)
  8001f6a:	6018      	str	r0, [r3, #0]
 		num_digits++;
- 8001f6c:	4a1a      	ldr	r2, [pc, #104]	; (8001fd8 <app_encoder_loop+0x124>)
+ 8001f6c:	4a13      	ldr	r2, [pc, #76]	; (8001fbc <app_encoder_loop+0x108>)
  8001f6e:	6813      	ldr	r3, [r2, #0]
  8001f70:	3301      	adds	r3, #1
  8001f72:	6013      	str	r3, [r2, #0]
 	while (integer_part) {
- 8001f74:	4b17      	ldr	r3, [pc, #92]	; (8001fd4 <app_encoder_loop+0x120>)
+ 8001f74:	4b10      	ldr	r3, [pc, #64]	; (8001fb8 <app_encoder_loop+0x104>)
  8001f76:	6818      	ldr	r0, [r3, #0]
  8001f78:	2800      	cmp	r0, #0
  8001f7a:	d1f2      	bne.n	8001f62 <app_encoder_loop+0xae>
 	}
 
 	//Print the voltage to the display
-	max7219_PrintItos(num_digits, voltage);
- 8001f7c:	4b16      	ldr	r3, [pc, #88]	; (8001fd8 <app_encoder_loop+0x124>)
+	max7219_PrintItos(num_digits, voltage, 3);
+ 8001f7c:	4b0f      	ldr	r3, [pc, #60]	; (8001fbc <app_encoder_loop+0x108>)
  8001f7e:	7818      	ldrb	r0, [r3, #0]
- 8001f80:	0021      	movs	r1, r4
- 8001f82:	f000 f907 	bl	8002194 <max7219_PrintItos>
-
-	//Print the decimal point
-	max7219_PrintDigit(2, BLANK, true);
- 8001f86:	2201      	movs	r2, #1
- 8001f88:	210f      	movs	r1, #15
- 8001f8a:	2002      	movs	r0, #2
- 8001f8c:	f000 f8cc 	bl	8002128 <max7219_PrintDigit>
-
-	//Print starting zeroes if voltage has less than 4 digits
+ 8001f80:	2203      	movs	r2, #3
+ 8001f82:	0021      	movs	r1, r4
+ 8001f84:	f000 f8f8 	bl	8002178 <max7219_PrintItos>
 	for (int i= 4; i > num_digits; i--) {
- 8001f90:	2404      	movs	r4, #4
- 8001f92:	e004      	b.n	8001f9e <app_encoder_loop+0xea>
-		max7219_PrintItos(i, 0);
- 8001f94:	b2e0      	uxtb	r0, r4
- 8001f96:	2100      	movs	r1, #0
- 8001f98:	f000 f8fc 	bl	8002194 <max7219_PrintItos>
-	for (int i= 4; i > num_digits; i--) {
- 8001f9c:	3c01      	subs	r4, #1
- 8001f9e:	4b0e      	ldr	r3, [pc, #56]	; (8001fd8 <app_encoder_loop+0x124>)
- 8001fa0:	681b      	ldr	r3, [r3, #0]
- 8001fa2:	42a3      	cmp	r3, r4
- 8001fa4:	dbf6      	blt.n	8001f94 <app_encoder_loop+0xe0>
+		max7219_PrintItos(i, 0, 0);
 	}
-
+	*/
 
 	encoderValPrev = encoderVal;
- 8001fa6:	4b03      	ldr	r3, [pc, #12]	; (8001fb4 <app_encoder_loop+0x100>)
- 8001fa8:	4a01      	ldr	r2, [pc, #4]	; (8001fb0 <app_encoder_loop+0xfc>)
- 8001faa:	6812      	ldr	r2, [r2, #0]
- 8001fac:	601a      	str	r2, [r3, #0]
+ 8001f88:	4b03      	ldr	r3, [pc, #12]	; (8001f98 <app_encoder_loop+0xe4>)
+ 8001f8a:	4a02      	ldr	r2, [pc, #8]	; (8001f94 <app_encoder_loop+0xe0>)
+ 8001f8c:	6812      	ldr	r2, [r2, #0]
+ 8001f8e:	601a      	str	r2, [r3, #0]
 }
- 8001fae:	bd10      	pop	{r4, pc}
- 8001fb0:	20000130 	.word	0x20000130
- 8001fb4:	20000134 	.word	0x20000134
- 8001fb8:	2000000c 	.word	0x2000000c
- 8001fbc:	20000144 	.word	0x20000144
- 8001fc0:	20000150 	.word	0x20000150
- 8001fc4:	2000014c 	.word	0x2000014c
- 8001fc8:	20000010 	.word	0x20000010
- 8001fcc:	20000148 	.word	0x20000148
- 8001fd0:	20000138 	.word	0x20000138
- 8001fd4:	2000013c 	.word	0x2000013c
- 8001fd8:	20000140 	.word	0x20000140
+ 8001f90:	bd10      	pop	{r4, pc}
+ 8001f92:	46c0      	nop			; (mov r8, r8)
+ 8001f94:	20000130 	.word	0x20000130
+ 8001f98:	20000134 	.word	0x20000134
+ 8001f9c:	2000000c 	.word	0x2000000c
+ 8001fa0:	20000144 	.word	0x20000144
+ 8001fa4:	20000150 	.word	0x20000150
+ 8001fa8:	2000014c 	.word	0x2000014c
+ 8001fac:	20000010 	.word	0x20000010
+ 8001fb0:	20000148 	.word	0x20000148
+ 8001fb4:	20000138 	.word	0x20000138
+ 8001fb8:	2000013c 	.word	0x2000013c
+ 8001fbc:	20000140 	.word	0x20000140
 
-08001fdc <button_isr>:
+08001fc0 <button_isr>:
 /**
  * Button interrupt service routine
  */
 void button_isr(void){
 	//Mask unwanted button interrupts caused by debouncing
 	EXTI->IMR1 &= ~(EXTI_IMR1_IM3);
- 8001fdc:	490e      	ldr	r1, [pc, #56]	; (8002018 <button_isr+0x3c>)
- 8001fde:	2280      	movs	r2, #128	; 0x80
- 8001fe0:	588b      	ldr	r3, [r1, r2]
- 8001fe2:	2008      	movs	r0, #8
- 8001fe4:	4383      	bics	r3, r0
- 8001fe6:	508b      	str	r3, [r1, r2]
+ 8001fc0:	490e      	ldr	r1, [pc, #56]	; (8001ffc <button_isr+0x3c>)
+ 8001fc2:	2280      	movs	r2, #128	; 0x80
+ 8001fc4:	588b      	ldr	r3, [r1, r2]
+ 8001fc6:	2008      	movs	r0, #8
+ 8001fc8:	4383      	bics	r3, r0
+ 8001fca:	508b      	str	r3, [r1, r2]
   WRITE_REG(TIMx->CNT, Counter);
- 8001fe8:	4b0c      	ldr	r3, [pc, #48]	; (800201c <button_isr+0x40>)
- 8001fea:	2200      	movs	r2, #0
- 8001fec:	625a      	str	r2, [r3, #36]	; 0x24
+ 8001fcc:	4b0c      	ldr	r3, [pc, #48]	; (8002000 <button_isr+0x40>)
+ 8001fce:	2200      	movs	r2, #0
+ 8001fd0:	625a      	str	r2, [r3, #36]	; 0x24
   SET_BIT(TIMx->CR1, TIM_CR1_CEN);
- 8001fee:	681a      	ldr	r2, [r3, #0]
- 8001ff0:	2101      	movs	r1, #1
- 8001ff2:	430a      	orrs	r2, r1
- 8001ff4:	601a      	str	r2, [r3, #0]
+ 8001fd2:	681a      	ldr	r2, [r3, #0]
+ 8001fd4:	2101      	movs	r1, #1
+ 8001fd6:	430a      	orrs	r2, r1
+ 8001fd8:	601a      	str	r2, [r3, #0]
 
 	//Zero TIM6 counter and start counting
 	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
 	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
 
 	if (encoderPress > 0){
- 8001ff6:	4b0a      	ldr	r3, [pc, #40]	; (8002020 <button_isr+0x44>)
- 8001ff8:	681b      	ldr	r3, [r3, #0]
- 8001ffa:	2b00      	cmp	r3, #0
- 8001ffc:	dd07      	ble.n	800200e <button_isr+0x32>
+ 8001fda:	4b0a      	ldr	r3, [pc, #40]	; (8002004 <button_isr+0x44>)
+ 8001fdc:	681b      	ldr	r3, [r3, #0]
+ 8001fde:	2b00      	cmp	r3, #0
+ 8001fe0:	dd07      	ble.n	8001ff2 <button_isr+0x32>
 		encoderPress--;
- 8001ffe:	4a08      	ldr	r2, [pc, #32]	; (8002020 <button_isr+0x44>)
- 8002000:	3b01      	subs	r3, #1
- 8002002:	6013      	str	r3, [r2, #0]
+ 8001fe2:	4a08      	ldr	r2, [pc, #32]	; (8002004 <button_isr+0x44>)
+ 8001fe4:	3b01      	subs	r3, #1
+ 8001fe6:	6013      	str	r3, [r2, #0]
 	else {
 		encoderPress = 3;
 	}
 
 	//Erase btn (PC3) interrupt flag
     __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_3);
- 8002004:	4b04      	ldr	r3, [pc, #16]	; (8002018 <button_isr+0x3c>)
- 8002006:	2208      	movs	r2, #8
- 8002008:	60da      	str	r2, [r3, #12]
- 800200a:	611a      	str	r2, [r3, #16]
+ 8001fe8:	4b04      	ldr	r3, [pc, #16]	; (8001ffc <button_isr+0x3c>)
+ 8001fea:	2208      	movs	r2, #8
+ 8001fec:	60da      	str	r2, [r3, #12]
+ 8001fee:	611a      	str	r2, [r3, #16]
 }
- 800200c:	4770      	bx	lr
+ 8001ff0:	4770      	bx	lr
 		encoderPress = 3;
- 800200e:	4b04      	ldr	r3, [pc, #16]	; (8002020 <button_isr+0x44>)
- 8002010:	2203      	movs	r2, #3
- 8002012:	601a      	str	r2, [r3, #0]
- 8002014:	e7f6      	b.n	8002004 <button_isr+0x28>
- 8002016:	46c0      	nop			; (mov r8, r8)
- 8002018:	40021800 	.word	0x40021800
- 800201c:	40001400 	.word	0x40001400
- 8002020:	2000000c 	.word	0x2000000c
+ 8001ff2:	4b04      	ldr	r3, [pc, #16]	; (8002004 <button_isr+0x44>)
+ 8001ff4:	2203      	movs	r2, #3
+ 8001ff6:	601a      	str	r2, [r3, #0]
+ 8001ff8:	e7f6      	b.n	8001fe8 <button_isr+0x28>
+ 8001ffa:	46c0      	nop			; (mov r8, r8)
+ 8001ffc:	40021800 	.word	0x40021800
+ 8002000:	40001400 	.word	0x40001400
+ 8002004:	2000000c 	.word	0x2000000c
 
-08002024 <button_timer_isr>:
+08002008 <button_timer_isr>:
 
 /*
  * Timer interrupt routine
  */
 void button_timer_isr(void){
 	EXTI->IMR1 |= EXTI_IMR1_IM3; //unmask interrupt mask register on exti line 3
- 8002024:	4904      	ldr	r1, [pc, #16]	; (8002038 <button_timer_isr+0x14>)
- 8002026:	2280      	movs	r2, #128	; 0x80
- 8002028:	588b      	ldr	r3, [r1, r2]
- 800202a:	2008      	movs	r0, #8
- 800202c:	4303      	orrs	r3, r0
- 800202e:	508b      	str	r3, [r1, r2]
+ 8002008:	4904      	ldr	r1, [pc, #16]	; (800201c <button_timer_isr+0x14>)
+ 800200a:	2280      	movs	r2, #128	; 0x80
+ 800200c:	588b      	ldr	r3, [r1, r2]
+ 800200e:	2008      	movs	r0, #8
+ 8002010:	4303      	orrs	r3, r0
+ 8002012:	508b      	str	r3, [r1, r2]
   WRITE_REG(TIMx->SR, ~(TIM_SR_UIF));
- 8002030:	4b02      	ldr	r3, [pc, #8]	; (800203c <button_timer_isr+0x18>)
- 8002032:	3a82      	subs	r2, #130	; 0x82
- 8002034:	611a      	str	r2, [r3, #16]
+ 8002014:	4b02      	ldr	r3, [pc, #8]	; (8002020 <button_timer_isr+0x18>)
+ 8002016:	3a82      	subs	r2, #130	; 0x82
+ 8002018:	611a      	str	r2, [r3, #16]
 	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
 }
- 8002036:	4770      	bx	lr
- 8002038:	40021800 	.word	0x40021800
- 800203c:	40001400 	.word	0x40001400
+ 800201a:	4770      	bx	lr
+ 800201c:	40021800 	.word	0x40021800
+ 8002020:	40001400 	.word	0x40001400
 
-08002040 <getSymbol>:
+08002024 <getSymbol>:
 	return position;
 }
 
 static uint16_t getSymbol(uint8_t number)
 {
 	return SYMBOLS[number];
- 8002040:	4b01      	ldr	r3, [pc, #4]	; (8002048 <getSymbol+0x8>)
- 8002042:	5c18      	ldrb	r0, [r3, r0]
+ 8002024:	4b01      	ldr	r3, [pc, #4]	; (800202c <getSymbol+0x8>)
+ 8002026:	5c18      	ldrb	r0, [r3, r0]
 }
- 8002044:	4770      	bx	lr
- 8002046:	46c0      	nop			; (mov r8, r8)
- 8002048:	08002308 	.word	0x08002308
+ 8002028:	4770      	bx	lr
+ 800202a:	46c0      	nop			; (mov r8, r8)
+ 800202c:	08002330 	.word	0x08002330
 
-0800204c <max7219_SendData>:
+08002030 <max7219_SendData>:
 {
- 800204c:	b5f0      	push	{r4, r5, r6, r7, lr}
- 800204e:	46c6      	mov	lr, r8
- 8002050:	b500      	push	{lr}
- 8002052:	b082      	sub	sp, #8
- 8002054:	2307      	movs	r3, #7
- 8002056:	446b      	add	r3, sp
- 8002058:	4698      	mov	r8, r3
- 800205a:	7018      	strb	r0, [r3, #0]
- 800205c:	466b      	mov	r3, sp
- 800205e:	1d9e      	adds	r6, r3, #6
- 8002060:	7199      	strb	r1, [r3, #6]
+ 8002030:	b5f0      	push	{r4, r5, r6, r7, lr}
+ 8002032:	46c6      	mov	lr, r8
+ 8002034:	b500      	push	{lr}
+ 8002036:	b082      	sub	sp, #8
+ 8002038:	2307      	movs	r3, #7
+ 800203a:	446b      	add	r3, sp
+ 800203c:	4698      	mov	r8, r3
+ 800203e:	7018      	strb	r0, [r3, #0]
+ 8002040:	466b      	mov	r3, sp
+ 8002042:	1d9e      	adds	r6, r3, #6
+ 8002044:	7199      	strb	r1, [r3, #6]
 	CS_SET();
- 8002062:	4d0f      	ldr	r5, [pc, #60]	; (80020a0 <max7219_SendData+0x54>)
- 8002064:	2200      	movs	r2, #0
- 8002066:	2101      	movs	r1, #1
- 8002068:	0028      	movs	r0, r5
- 800206a:	f7fe fd5d 	bl	8000b28 <HAL_GPIO_WritePin>
+ 8002046:	4d0f      	ldr	r5, [pc, #60]	; (8002084 <max7219_SendData+0x54>)
+ 8002048:	2200      	movs	r2, #0
+ 800204a:	2101      	movs	r1, #1
+ 800204c:	0028      	movs	r0, r5
+ 800204e:	f7fe fd6b 	bl	8000b28 <HAL_GPIO_WritePin>
 	HAL_SPI_Transmit(&hspi1, &addr, 1, HAL_MAX_DELAY);
- 800206e:	2701      	movs	r7, #1
- 8002070:	427f      	negs	r7, r7
- 8002072:	4c0c      	ldr	r4, [pc, #48]	; (80020a4 <max7219_SendData+0x58>)
- 8002074:	003b      	movs	r3, r7
- 8002076:	2201      	movs	r2, #1
- 8002078:	4641      	mov	r1, r8
- 800207a:	0020      	movs	r0, r4
- 800207c:	f7ff fb34 	bl	80016e8 <HAL_SPI_Transmit>
+ 8002052:	2701      	movs	r7, #1
+ 8002054:	427f      	negs	r7, r7
+ 8002056:	4c0c      	ldr	r4, [pc, #48]	; (8002088 <max7219_SendData+0x58>)
+ 8002058:	003b      	movs	r3, r7
+ 800205a:	2201      	movs	r2, #1
+ 800205c:	4641      	mov	r1, r8
+ 800205e:	0020      	movs	r0, r4
+ 8002060:	f7ff fb42 	bl	80016e8 <HAL_SPI_Transmit>
 	HAL_SPI_Transmit(&hspi1, &data, 1, HAL_MAX_DELAY);
- 8002080:	003b      	movs	r3, r7
- 8002082:	2201      	movs	r2, #1
- 8002084:	0031      	movs	r1, r6
- 8002086:	0020      	movs	r0, r4
- 8002088:	f7ff fb2e 	bl	80016e8 <HAL_SPI_Transmit>
+ 8002064:	003b      	movs	r3, r7
+ 8002066:	2201      	movs	r2, #1
+ 8002068:	0031      	movs	r1, r6
+ 800206a:	0020      	movs	r0, r4
+ 800206c:	f7ff fb3c 	bl	80016e8 <HAL_SPI_Transmit>
 	CS_RESET();
- 800208c:	2201      	movs	r2, #1
- 800208e:	2101      	movs	r1, #1
- 8002090:	0028      	movs	r0, r5
- 8002092:	f7fe fd49 	bl	8000b28 <HAL_GPIO_WritePin>
+ 8002070:	2201      	movs	r2, #1
+ 8002072:	2101      	movs	r1, #1
+ 8002074:	0028      	movs	r0, r5
+ 8002076:	f7fe fd57 	bl	8000b28 <HAL_GPIO_WritePin>
 }
- 8002096:	b002      	add	sp, #8
- 8002098:	bc80      	pop	{r7}
- 800209a:	46b8      	mov	r8, r7
- 800209c:	bdf0      	pop	{r4, r5, r6, r7, pc}
- 800209e:	46c0      	nop			; (mov r8, r8)
- 80020a0:	50000400 	.word	0x50000400
- 80020a4:	20000030 	.word	0x20000030
+ 800207a:	b002      	add	sp, #8
+ 800207c:	bc80      	pop	{r7}
+ 800207e:	46b8      	mov	r8, r7
+ 8002080:	bdf0      	pop	{r4, r5, r6, r7, pc}
+ 8002082:	46c0      	nop			; (mov r8, r8)
+ 8002084:	50000400 	.word	0x50000400
+ 8002088:	20000030 	.word	0x20000030
 
-080020a8 <max7219_SetIntensivity>:
+0800208c <max7219_SetIntensivity>:
 {
- 80020a8:	b510      	push	{r4, lr}
- 80020aa:	0001      	movs	r1, r0
+ 800208c:	b510      	push	{r4, lr}
+ 800208e:	0001      	movs	r1, r0
 	if (intensivity > 0x0F)
- 80020ac:	280f      	cmp	r0, #15
- 80020ae:	d900      	bls.n	80020b2 <max7219_SetIntensivity+0xa>
+ 8002090:	280f      	cmp	r0, #15
+ 8002092:	d900      	bls.n	8002096 <max7219_SetIntensivity+0xa>
 }
- 80020b0:	bd10      	pop	{r4, pc}
+ 8002094:	bd10      	pop	{r4, pc}
 	max7219_SendData(REG_INTENSITY, intensivity);
- 80020b2:	200a      	movs	r0, #10
- 80020b4:	f7ff ffca 	bl	800204c <max7219_SendData>
- 80020b8:	e7fa      	b.n	80020b0 <max7219_SetIntensivity+0x8>
+ 8002096:	200a      	movs	r0, #10
+ 8002098:	f7ff ffca 	bl	8002030 <max7219_SendData>
+ 800209c:	e7fa      	b.n	8002094 <max7219_SetIntensivity+0x8>
 	...
 
-080020bc <max7219_Clean>:
+080020a0 <max7219_Clean>:
 {
- 80020bc:	b570      	push	{r4, r5, r6, lr}
+ 80020a0:	b570      	push	{r4, r5, r6, lr}
 	if(decodeMode == 0xFF)
- 80020be:	4b09      	ldr	r3, [pc, #36]	; (80020e4 <max7219_Clean+0x28>)
- 80020c0:	781b      	ldrb	r3, [r3, #0]
- 80020c2:	2bff      	cmp	r3, #255	; 0xff
- 80020c4:	d002      	beq.n	80020cc <max7219_Clean+0x10>
+ 80020a2:	4b09      	ldr	r3, [pc, #36]	; (80020c8 <max7219_Clean+0x28>)
+ 80020a4:	781b      	ldrb	r3, [r3, #0]
+ 80020a6:	2bff      	cmp	r3, #255	; 0xff
+ 80020a8:	d002      	beq.n	80020b0 <max7219_Clean+0x10>
 	uint8_t clear = 0x00;
- 80020c6:	2500      	movs	r5, #0
+ 80020aa:	2500      	movs	r5, #0
 	for (int i = 0; i < 8; ++i)
- 80020c8:	2400      	movs	r4, #0
- 80020ca:	e007      	b.n	80020dc <max7219_Clean+0x20>
+ 80020ac:	2400      	movs	r4, #0
+ 80020ae:	e007      	b.n	80020c0 <max7219_Clean+0x20>
 		clear = BLANK;
- 80020cc:	250f      	movs	r5, #15
- 80020ce:	e7fb      	b.n	80020c8 <max7219_Clean+0xc>
+ 80020b0:	250f      	movs	r5, #15
+ 80020b2:	e7fb      	b.n	80020ac <max7219_Clean+0xc>
 		max7219_SendData(i + 1, clear);
- 80020d0:	1c60      	adds	r0, r4, #1
- 80020d2:	b2c0      	uxtb	r0, r0
- 80020d4:	0029      	movs	r1, r5
- 80020d6:	f7ff ffb9 	bl	800204c <max7219_SendData>
+ 80020b4:	1c60      	adds	r0, r4, #1
+ 80020b6:	b2c0      	uxtb	r0, r0
+ 80020b8:	0029      	movs	r1, r5
+ 80020ba:	f7ff ffb9 	bl	8002030 <max7219_SendData>
 	for (int i = 0; i < 8; ++i)
- 80020da:	3401      	adds	r4, #1
- 80020dc:	2c07      	cmp	r4, #7
- 80020de:	ddf7      	ble.n	80020d0 <max7219_Clean+0x14>
+ 80020be:	3401      	adds	r4, #1
+ 80020c0:	2c07      	cmp	r4, #7
+ 80020c2:	ddf7      	ble.n	80020b4 <max7219_Clean+0x14>
 }
- 80020e0:	bd70      	pop	{r4, r5, r6, pc}
- 80020e2:	46c0      	nop			; (mov r8, r8)
- 80020e4:	20000154 	.word	0x20000154
+ 80020c4:	bd70      	pop	{r4, r5, r6, pc}
+ 80020c6:	46c0      	nop			; (mov r8, r8)
+ 80020c8:	20000154 	.word	0x20000154
 
-080020e8 <max7219_Turn_On>:
+080020cc <max7219_Turn_On>:
 {
- 80020e8:	b510      	push	{r4, lr}
+ 80020cc:	b510      	push	{r4, lr}
 	max7219_SendData(REG_SHUTDOWN, 0x01);
- 80020ea:	2101      	movs	r1, #1
- 80020ec:	200c      	movs	r0, #12
- 80020ee:	f7ff ffad 	bl	800204c <max7219_SendData>
+ 80020ce:	2101      	movs	r1, #1
+ 80020d0:	200c      	movs	r0, #12
+ 80020d2:	f7ff ffad 	bl	8002030 <max7219_SendData>
+}
+ 80020d6:	bd10      	pop	{r4, pc}
+
+080020d8 <max7219_Init>:
+{
+ 80020d8:	b510      	push	{r4, lr}
+ 80020da:	0004      	movs	r4, r0
+	max7219_Turn_On();
+ 80020dc:	f7ff fff6 	bl	80020cc <max7219_Turn_On>
+	max7219_SendData(REG_SCAN_LIMIT, NUMBER_OF_DIGITS - 1);
+ 80020e0:	2107      	movs	r1, #7
+ 80020e2:	200b      	movs	r0, #11
+ 80020e4:	f7ff ffa4 	bl	8002030 <max7219_SendData>
+	max7219_SetIntensivity(intensivity);
+ 80020e8:	0020      	movs	r0, r4
+ 80020ea:	f7ff ffcf 	bl	800208c <max7219_SetIntensivity>
+	max7219_Clean();
+ 80020ee:	f7ff ffd7 	bl	80020a0 <max7219_Clean>
 }
  80020f2:	bd10      	pop	{r4, pc}
 
-080020f4 <max7219_Init>:
+080020f4 <max7219_Decode_On>:
 {
  80020f4:	b510      	push	{r4, lr}
- 80020f6:	0004      	movs	r4, r0
-	max7219_Turn_On();
- 80020f8:	f7ff fff6 	bl	80020e8 <max7219_Turn_On>
-	max7219_SendData(REG_SCAN_LIMIT, NUMBER_OF_DIGITS - 1);
- 80020fc:	2107      	movs	r1, #7
- 80020fe:	200b      	movs	r0, #11
- 8002100:	f7ff ffa4 	bl	800204c <max7219_SendData>
-	max7219_SetIntensivity(intensivity);
- 8002104:	0020      	movs	r0, r4
- 8002106:	f7ff ffcf 	bl	80020a8 <max7219_SetIntensivity>
-	max7219_Clean();
- 800210a:	f7ff ffd7 	bl	80020bc <max7219_Clean>
-}
- 800210e:	bd10      	pop	{r4, pc}
-
-08002110 <max7219_Decode_On>:
-{
- 8002110:	b510      	push	{r4, lr}
 	decodeMode = 0xFF;
- 8002112:	4b04      	ldr	r3, [pc, #16]	; (8002124 <max7219_Decode_On+0x14>)
- 8002114:	22ff      	movs	r2, #255	; 0xff
- 8002116:	701a      	strb	r2, [r3, #0]
+ 80020f6:	4b04      	ldr	r3, [pc, #16]	; (8002108 <max7219_Decode_On+0x14>)
+ 80020f8:	22ff      	movs	r2, #255	; 0xff
+ 80020fa:	701a      	strb	r2, [r3, #0]
 	max7219_SendData(REG_DECODE_MODE, decodeMode);
- 8002118:	21ff      	movs	r1, #255	; 0xff
- 800211a:	2009      	movs	r0, #9
- 800211c:	f7ff ff96 	bl	800204c <max7219_SendData>
+ 80020fc:	21ff      	movs	r1, #255	; 0xff
+ 80020fe:	2009      	movs	r0, #9
+ 8002100:	f7ff ff96 	bl	8002030 <max7219_SendData>
 }
- 8002120:	bd10      	pop	{r4, pc}
- 8002122:	46c0      	nop			; (mov r8, r8)
- 8002124:	20000154 	.word	0x20000154
+ 8002104:	bd10      	pop	{r4, pc}
+ 8002106:	46c0      	nop			; (mov r8, r8)
+ 8002108:	20000154 	.word	0x20000154
 
-08002128 <max7219_PrintDigit>:
+0800210c <max7219_PrintDigit>:
 {
- 8002128:	b510      	push	{r4, lr}
- 800212a:	0004      	movs	r4, r0
+ 800210c:	b510      	push	{r4, lr}
+ 800210e:	0004      	movs	r4, r0
 	if(position > NUMBER_OF_DIGITS)
- 800212c:	2808      	cmp	r0, #8
- 800212e:	d807      	bhi.n	8002140 <max7219_PrintDigit+0x18>
+ 8002110:	2808      	cmp	r0, #8
+ 8002112:	d807      	bhi.n	8002124 <max7219_PrintDigit+0x18>
 	if(point)
- 8002130:	2a00      	cmp	r2, #0
- 8002132:	d018      	beq.n	8002166 <max7219_PrintDigit+0x3e>
+ 8002114:	2a00      	cmp	r2, #0
+ 8002116:	d018      	beq.n	800214a <max7219_PrintDigit+0x3e>
 		if(decodeMode == 0x00)
- 8002134:	4b16      	ldr	r3, [pc, #88]	; (8002190 <max7219_PrintDigit+0x68>)
- 8002136:	781b      	ldrb	r3, [r3, #0]
- 8002138:	2b00      	cmp	r3, #0
- 800213a:	d002      	beq.n	8002142 <max7219_PrintDigit+0x1a>
+ 8002118:	4b16      	ldr	r3, [pc, #88]	; (8002174 <max7219_PrintDigit+0x68>)
+ 800211a:	781b      	ldrb	r3, [r3, #0]
+ 800211c:	2b00      	cmp	r3, #0
+ 800211e:	d002      	beq.n	8002126 <max7219_PrintDigit+0x1a>
 		else if(decodeMode == 0xFF)
- 800213c:	2bff      	cmp	r3, #255	; 0xff
- 800213e:	d00b      	beq.n	8002158 <max7219_PrintDigit+0x30>
+ 8002120:	2bff      	cmp	r3, #255	; 0xff
+ 8002122:	d00b      	beq.n	800213c <max7219_PrintDigit+0x30>
 }
- 8002140:	bd10      	pop	{r4, pc}
+ 8002124:	bd10      	pop	{r4, pc}
 			max7219_SendData(position, getSymbol(numeric) | (1 << 7));
- 8002142:	0008      	movs	r0, r1
- 8002144:	f7ff ff7c 	bl	8002040 <getSymbol>
- 8002148:	2180      	movs	r1, #128	; 0x80
- 800214a:	4249      	negs	r1, r1
- 800214c:	4301      	orrs	r1, r0
- 800214e:	b2c9      	uxtb	r1, r1
- 8002150:	0020      	movs	r0, r4
- 8002152:	f7ff ff7b 	bl	800204c <max7219_SendData>
- 8002156:	e7f3      	b.n	8002140 <max7219_PrintDigit+0x18>
+ 8002126:	0008      	movs	r0, r1
+ 8002128:	f7ff ff7c 	bl	8002024 <getSymbol>
+ 800212c:	2180      	movs	r1, #128	; 0x80
+ 800212e:	4249      	negs	r1, r1
+ 8002130:	4301      	orrs	r1, r0
+ 8002132:	b2c9      	uxtb	r1, r1
+ 8002134:	0020      	movs	r0, r4
+ 8002136:	f7ff ff7b 	bl	8002030 <max7219_SendData>
+ 800213a:	e7f3      	b.n	8002124 <max7219_PrintDigit+0x18>
 			max7219_SendData(position, numeric | (1 << 7));
- 8002158:	3b80      	subs	r3, #128	; 0x80
- 800215a:	3bff      	subs	r3, #255	; 0xff
- 800215c:	4319      	orrs	r1, r3
- 800215e:	b2c9      	uxtb	r1, r1
- 8002160:	f7ff ff74 	bl	800204c <max7219_SendData>
- 8002164:	e7ec      	b.n	8002140 <max7219_PrintDigit+0x18>
+ 800213c:	3b80      	subs	r3, #128	; 0x80
+ 800213e:	3bff      	subs	r3, #255	; 0xff
+ 8002140:	4319      	orrs	r1, r3
+ 8002142:	b2c9      	uxtb	r1, r1
+ 8002144:	f7ff ff74 	bl	8002030 <max7219_SendData>
+ 8002148:	e7ec      	b.n	8002124 <max7219_PrintDigit+0x18>
 		if(decodeMode == 0x00)
- 8002166:	4b0a      	ldr	r3, [pc, #40]	; (8002190 <max7219_PrintDigit+0x68>)
- 8002168:	781b      	ldrb	r3, [r3, #0]
- 800216a:	2b00      	cmp	r3, #0
- 800216c:	d006      	beq.n	800217c <max7219_PrintDigit+0x54>
+ 800214a:	4b0a      	ldr	r3, [pc, #40]	; (8002174 <max7219_PrintDigit+0x68>)
+ 800214c:	781b      	ldrb	r3, [r3, #0]
+ 800214e:	2b00      	cmp	r3, #0
+ 8002150:	d006      	beq.n	8002160 <max7219_PrintDigit+0x54>
 		else if(decodeMode == 0xFF)
- 800216e:	2bff      	cmp	r3, #255	; 0xff
- 8002170:	d1e6      	bne.n	8002140 <max7219_PrintDigit+0x18>
+ 8002152:	2bff      	cmp	r3, #255	; 0xff
+ 8002154:	d1e6      	bne.n	8002124 <max7219_PrintDigit+0x18>
 			max7219_SendData(position, numeric & (~(1 << 7)));
- 8002172:	3b80      	subs	r3, #128	; 0x80
- 8002174:	4019      	ands	r1, r3
- 8002176:	f7ff ff69 	bl	800204c <max7219_SendData>
- 800217a:	e7e1      	b.n	8002140 <max7219_PrintDigit+0x18>
+ 8002156:	3b80      	subs	r3, #128	; 0x80
+ 8002158:	4019      	ands	r1, r3
+ 800215a:	f7ff ff69 	bl	8002030 <max7219_SendData>
+ 800215e:	e7e1      	b.n	8002124 <max7219_PrintDigit+0x18>
 			max7219_SendData(position, getSymbol(numeric) & (~(1 << 7)));
- 800217c:	0008      	movs	r0, r1
- 800217e:	f7ff ff5f 	bl	8002040 <getSymbol>
- 8002182:	217f      	movs	r1, #127	; 0x7f
- 8002184:	4001      	ands	r1, r0
- 8002186:	0020      	movs	r0, r4
- 8002188:	f7ff ff60 	bl	800204c <max7219_SendData>
- 800218c:	e7d8      	b.n	8002140 <max7219_PrintDigit+0x18>
- 800218e:	46c0      	nop			; (mov r8, r8)
- 8002190:	20000154 	.word	0x20000154
+ 8002160:	0008      	movs	r0, r1
+ 8002162:	f7ff ff5f 	bl	8002024 <getSymbol>
+ 8002166:	217f      	movs	r1, #127	; 0x7f
+ 8002168:	4001      	ands	r1, r0
+ 800216a:	0020      	movs	r0, r4
+ 800216c:	f7ff ff60 	bl	8002030 <max7219_SendData>
+ 8002170:	e7d8      	b.n	8002124 <max7219_PrintDigit+0x18>
+ 8002172:	46c0      	nop			; (mov r8, r8)
+ 8002174:	20000154 	.word	0x20000154
 
-08002194 <max7219_PrintItos>:
+08002178 <max7219_PrintItos>:
 {
- 8002194:	b570      	push	{r4, r5, r6, lr}
- 8002196:	0005      	movs	r5, r0
- 8002198:	000e      	movs	r6, r1
+ 8002178:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 800217a:	46ce      	mov	lr, r9
+ 800217c:	4647      	mov	r7, r8
+ 800217e:	b580      	push	{r7, lr}
+ 8002180:	0007      	movs	r7, r0
+ 8002182:	4688      	mov	r8, r1
+ 8002184:	4691      	mov	r9, r2
 	max7219_SendData(REG_DECODE_MODE, 0xFF);
- 800219a:	21ff      	movs	r1, #255	; 0xff
- 800219c:	2009      	movs	r0, #9
- 800219e:	f7ff ff55 	bl	800204c <max7219_SendData>
+ 8002186:	21ff      	movs	r1, #255	; 0xff
+ 8002188:	2009      	movs	r0, #9
+ 800218a:	f7ff ff51 	bl	8002030 <max7219_SendData>
 	if (value < 0)
- 80021a2:	2e00      	cmp	r6, #0
- 80021a4:	db01      	blt.n	80021aa <max7219_PrintItos+0x16>
+ 800218e:	4643      	mov	r3, r8
+ 8002190:	2b00      	cmp	r3, #0
+ 8002192:	db02      	blt.n	800219a <max7219_PrintItos+0x22>
+	uint8_t num_digits = 0;
+ 8002194:	2500      	movs	r5, #0
 	i = 1;
- 80021a6:	2401      	movs	r4, #1
+ 8002196:	2401      	movs	r4, #1
 	while ((value / i) > 9)
- 80021a8:	e00d      	b.n	80021c6 <max7219_PrintItos+0x32>
+ 8002198:	e011      	b.n	80021be <max7219_PrintItos+0x46>
 		if(position > 0)
- 80021aa:	2d00      	cmp	r5, #0
- 80021ac:	d101      	bne.n	80021b2 <max7219_PrintItos+0x1e>
+ 800219a:	2f00      	cmp	r7, #0
+ 800219c:	d103      	bne.n	80021a6 <max7219_PrintItos+0x2e>
 		value = -value;
- 80021ae:	4276      	negs	r6, r6
- 80021b0:	e7f9      	b.n	80021a6 <max7219_PrintItos+0x12>
+ 800219e:	4643      	mov	r3, r8
+ 80021a0:	425b      	negs	r3, r3
+ 80021a2:	4698      	mov	r8, r3
+ 80021a4:	e7f6      	b.n	8002194 <max7219_PrintItos+0x1c>
 			max7219_SendData(position, MINUS);
- 80021b2:	210a      	movs	r1, #10
- 80021b4:	0028      	movs	r0, r5
- 80021b6:	f7ff ff49 	bl	800204c <max7219_SendData>
+ 80021a6:	210a      	movs	r1, #10
+ 80021a8:	0038      	movs	r0, r7
+ 80021aa:	f7ff ff41 	bl	8002030 <max7219_SendData>
 			position--;
- 80021ba:	3d01      	subs	r5, #1
- 80021bc:	b2ed      	uxtb	r5, r5
- 80021be:	e7f6      	b.n	80021ae <max7219_PrintItos+0x1a>
+ 80021ae:	3f01      	subs	r7, #1
+ 80021b0:	b2ff      	uxtb	r7, r7
+ 80021b2:	e7f4      	b.n	800219e <max7219_PrintItos+0x26>
 		i *= 10;
- 80021c0:	00a3      	lsls	r3, r4, #2
- 80021c2:	191c      	adds	r4, r3, r4
- 80021c4:	0064      	lsls	r4, r4, #1
+ 80021b4:	00a3      	lsls	r3, r4, #2
+ 80021b6:	191c      	adds	r4, r3, r4
+ 80021b8:	0064      	lsls	r4, r4, #1
+		num_digits++;
+ 80021ba:	3501      	adds	r5, #1
+ 80021bc:	b2ed      	uxtb	r5, r5
 	while ((value / i) > 9)
- 80021c6:	0021      	movs	r1, r4
- 80021c8:	0030      	movs	r0, r6
- 80021ca:	f7fe f825 	bl	8000218 <__divsi3>
- 80021ce:	2809      	cmp	r0, #9
- 80021d0:	dcf6      	bgt.n	80021c0 <max7219_PrintItos+0x2c>
-	if(position > 0)
- 80021d2:	2d00      	cmp	r5, #0
- 80021d4:	d105      	bne.n	80021e2 <max7219_PrintItos+0x4e>
-	i /= 10;
- 80021d6:	210a      	movs	r1, #10
- 80021d8:	0020      	movs	r0, r4
- 80021da:	f7fe f81d 	bl	8000218 <__divsi3>
- 80021de:	0004      	movs	r4, r0
-	while (i > 0)
- 80021e0:	e00b      	b.n	80021fa <max7219_PrintItos+0x66>
-		max7219_SendData(position, value/i);
- 80021e2:	b2c1      	uxtb	r1, r0
- 80021e4:	0028      	movs	r0, r5
- 80021e6:	f7ff ff31 	bl	800204c <max7219_SendData>
-		position--;
- 80021ea:	3d01      	subs	r5, #1
- 80021ec:	b2ed      	uxtb	r5, r5
- 80021ee:	e7f2      	b.n	80021d6 <max7219_PrintItos+0x42>
-		i /= 10;
- 80021f0:	210a      	movs	r1, #10
- 80021f2:	0020      	movs	r0, r4
- 80021f4:	f7fe f810 	bl	8000218 <__divsi3>
- 80021f8:	0004      	movs	r4, r0
-	while (i > 0)
- 80021fa:	2c00      	cmp	r4, #0
- 80021fc:	dd12      	ble.n	8002224 <max7219_PrintItos+0x90>
-		if(position > 0)
- 80021fe:	2d00      	cmp	r5, #0
- 8002200:	d0f6      	beq.n	80021f0 <max7219_PrintItos+0x5c>
-			max7219_SendData(position, (value % (i * 10)) / i);
- 8002202:	00a1      	lsls	r1, r4, #2
- 8002204:	1909      	adds	r1, r1, r4
- 8002206:	0049      	lsls	r1, r1, #1
- 8002208:	0030      	movs	r0, r6
- 800220a:	f7fe f8eb 	bl	80003e4 <__aeabi_idivmod>
- 800220e:	0008      	movs	r0, r1
- 8002210:	0021      	movs	r1, r4
- 8002212:	f7fe f801 	bl	8000218 <__divsi3>
- 8002216:	b2c1      	uxtb	r1, r0
- 8002218:	0028      	movs	r0, r5
- 800221a:	f7ff ff17 	bl	800204c <max7219_SendData>
+ 80021be:	0021      	movs	r1, r4
+ 80021c0:	4640      	mov	r0, r8
+ 80021c2:	f7fe f829 	bl	8000218 <__divsi3>
+ 80021c6:	2809      	cmp	r0, #9
+ 80021c8:	dcf4      	bgt.n	80021b4 <max7219_PrintItos+0x3c>
+	num_digits++;
+ 80021ca:	3501      	adds	r5, #1
+ 80021cc:	b2ee      	uxtb	r6, r5
+	for (int j= 4; j > num_digits; j--) {
+ 80021ce:	2504      	movs	r5, #4
+ 80021d0:	e005      	b.n	80021de <max7219_PrintItos+0x66>
+			max7219_PrintDigit(j, 0, true);
+ 80021d2:	b2e8      	uxtb	r0, r5
+ 80021d4:	2201      	movs	r2, #1
+ 80021d6:	2100      	movs	r1, #0
+ 80021d8:	f7ff ff98 	bl	800210c <max7219_PrintDigit>
+	for (int j= 4; j > num_digits; j--) {
+ 80021dc:	3d01      	subs	r5, #1
+ 80021de:	42ae      	cmp	r6, r5
+ 80021e0:	da1c      	bge.n	800221c <max7219_PrintItos+0xa4>
+		if(j == decimal_position) {
+ 80021e2:	45a9      	cmp	r9, r5
+ 80021e4:	d0f5      	beq.n	80021d2 <max7219_PrintItos+0x5a>
+			max7219_SendData(j, 0);
+ 80021e6:	b2e8      	uxtb	r0, r5
+ 80021e8:	2100      	movs	r1, #0
+ 80021ea:	f7ff ff21 	bl	8002030 <max7219_SendData>
+ 80021ee:	e7f5      	b.n	80021dc <max7219_PrintItos+0x64>
+				max7219_PrintDigit(position, (value % (i * 10)) / i, true);
+ 80021f0:	00a1      	lsls	r1, r4, #2
+ 80021f2:	1909      	adds	r1, r1, r4
+ 80021f4:	0049      	lsls	r1, r1, #1
+ 80021f6:	4640      	mov	r0, r8
+ 80021f8:	f7fe f8f4 	bl	80003e4 <__aeabi_idivmod>
+ 80021fc:	0008      	movs	r0, r1
+ 80021fe:	0021      	movs	r1, r4
+ 8002200:	f7fe f80a 	bl	8000218 <__divsi3>
+ 8002204:	b2c1      	uxtb	r1, r0
+ 8002206:	2201      	movs	r2, #1
+ 8002208:	0038      	movs	r0, r7
+ 800220a:	f7ff ff7f 	bl	800210c <max7219_PrintDigit>
 			position--;
- 800221e:	3d01      	subs	r5, #1
- 8002220:	b2ed      	uxtb	r5, r5
- 8002222:	e7e5      	b.n	80021f0 <max7219_PrintItos+0x5c>
+ 800220e:	3f01      	subs	r7, #1
+ 8002210:	b2ff      	uxtb	r7, r7
+		i /= 10;
+ 8002212:	210a      	movs	r1, #10
+ 8002214:	0020      	movs	r0, r4
+ 8002216:	f7fd ffff 	bl	8000218 <__divsi3>
+ 800221a:	0004      	movs	r4, r0
+	while (i > 0)
+ 800221c:	2c00      	cmp	r4, #0
+ 800221e:	dd12      	ble.n	8002246 <max7219_PrintItos+0xce>
+		if(position > 0)
+ 8002220:	2f00      	cmp	r7, #0
+ 8002222:	d0f6      	beq.n	8002212 <max7219_PrintItos+0x9a>
+			if(position == decimal_position) {
+ 8002224:	454f      	cmp	r7, r9
+ 8002226:	d0e3      	beq.n	80021f0 <max7219_PrintItos+0x78>
+				max7219_SendData(position, (value % (i * 10)) / i);
+ 8002228:	00a1      	lsls	r1, r4, #2
+ 800222a:	1909      	adds	r1, r1, r4
+ 800222c:	0049      	lsls	r1, r1, #1
+ 800222e:	4640      	mov	r0, r8
+ 8002230:	f7fe f8d8 	bl	80003e4 <__aeabi_idivmod>
+ 8002234:	0008      	movs	r0, r1
+ 8002236:	0021      	movs	r1, r4
+ 8002238:	f7fd ffee 	bl	8000218 <__divsi3>
+ 800223c:	b2c1      	uxtb	r1, r0
+ 800223e:	0038      	movs	r0, r7
+ 8002240:	f7ff fef6 	bl	8002030 <max7219_SendData>
+ 8002244:	e7e3      	b.n	800220e <max7219_PrintItos+0x96>
 	max7219_SendData(REG_DECODE_MODE, decodeMode);
- 8002224:	4b03      	ldr	r3, [pc, #12]	; (8002234 <max7219_PrintItos+0xa0>)
- 8002226:	7819      	ldrb	r1, [r3, #0]
- 8002228:	2009      	movs	r0, #9
- 800222a:	f7ff ff0f 	bl	800204c <max7219_SendData>
+ 8002246:	4b05      	ldr	r3, [pc, #20]	; (800225c <max7219_PrintItos+0xe4>)
+ 8002248:	7819      	ldrb	r1, [r3, #0]
+ 800224a:	2009      	movs	r0, #9
+ 800224c:	f7ff fef0 	bl	8002030 <max7219_SendData>
 }
- 800222e:	0028      	movs	r0, r5
- 8002230:	bd70      	pop	{r4, r5, r6, pc}
- 8002232:	46c0      	nop			; (mov r8, r8)
- 8002234:	20000154 	.word	0x20000154
+ 8002250:	0038      	movs	r0, r7
+ 8002252:	bcc0      	pop	{r6, r7}
+ 8002254:	46b9      	mov	r9, r7
+ 8002256:	46b0      	mov	r8, r6
+ 8002258:	bdf8      	pop	{r3, r4, r5, r6, r7, pc}
+ 800225a:	46c0      	nop			; (mov r8, r8)
+ 800225c:	20000154 	.word	0x20000154
 
-08002238 <memset>:
- 8002238:	0003      	movs	r3, r0
- 800223a:	1882      	adds	r2, r0, r2
- 800223c:	4293      	cmp	r3, r2
- 800223e:	d100      	bne.n	8002242 <memset+0xa>
- 8002240:	4770      	bx	lr
- 8002242:	7019      	strb	r1, [r3, #0]
- 8002244:	3301      	adds	r3, #1
- 8002246:	e7f9      	b.n	800223c <memset+0x4>
+08002260 <memset>:
+ 8002260:	0003      	movs	r3, r0
+ 8002262:	1882      	adds	r2, r0, r2
+ 8002264:	4293      	cmp	r3, r2
+ 8002266:	d100      	bne.n	800226a <memset+0xa>
+ 8002268:	4770      	bx	lr
+ 800226a:	7019      	strb	r1, [r3, #0]
+ 800226c:	3301      	adds	r3, #1
+ 800226e:	e7f9      	b.n	8002264 <memset+0x4>
 
-08002248 <__libc_init_array>:
- 8002248:	b570      	push	{r4, r5, r6, lr}
- 800224a:	2600      	movs	r6, #0
- 800224c:	4c0c      	ldr	r4, [pc, #48]	; (8002280 <__libc_init_array+0x38>)
- 800224e:	4d0d      	ldr	r5, [pc, #52]	; (8002284 <__libc_init_array+0x3c>)
- 8002250:	1b64      	subs	r4, r4, r5
- 8002252:	10a4      	asrs	r4, r4, #2
- 8002254:	42a6      	cmp	r6, r4
- 8002256:	d109      	bne.n	800226c <__libc_init_array+0x24>
- 8002258:	2600      	movs	r6, #0
- 800225a:	f000 f819 	bl	8002290 <_init>
- 800225e:	4c0a      	ldr	r4, [pc, #40]	; (8002288 <__libc_init_array+0x40>)
- 8002260:	4d0a      	ldr	r5, [pc, #40]	; (800228c <__libc_init_array+0x44>)
- 8002262:	1b64      	subs	r4, r4, r5
- 8002264:	10a4      	asrs	r4, r4, #2
- 8002266:	42a6      	cmp	r6, r4
- 8002268:	d105      	bne.n	8002276 <__libc_init_array+0x2e>
- 800226a:	bd70      	pop	{r4, r5, r6, pc}
- 800226c:	00b3      	lsls	r3, r6, #2
- 800226e:	58eb      	ldr	r3, [r5, r3]
- 8002270:	4798      	blx	r3
- 8002272:	3601      	adds	r6, #1
- 8002274:	e7ee      	b.n	8002254 <__libc_init_array+0xc>
- 8002276:	00b3      	lsls	r3, r6, #2
- 8002278:	58eb      	ldr	r3, [r5, r3]
- 800227a:	4798      	blx	r3
- 800227c:	3601      	adds	r6, #1
- 800227e:	e7f2      	b.n	8002266 <__libc_init_array+0x1e>
- 8002280:	08002318 	.word	0x08002318
- 8002284:	08002318 	.word	0x08002318
- 8002288:	0800231c 	.word	0x0800231c
- 800228c:	08002318 	.word	0x08002318
+08002270 <__libc_init_array>:
+ 8002270:	b570      	push	{r4, r5, r6, lr}
+ 8002272:	2600      	movs	r6, #0
+ 8002274:	4c0c      	ldr	r4, [pc, #48]	; (80022a8 <__libc_init_array+0x38>)
+ 8002276:	4d0d      	ldr	r5, [pc, #52]	; (80022ac <__libc_init_array+0x3c>)
+ 8002278:	1b64      	subs	r4, r4, r5
+ 800227a:	10a4      	asrs	r4, r4, #2
+ 800227c:	42a6      	cmp	r6, r4
+ 800227e:	d109      	bne.n	8002294 <__libc_init_array+0x24>
+ 8002280:	2600      	movs	r6, #0
+ 8002282:	f000 f819 	bl	80022b8 <_init>
+ 8002286:	4c0a      	ldr	r4, [pc, #40]	; (80022b0 <__libc_init_array+0x40>)
+ 8002288:	4d0a      	ldr	r5, [pc, #40]	; (80022b4 <__libc_init_array+0x44>)
+ 800228a:	1b64      	subs	r4, r4, r5
+ 800228c:	10a4      	asrs	r4, r4, #2
+ 800228e:	42a6      	cmp	r6, r4
+ 8002290:	d105      	bne.n	800229e <__libc_init_array+0x2e>
+ 8002292:	bd70      	pop	{r4, r5, r6, pc}
+ 8002294:	00b3      	lsls	r3, r6, #2
+ 8002296:	58eb      	ldr	r3, [r5, r3]
+ 8002298:	4798      	blx	r3
+ 800229a:	3601      	adds	r6, #1
+ 800229c:	e7ee      	b.n	800227c <__libc_init_array+0xc>
+ 800229e:	00b3      	lsls	r3, r6, #2
+ 80022a0:	58eb      	ldr	r3, [r5, r3]
+ 80022a2:	4798      	blx	r3
+ 80022a4:	3601      	adds	r6, #1
+ 80022a6:	e7f2      	b.n	800228e <__libc_init_array+0x1e>
+ 80022a8:	08002340 	.word	0x08002340
+ 80022ac:	08002340 	.word	0x08002340
+ 80022b0:	08002344 	.word	0x08002344
+ 80022b4:	08002340 	.word	0x08002340
 
-08002290 <_init>:
- 8002290:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
- 8002292:	46c0      	nop			; (mov r8, r8)
- 8002294:	bcf8      	pop	{r3, r4, r5, r6, r7}
- 8002296:	bc08      	pop	{r3}
- 8002298:	469e      	mov	lr, r3
- 800229a:	4770      	bx	lr
+080022b8 <_init>:
+ 80022b8:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 80022ba:	46c0      	nop			; (mov r8, r8)
+ 80022bc:	bcf8      	pop	{r3, r4, r5, r6, r7}
+ 80022be:	bc08      	pop	{r3}
+ 80022c0:	469e      	mov	lr, r3
+ 80022c2:	4770      	bx	lr
 
-0800229c <_fini>:
- 800229c:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
- 800229e:	46c0      	nop			; (mov r8, r8)
- 80022a0:	bcf8      	pop	{r3, r4, r5, r6, r7}
- 80022a2:	bc08      	pop	{r3}
- 80022a4:	469e      	mov	lr, r3
- 80022a6:	4770      	bx	lr
+080022c4 <_fini>:
+ 80022c4:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 80022c6:	46c0      	nop			; (mov r8, r8)
+ 80022c8:	bcf8      	pop	{r3, r4, r5, r6, r7}
+ 80022ca:	bc08      	pop	{r3}
+ 80022cc:	469e      	mov	lr, r3
+ 80022ce:	4770      	bx	lr

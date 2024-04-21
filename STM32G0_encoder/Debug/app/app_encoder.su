@@ -1,4 +1,4 @@
 ../app/app_encoder.c:32:6:app_encoder_init	8	static
 ../app/app_encoder.c:47:6:app_encoder_loop	8	static
-../app/app_encoder.c:112:6:button_isr	0	static
-../app/app_encoder.c:134:6:button_timer_isr	0	static
+../app/app_encoder.c:110:6:button_isr	0	static
+../app/app_encoder.c:132:6:button_timer_isr	0	static
