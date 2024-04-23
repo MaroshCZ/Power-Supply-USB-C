@@ -1,5 +1,5 @@
-../app/max7219.c:280:17:getSymbol	0	static
-../app/max7219.c:285:17:lcdPow10	0	static
+../app/max7219.c:287:17:getSymbol	0	static
+../app/max7219.c:292:17:lcdPow10	0	static
 ../app/max7219.c:70:6:max7219_SendData	32	static
 ../app/max7219.c:45:6:max7219_SetIntensivity	8	static
 ../app/max7219.c:55:6:max7219_Clean	16	static
@@ -10,5 +10,6 @@
 ../app/max7219.c:94:6:max7219_Decode_Off	8	static
 ../app/max7219.c:100:6:max7219_PrintDigit	8	static
 ../app/max7219.c:131:16:max7219_PrintItos	32	static
-../app/max7219.c:221:16:max7219_PrintNtos	16	static
-../app/max7219.c:246:16:max7219_PrintFtos	32	static
+../app/max7219.c:201:16:max7219_PrintNtos	16	static
+../app/max7219.c:226:16:max7219_PrintFtos	32	static
+../app/max7219.c:260:6:max7219_BlinkDigit	16	static

@@ -14,7 +14,7 @@
 int encoderVal = 0;
 int encoderValPrev = 0;
 int encoderPress = 4;
-int voltage = 0;
+int voltage = 2754;
 int voltageTemp = 0;
 int val;
 int voltageMin = 0;
@@ -100,7 +100,7 @@ void app_encoder_loop(void){
 		max7219_PrintItos(i, 0, 0);
 	}
 	*/
-
+	max7219_BlinkDigit(voltage, encoderPress);
 	encoderValPrev = encoderVal;
 }
 
@@ -115,11 +115,11 @@ void button_isr(void){
 	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
 	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
 
-	if (encoderPress > 0){
+	if (encoderPress > 1){
 		encoderPress--;
 	}
 	else {
-		encoderPress = 3;
+		encoderPress = 4;
 	}
 
 	//Erase btn (PC3) interrupt flag

@@ -69,5 +69,5 @@ void max7219_PrintDigit(MAX7219_Digits position, MAX7219_Numeric numeric, bool p
 MAX7219_Digits max7219_PrintItos(MAX7219_Digits position, int value, uint8_t decimal_position);
 MAX7219_Digits max7219_PrintNtos(MAX7219_Digits position, uint32_t value, uint8_t n);
 MAX7219_Digits max7219_PrintFtos(MAX7219_Digits position, float value, uint8_t n);
-
+void max7219_BlinkDigit(int value, uint8_t n);
 #endif /* MAX7219_H_ */
