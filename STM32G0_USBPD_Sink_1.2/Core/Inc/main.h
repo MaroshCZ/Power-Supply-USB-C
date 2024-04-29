@@ -74,6 +74,8 @@ void Error_Handler(void);
 #define USER_BUTTON_Pin GPIO_PIN_13
 #define USER_BUTTON_GPIO_Port GPIOC
 #define USER_BUTTON_EXTI_IRQn EXTI4_15_IRQn
+#define ENCODER_BUTTON_Pin GPIO_PIN_3
+#define ENCODER_BUTTON_GPIO_Port GPIOC
 #define VSENSE_Pin GPIO_PIN_1
 #define VSENSE_GPIO_Port GPIOB
 #define DB_OUT_Pin GPIO_PIN_6
