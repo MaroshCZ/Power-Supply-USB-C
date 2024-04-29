@@ -26,6 +26,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <usbpd_trace.h>
+#include <app.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
