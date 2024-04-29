@@ -659,7 +659,7 @@ USBPD_StatusTypeDef USBPD_DPM_RequestMessageRequest(uint8_t PortNum, uint8_t Ind
       }
     }
 
-  /* USER CODE END USBPD_DPM_RequestMessageRequest */
+/* USER CODE END USBPD_DPM_RequestMessageRequest */
   DPM_USER_ERROR_TRACE(PortNum, _status, "REQUEST not accepted by the stack");
   return _status;
 }
