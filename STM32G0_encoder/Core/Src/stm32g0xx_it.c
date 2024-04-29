@@ -56,6 +56,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern TIM_HandleTypeDef htim4;
 extern TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN EV */
@@ -157,6 +158,19 @@ void EXTI2_3_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles TIM3, TIM4 global Interrupt.
+  */
+void TIM3_TIM4_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM3_TIM4_IRQn 0 */
+  /* USER CODE END TIM3_TIM4_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim4);
+  /* USER CODE BEGIN TIM3_TIM4_IRQn 1 */
+
+  /* USER CODE END TIM3_TIM4_IRQn 1 */
+}
+
+/**
   * @brief This function handles TIM6, DAC and LPTIM1 global Interrupts.
   */
 void TIM6_DAC_LPTIM1_IRQHandler(void)
@@ -176,7 +190,8 @@ void TIM6_DAC_LPTIM1_IRQHandler(void)
 void TIM7_LPTIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM7_LPTIM2_IRQn 0 */
-	button_timer_isr();
+	//button_timer_isr();
+	timer_delay_isr();
   /* USER CODE END TIM7_LPTIM2_IRQn 0 */
 
   /* USER CODE BEGIN TIM7_LPTIM2_IRQn 1 */

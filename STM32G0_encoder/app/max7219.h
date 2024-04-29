@@ -10,6 +10,7 @@
 
 #include "main.h"
 #include "stdbool.h"
+#include "app_encoder.h"
 
 #define NUMBER_OF_DIGITS	8
 #define SPI_PORT			hspi1

@@ -68,6 +68,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define LED_Pin GPIO_PIN_5
+#define LED_GPIO_Port GPIOA
 #define CS_MAX7219_Pin GPIO_PIN_0
 #define CS_MAX7219_GPIO_Port GPIOB
 #define DB_OUT_Pin GPIO_PIN_6

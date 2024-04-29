@@ -1,5 +1,5 @@
-../app/max7219.c:287:17:getSymbol	0	static
-../app/max7219.c:292:17:lcdPow10	0	static
+../app/max7219.c:298:17:getSymbol	0	static
+../app/max7219.c:303:17:lcdPow10	0	static
 ../app/max7219.c:70:6:max7219_SendData	32	static
 ../app/max7219.c:45:6:max7219_SetIntensivity	8	static
 ../app/max7219.c:55:6:max7219_Clean	16	static

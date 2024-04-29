@@ -16,5 +16,8 @@ void app_encoder_init(void);
 //declaration of isr
 void button_isr(void);
 void button_timer_isr(void);
+void encoder_isr(void);
+void timer_delay(uint32_t ms);
+void timer_delay_isr(void);
 
 #endif /* APP_ENCODER_H_ */
