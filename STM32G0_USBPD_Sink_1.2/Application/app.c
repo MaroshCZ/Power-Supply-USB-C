@@ -11,8 +11,15 @@
 #include "max7219.h"
 
 //Variables declaration
-int encoderVal = 0;
-int encoderPress = 4;
+int encoderVal; //TIM2 CNT register reading
+int encoderValPrev;
+int encoderPress = 4; //currently selected digit
+int voltage = 254; //final voltage value
+int voltageTemp = 0; //temporary voltage value
+int val; //variable holding current voltage addition
+int voltageMin = 0; //voltage down limit
+int voltageMax = 2200; //voltage upper limit
+
 int g = 0;
 
 /*
@@ -44,6 +51,25 @@ void app_loop(void){
  */
 void encoder_turn_isr(void) {
 	encoderVal = (TIM2 -> CNT) >> 2;
+
+	if (encoderVal != encoderValPrev){
+
+		//Get direction of encoder turning
+		if (encoderVal > encoderValPrev) {
+			voltageTemp += val;
+		} else {
+			voltageTemp -= val;
+		}
+
+		//If required temp value within limits, assign it to voltage
+		if (voltageMin <= voltageTemp && voltageTemp <= voltageMax) {
+			voltage = voltageTemp;
+		} else {
+			voltageTemp = voltage;
+		}
+
+		encoderValPrev = encoderVal;
+	}
 }
 
 
@@ -64,6 +90,21 @@ void button_isr(void){
 	else {
 		encoderPress = 4;
 	}
+
+	switch (encoderPress) {
+				case 1:
+					val = 1;
+					break;
+				case 2:
+					val = 10;
+					break;
+				case 3:
+					val = 100;
+					break;
+				case 4:
+					val = 1000;
+					break;
+			}
 
 	//Erase btn (PC3) interrupt flag
     __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_3);
