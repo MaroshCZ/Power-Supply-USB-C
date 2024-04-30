@@ -4,4 +4,4 @@
 ../Core/Src/stm32g0xx_hal_msp.c:153:6:HAL_SPI_MspInit	2
 ../Core/Src/stm32g0xx_hal_msp.c:189:6:HAL_SPI_MspDeInit	2
 ../Core/Src/stm32g0xx_hal_msp.c:218:6:HAL_TIM_Encoder_MspInit	2
-../Core/Src/stm32g0xx_hal_msp.c:254:6:HAL_TIM_Encoder_MspDeInit	2
+../Core/Src/stm32g0xx_hal_msp.c:257:6:HAL_TIM_Encoder_MspDeInit	2

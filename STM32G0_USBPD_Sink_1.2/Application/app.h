@@ -13,6 +13,7 @@ void app_init(void);
 void app_loop(void);
 
 //declaration of isr
+void encoder_turn_isr(void);
 void button_isr(void);
 void button_timer_isr(void);
 

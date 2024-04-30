@@ -40,6 +40,14 @@ void app_loop(void){
 }
 
 /**
+ * TIM2 encoder turning interrupt service routine
+ */
+void encoder_turn_isr(void) {
+	encoderVal = (TIM2 -> CNT) >> 2;
+}
+
+
+/**
  * Button interrupt service routine
  */
 void button_isr(void){

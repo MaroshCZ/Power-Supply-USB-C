@@ -119,6 +119,7 @@ int main(void)
   MX_SPI1_Init();
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Encoder_Start_IT(&htim2, TIM_CHANNEL_ALL);
   app_init();
   /* USER CODE END 2 */
 

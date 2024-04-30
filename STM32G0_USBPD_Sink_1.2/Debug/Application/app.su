@@ -4,5 +4,6 @@
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_tim.h:4625:22:LL_TIM_EnableIT_UPDATE	16	static
 ../Application/app.c:21:6:app_init	8	static
 ../Application/app.c:34:6:app_loop	8	static
-../Application/app.c:45:6:button_isr	8	static
-../Application/app.c:67:6:button_timer_isr	8	static
+../Application/app.c:45:6:encoder_turn_isr	8	static
+../Application/app.c:54:6:button_isr	8	static
+../Application/app.c:76:6:button_timer_isr	8	static
