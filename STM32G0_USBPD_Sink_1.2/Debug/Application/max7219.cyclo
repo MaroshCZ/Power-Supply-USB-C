@@ -7,8 +7,8 @@
 ../Application/max7219.c:88:6:max7219_Decode_On	1
 ../Application/max7219.c:94:6:max7219_Decode_Off	1
 ../Application/max7219.c:100:6:max7219_PrintDigit	7
-../Application/max7219.c:131:16:max7219_PrintItos	7
-../Application/max7219.c:178:16:max7219_PrintNtos	4
-../Application/max7219.c:203:16:max7219_PrintFtos	5
-../Application/max7219.c:237:17:getSymbol	1
-../Application/max7219.c:242:17:lcdPow10	2
+../Application/max7219.c:131:16:max7219_PrintItos	9
+../Application/max7219.c:202:16:max7219_PrintNtos	4
+../Application/max7219.c:227:16:max7219_PrintFtos	5
+../Application/max7219.c:261:17:getSymbol	1
+../Application/max7219.c:266:17:lcdPow10	2

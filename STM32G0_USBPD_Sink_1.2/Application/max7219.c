@@ -128,11 +128,12 @@ void max7219_PrintDigit(MAX7219_Digits position, MAX7219_Numeric numeric, bool p
 	}
 }
 
-MAX7219_Digits max7219_PrintItos(MAX7219_Digits position, int value)
+MAX7219_Digits max7219_PrintItos(MAX7219_Digits position, int value, uint8_t decimal_position)
 {
 	max7219_SendData(REG_DECODE_MODE, 0xFF);
 
 	int32_t i;
+    int8_t num_digits = 0;
 
 	if (value < 0)
 	{
@@ -146,11 +147,15 @@ MAX7219_Digits max7219_PrintItos(MAX7219_Digits position, int value)
 
 	i = 1;
 
+	//Get number of non-zero digits
 	while ((value / i) > 9)
 	{
 		i *= 10;
+		num_digits++;
 	}
+	num_digits++;
 
+/*
 	if(position > 0)
 	{
 		max7219_SendData(position, value/i);
@@ -158,16 +163,35 @@ MAX7219_Digits max7219_PrintItos(MAX7219_Digits position, int value)
 	}
 
 	i /= 10;
+*/
 
+	//Print leading zeros and check for decimal point
+	for (int j= 4; j > num_digits; j--) {
+		if(j == decimal_position) {
+			max7219_PrintDigit(j, 0, true);
+		}
+		else {
+			max7219_SendData(j, 0);
+		}
+	}
+
+
+	//Print each number and decimal point
 	while (i > 0)
 	{
 		if(position > 0)
-		{
-			max7219_SendData(position, (value % (i * 10)) / i);
+		{	//If current number position is decimal point, print also decimal point
+			if(position == decimal_position) {
+				max7219_PrintDigit(position, (value % (i * 10)) / i, true);
+			}
+			else {
+				max7219_SendData(position, (value % (i * 10)) / i);
+			}
 			position--;
 		}
 
 		i /= 10;
+
 	}
 
 	max7219_SendData(REG_DECODE_MODE, decodeMode);
@@ -220,7 +244,7 @@ MAX7219_Digits max7219_PrintFtos(MAX7219_Digits position, float value, uint8_t n
 		value = -value;
 	}
 
-	position = max7219_PrintItos(position, (int32_t) value);
+	position = max7219_PrintItos(position, (int32_t) value, 0);
 
 	if (n > 0u)
 	{
