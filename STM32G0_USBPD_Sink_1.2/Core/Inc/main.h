@@ -31,6 +31,7 @@ extern "C" {
 
 #include "stm32g0xx_ll_lpuart.h"
 #include "stm32g0xx_ll_rcc.h"
+#include "stm32g0xx_ll_tim.h"
 #include "stm32g0xx_ll_ucpd.h"
 #include "stm32g0xx_ll_bus.h"
 #include "stm32g0xx_ll_cortex.h"
@@ -76,6 +77,7 @@ void Error_Handler(void);
 #define USER_BUTTON_EXTI_IRQn EXTI4_15_IRQn
 #define ENCODER_BUTTON_Pin GPIO_PIN_3
 #define ENCODER_BUTTON_GPIO_Port GPIOC
+#define ENCODER_BUTTON_EXTI_IRQn EXTI2_3_IRQn
 #define CS_MAX7219_Pin GPIO_PIN_0
 #define CS_MAX7219_GPIO_Port GPIOB
 #define VSENSE_Pin GPIO_PIN_1
