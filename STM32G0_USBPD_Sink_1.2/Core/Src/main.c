@@ -711,6 +711,7 @@ void StartDefaultTask(void *argument)
   for(;;)
   {
     osDelay(1);
+    app_loop();
   }
   /* USER CODE END 5 */
 }

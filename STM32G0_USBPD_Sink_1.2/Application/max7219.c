@@ -258,6 +258,39 @@ MAX7219_Digits max7219_PrintFtos(MAX7219_Digits position, float value, uint8_t n
 	return position;
 }
 
+void max7219_BlinkDigit(int value, uint8_t n, uint32_t ms) {
+	uint32_t blinkDelay = ms;   // Delay in milliseconds (adjust as needed)
+	uint16_t blinkDigit = n;     // Digit to blink (0-3)
+
+	//Print the BLANK and also decimal point for position 3
+	if (blinkDigit== 3) {
+		max7219_PrintDigit(blinkDigit, BLANK, true);
+	}
+	else {
+		max7219_PrintDigit(blinkDigit, BLANK, false);
+	}
+
+	//Delay
+	uint32_t blinkTimer = HAL_GetTick() + blinkDelay;
+	while (HAL_GetTick() < blinkTimer);
+
+
+	// Get the digit value at n position
+	uint8_t digit = (value / lcdPow10(blinkDigit-1)) % 10;
+
+	// Print the digit and also decimal point for position 3
+	if (blinkDigit== 3) {
+		max7219_PrintDigit(blinkDigit, digit, true);
+	}
+	else {
+		max7219_PrintDigit(blinkDigit, digit, false);
+	}
+
+	//Delay
+	blinkTimer = HAL_GetTick() + blinkDelay;
+	while (HAL_GetTick() < blinkTimer);
+}
+
 static uint16_t getSymbol(uint8_t number)
 {
 	return SYMBOLS[number];

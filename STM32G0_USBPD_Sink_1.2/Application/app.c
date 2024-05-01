@@ -44,7 +44,8 @@ void app_init(void){
  * Loop function
  */
 void app_loop(void){
-
+	//Blink currently selected digit
+	max7219_BlinkDigit(voltage, encoderPress, 500);
 }
 
 /**
