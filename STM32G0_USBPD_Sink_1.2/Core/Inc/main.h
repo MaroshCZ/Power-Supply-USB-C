@@ -78,10 +78,14 @@ void Error_Handler(void);
 #define ENCODER_BUTTON_Pin GPIO_PIN_3
 #define ENCODER_BUTTON_GPIO_Port GPIOC
 #define ENCODER_BUTTON_EXTI_IRQn EXTI2_3_IRQn
-#define CS_MAX7219_Pin GPIO_PIN_0
-#define CS_MAX7219_GPIO_Port GPIOB
+#define CC1_G4_Pin GPIO_PIN_0
+#define CC1_G4_GPIO_Port GPIOB
 #define VSENSE_Pin GPIO_PIN_1
 #define VSENSE_GPIO_Port GPIOB
+#define CS_MAX7219_Pin GPIO_PIN_7
+#define CS_MAX7219_GPIO_Port GPIOC
+#define CC2_G4_Pin GPIO_PIN_4
+#define CC2_G4_GPIO_Port GPIOB
 #define DB_OUT_Pin GPIO_PIN_6
 #define DB_OUT_GPIO_Port GPIOB
 #define VCC_OUT_Pin GPIO_PIN_10

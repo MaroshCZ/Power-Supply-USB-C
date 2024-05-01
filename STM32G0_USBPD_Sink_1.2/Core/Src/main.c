@@ -164,7 +164,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	app_loop();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -646,19 +645,25 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(ENCODER_BUTTON_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CS_MAX7219_Pin DB_OUT_Pin */
-  GPIO_InitStruct.Pin = CS_MAX7219_Pin|DB_OUT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  /*Configure GPIO pins : CC1_G4_Pin CC2_G4_Pin */
+  GPIO_InitStruct.Pin = CC1_G4_Pin|CC2_G4_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : VCC_OUT_Pin */
-  GPIO_InitStruct.Pin = VCC_OUT_Pin;
+  /*Configure GPIO pins : CS_MAX7219_Pin VCC_OUT_Pin */
+  GPIO_InitStruct.Pin = CS_MAX7219_Pin|VCC_OUT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(VCC_OUT_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : DB_OUT_Pin */
+  GPIO_InitStruct.Pin = DB_OUT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(DB_OUT_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI2_3_IRQn, 3, 0);
