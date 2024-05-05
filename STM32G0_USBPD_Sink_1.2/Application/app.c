@@ -14,9 +14,9 @@
 int encoderVal; //TIM2 CNT register reading
 int encoderValPrev;
 int encoderPress = 4; //currently selected digit
-int voltage = 254; //final voltage value
+int val = 1000; //variable holding current voltage addition
+int voltage = 0; //final voltage value
 int voltageTemp = 0; //temporary voltage value
-int val; //variable holding current voltage addition
 int voltageMin = 0; //voltage down limit
 int voltageMax = 2200; //voltage upper limit
 int integer_part;
@@ -45,7 +45,7 @@ void app_init(void){
  */
 void app_loop(void){
 	//Blink currently selected digit
-	max7219_BlinkDigit(voltage, encoderPress, 500);
+	max7219_BlinkDigit(&voltage, encoderPress, 500); //pass voltage address to BlinkDigit function
 }
 
 /**
