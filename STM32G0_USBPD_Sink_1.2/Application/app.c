@@ -9,6 +9,10 @@
 #include "main.h"
 #include "app.h"
 #include "max7219.h"
+#include "usbpd_def.h"
+#include "usbpd_dpm_user.h"
+
+
 
 //Variables declaration
 int encoderVal; //TIM2 CNT register reading
@@ -47,6 +51,7 @@ void app_loop(void){
 	//Blink currently selected digit
 	max7219_BlinkDigit(&voltage, encoderPress, 500); //pass voltage address to BlinkDigit function
 }
+
 
 /**
  * TIM2 encoder turning interrupt service routine
@@ -97,6 +102,9 @@ void button_isr(void){
 	//Mask unwanted button interrupts caused by debouncing on exti line 3 (PC3)
 	EXTI->IMR1 &= ~(EXTI_IMR1_IM3);
 
+	//Set debouncing time in ms
+	TIM7->ARR = 200;
+
 	//Zero TIM7 counter and start counting
 	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
 	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
@@ -112,7 +120,7 @@ void button_isr(void){
 	//Choose addition value based on encoderPress val,
 	switch (encoderPress) {
 		case 1:
-			val = 1;
+			val = 5;
 			break;
 		case 2:
 			val = 10;
@@ -133,7 +141,26 @@ void button_isr(void){
  * Timer interrupt routine
  */
 void button_timer_isr(void){
+	//Unmask exti line 2 and 3
 	EXTI->IMR1 |= EXTI_IMR1_IM3; //unmask interrupt mask register on exti line 3 (PC3)
+	EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask interrupt mask register on exti line 2 (PC2)
+
+	//Clear update flag on TIM7
 	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
 }
 
+/*
+ * Request button interrupt routine
+ */
+void request_button_isr(void){
+	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PC2)
+	EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
+
+	//Zero TIM7 counter and start counting
+	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
+	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
+
+	g += 1;
+
+	USBPD_DPM_RequestMessageRequest(0, 7, voltage*10);
+}

@@ -111,8 +111,15 @@ void HardFault_Handler(void)
 void EXTI2_3_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI2_3_IRQn 0 */
-  button_isr();
+  if (__HAL_GPIO_EXTI_GET_IT(ENCODER_BUTTON_Pin) != RESET){
+	  button_isr();
+  }
+  if (__HAL_GPIO_EXTI_GET_IT(REQUEST_BUTTON_Pin) != RESET){
+  	  request_button_isr();
+  }
+
   /* USER CODE END EXTI2_3_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(REQUEST_BUTTON_Pin);
   HAL_GPIO_EXTI_IRQHandler(ENCODER_BUTTON_Pin);
   /* USER CODE BEGIN EXTI2_3_IRQn 1 */
 

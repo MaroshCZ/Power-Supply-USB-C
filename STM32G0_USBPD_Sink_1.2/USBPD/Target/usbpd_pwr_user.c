@@ -287,7 +287,6 @@ __weak uint32_t BSP_PWR_VBUSGetVoltage(uint32_t PortId)
   uint32_t voltage = 0;
 
   (void)BSP_USBPD_PWR_VBUSGetVoltage(PortId, &voltage);
-
   return voltage;
 /* USER CODE END BSP_PWR_VBUSGetVoltage */
 }

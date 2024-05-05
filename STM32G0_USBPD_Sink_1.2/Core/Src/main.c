@@ -639,11 +639,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(USER_BUTTON_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : ENCODER_BUTTON_Pin */
-  GPIO_InitStruct.Pin = ENCODER_BUTTON_Pin;
+  /*Configure GPIO pins : REQUEST_BUTTON_Pin ENCODER_BUTTON_Pin */
+  GPIO_InitStruct.Pin = REQUEST_BUTTON_Pin|ENCODER_BUTTON_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(ENCODER_BUTTON_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pins : CC1_G4_Pin CC2_G4_Pin */
   GPIO_InitStruct.Pin = CC1_G4_Pin|CC2_G4_Pin;
@@ -685,6 +685,17 @@ static void MX_GPIO_Init(void)
 void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
 {
 	if (GPIO_Pin == USER_BUTTON_Pin) /* Will display in trace the VBUS value when user button
+is pressed */
+	{
+		//Get Voltage level into TRACE
+		char _str[10];
+		BSP_PWR_VBUSGetVoltage(0);
+		sprintf(_str,"VBUS:%lu", BSP_PWR_VBUSGetVoltage(0));
+		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+
+	}
+
+	if (GPIO_Pin == REQUEST_BUTTON_Pin) /* Will display in trace the VBUS value when user button
 is pressed */
 	{
 		//Get Voltage level into TRACE
