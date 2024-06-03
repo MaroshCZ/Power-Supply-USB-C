@@ -11,6 +11,9 @@
 #include "max7219.h"
 #include "usbpd_def.h"
 #include "usbpd_dpm_user.h"
+#include "usbpd_user_services.h"
+#include "string.h"
+#include "stdio.h"
 
 
 
@@ -19,12 +22,19 @@ int encoderVal; //TIM2 CNT register reading
 int encoderValPrev;
 int encoderPress = 4; //currently selected digit
 int val = 1000; //variable holding current voltage addition
-int voltage = 0; //final voltage value
+int voltage = 330; //final voltage value
 int voltageTemp = 0; //temporary voltage value
 int voltageMin = 0; //voltage down limit
 int voltageMax = 2200; //voltage upper limit
 int integer_part;
 int num_digits;
+int indexAPDO;
+uint8_t isMinVoltageAPDOInitialized = 0; // Flag to indicate if minvoltageAPDO has been initialized
+uint32_t maxvoltageAPDO;
+uint32_t minvoltageAPDO;
+uint32_t srcPdoIndex; //variable that holds Pdo index from FindVoltageIndex
+USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
+USBPD_StatusTypeDef powerProfiles;
 
 int g = 0;
 
@@ -42,6 +52,8 @@ void app_init(void){
 	//Init 7 segment display
 	max7219_Init( 7 );
 	max7219_Decode_On();
+
+
 }
 
 /*
@@ -133,6 +145,7 @@ void button_isr(void){
 			break;
 	}
 
+
 	//Erase btn (PC3) interrupt flag
     __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_3);
 }
@@ -162,5 +175,118 @@ void request_button_isr(void){
 
 	g += 1;
 
-	USBPD_DPM_RequestMessageRequest(0, 7, voltage*10);
+	/*
+	typedef struct
+	{
+	  uint32_t RequestedVoltageInmVunits;               //< Sink request operating voltage in mV units
+	  uint32_t MaxOperatingCurrentInmAunits;            //< Sink request Max operating current in mA units
+	  uint32_t OperatingCurrentInmAunits;               //< Sink request operating current in mA units
+	  uint32_t MaxOperatingPowerInmWunits;              //< Sink request Max operating power in mW units
+	  uint32_t OperatingPowerInmWunits;                 //< Sink request operating power in mW units
+	} USBPD_DPM_SNKPowerRequestDetailsTypeDef;
+	#endif */
+
+	sourcecapa_limits();
+	USBPD_DPM_RequestMessageRequest(0, indexAPDO, voltage*10);
+
+	//Using this function one could also request power?
+	//USER_SERV_SNK_EvaluateMatchWithSRCPDO (uint8_t PortNum, uint32_t SrcPDO,uint32_t *PtrRequestedVoltage, uint32_t *PtrRequestedPower)
+}
+
+
+#define MAX_LINE_PDO      7u
+/**
+  * @brief  src capa menu navigation
+  * @param  Nav
+  * @retval None
+  * source: demo_disco.c Display_sourcecapa_menu_nav
+  */
+static void sourcecapa_limits(void)
+{
+  uint8_t _str[30];
+  uint8_t _max = DPM_Ports[0].DPM_NumberOfRcvSRCPDO;
+  uint8_t _start, _end, _pos = 0;
+
+  /*
+  if (hmode == MODE_STANDALONE)
+  {
+	Menu_manage_selection(_max, MAX_LINE_PDO, &_start, &_end, Nav);
+  }
+  else
+  {
+	if((Nav == 1) && (_max > MAX_LINE_PDO))
+	{
+	  _start = _max - MAX_LINE_PDO;
+	  _end = _max;
+	}
+	else
+	{
+	  _start = 0;
+	  _end = MIN(_max, MAX_LINE_PDO);
+	}
+  }
+  */
+  _start = 0;
+  _end = 6;
+
+  for(int8_t index=_start; index < _max; index++)
+  {
+	switch(DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_TYPE_Msk)
+	{
+	case USBPD_PDO_TYPE_FIXED :
+	  {
+		uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_FIXED_MAX_CURRENT_Pos)*10;
+		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_VOLTAGE_Msk) >> USBPD_PDO_SRC_FIXED_VOLTAGE_Pos)*50;
+		sprintf((char*)_str, "FIXED:%2dV %2d.%dA", (int)(maxvoltage/1000), (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
+		break;
+	  }
+	case USBPD_PDO_TYPE_BATTERY :
+	  {
+		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_BATTERY_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_BATTERY_MAX_VOLTAGE_Pos) * 50;
+		uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_BATTERY_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_BATTERY_MIN_VOLTAGE_Pos) * 50;
+		uint32_t maxpower = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_BATTERY_MAX_POWER_Msk) >> USBPD_PDO_SRC_BATTERY_MAX_POWER_Pos) * 250;
+		if ((maxpower)==100000) /* 100W */
+		{
+		  sprintf((char*)_str, "B:%2d.%1d-%2d.%1dV %2dW",(int)(minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxpower/1000));
+		}
+		else
+		{
+		  sprintf((char*)_str, "B:%2d.%1d-%2d.%1dV %2d.%dW", (int)(minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxpower/1000), (int)(maxpower/100)%10);
+		}
+	  }
+	  break;
+	case USBPD_PDO_TYPE_VARIABLE :
+	  {
+		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Pos) * 50;
+		uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Pos) * 50;
+		uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Pos) * 10;
+		sprintf((char*)_str, "V:%2d.%1d-%2d.%1dV %d.%dA", (int)(minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
+	  }
+	  break;
+	case USBPD_PDO_TYPE_APDO :
+	  {
+		indexAPDO = index + 1;
+		uint32_t minvoltageAPDOtemp = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Pos) * 100;
+		uint32_t maxvoltageAPDOtemp = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Pos) * 100;
+		uint32_t maxcurrentAPDOtemp = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_APDO_MAX_CURRENT_Pos) * 50;
+		sprintf((char*)_str, "A:%2d.%1d-%2d.%1dV %d.%dA",(int) (minvoltageAPDOtemp/1000),(int)(minvoltageAPDOtemp/100)%10, (int)(maxvoltageAPDOtemp/1000),(int)(maxvoltageAPDOtemp/100)%10, (int)(maxcurrentAPDOtemp/1000), (int)((maxcurrentAPDOtemp % 1000) /100));
+
+		if (!isMinVoltageAPDOInitialized || minvoltageAPDOtemp < minvoltageAPDO) {
+			minvoltageAPDO = minvoltageAPDOtemp;
+			voltageMin = (int)minvoltageAPDOtemp/10;
+			voltage = voltageMin/10;
+			isMinVoltageAPDOInitialized = 1; // Set the flag to indicate it has been initialized
+		}
+
+		if (maxvoltageAPDOtemp > maxvoltageAPDO) {
+			maxvoltageAPDO = maxvoltageAPDOtemp;
+			voltageMax = (int)maxvoltageAPDOtemp/10;
+		}
+	  }
+	  break;
+	default :
+	  sprintf((char*)_str,"Unknown Source PDO");
+	  break;
+	}
+  }
 }

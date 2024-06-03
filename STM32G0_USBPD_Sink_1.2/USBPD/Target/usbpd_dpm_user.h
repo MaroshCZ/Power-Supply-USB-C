@@ -111,6 +111,8 @@ USBPD_StatusTypeDef USBPD_DPM_RequestCableReset(uint8_t PortNum);
 USBPD_StatusTypeDef USBPD_DPM_RequestGotoMin(uint8_t PortNum);
 USBPD_StatusTypeDef USBPD_DPM_RequestPing(uint8_t PortNum);
 USBPD_StatusTypeDef USBPD_DPM_RequestMessageRequest(uint8_t PortNum, uint8_t IndexSrcPDO, uint16_t RequestedVoltage);
+USBPD_StatusTypeDef USBPD_DPM_Request_SRC_PDO_(uint8_t PortNum, uint8_t IndexSrcPDO, uint16_t RequestedVoltage);
+void USER_DPM_SNKRDO_Builder(uint8_t PortNum, uint8_t PdoPosition, uint16_t Voltage_mV, uint16_t Current_mA, USBPD_SNKRDO_TypeDef* prdo, USBPD_CORE_PDO_Type_TypeDef* PtrPowerObject);
 USBPD_StatusTypeDef USBPD_DPM_RequestGetSourceCapability(uint8_t PortNum);
 USBPD_StatusTypeDef USBPD_DPM_RequestGetSinkCapability(uint8_t PortNum);
 USBPD_StatusTypeDef USBPD_DPM_RequestDataRoleSwap(uint8_t PortNum);
@@ -139,7 +141,7 @@ USBPD_StatusTypeDef USBPD_DPM_RequestGetBatteryCapability(uint8_t PortNum, uint8
 USBPD_StatusTypeDef USBPD_DPM_RequestGetBatteryStatus(uint8_t PortNum, uint8_t *pBatteryStatusRef);
 USBPD_StatusTypeDef USBPD_DPM_RequestSecurityRequest(uint8_t PortNum);
 /* USER CODE BEGIN Function */
-
+USBPD_StatusTypeDef DisplayVBUS(uint8_t PortNum, uint8_t * pData, uint16_t Size);
 /* USER CODE END Function */
 /**
   * @}

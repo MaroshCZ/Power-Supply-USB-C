@@ -699,9 +699,8 @@ is pressed */
 is pressed */
 	{
 		//Get Voltage level into TRACE
-		char _str[10];
-		BSP_PWR_VBUSGetVoltage(0);
-		sprintf(_str,"VBUS:%lu", BSP_PWR_VBUSGetVoltage(0));
+		char _str[40];
+		sprintf(_str,"APDO request: VBUS= 0, Ibus= 0");
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 
 	}

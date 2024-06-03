@@ -67,7 +67,7 @@ uint32_t USER_SERV_SNK_EvaluateMatchWithSRCPDO(uint8_t PortNum,
                                                       uint32_t *PtrRequestedVoltage,
                                                       uint32_t *PtrRequestedPower);
 
-static uint32_t USER_SERV_FindVoltageIndex(uint32_t PortNum,
+uint32_t USER_SERV_FindVoltageIndex(uint32_t PortNum,
                                            USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
                                            uint8_t Method);
 
@@ -218,6 +218,16 @@ void USBPD_USER_SERV_StoreSRCPDO(uint8_t PortNum, uint8_t *Ptr, uint32_t Size)
       rdo = (uint8_t *)&DPM_Ports[PortNum].DPM_ListOfRcvSRCPDO[index];
       (void)memcpy(rdo, (Ptr + (index * 4U)), (4U * sizeof(uint8_t)));
     }
+
+/*
+    // Copy PDO data in SINK pdo definition
+	for (uint32_t index = 0; index < (Size / 4U); index++)
+	{
+	  rdo = (uint8_t *)&PORT0_PDO_ListSNK[index];
+	  (void)memcpy(rdo, (Ptr + (index * 4U)), (4U * sizeof(uint8_t)));
+	}
+*/
+
   }
 }
 
@@ -496,7 +506,7 @@ uint32_t USER_SERV_SNK_EvaluateMatchWithSRCPDO(uint8_t PortNum,
   *         @arg @ref PDO_SEL_METHOD_MIN_CUR
   * @retval Index of PDO within source capabilities message (DPM_NO_SRC_PDO_FOUND indicating not found)
   */
-static uint32_t USER_SERV_FindVoltageIndex(uint32_t PortNum,
+uint32_t USER_SERV_FindVoltageIndex(uint32_t PortNum,
                                            USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
                                            uint8_t Method)
 {

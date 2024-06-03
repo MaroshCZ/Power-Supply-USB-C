@@ -37,6 +37,7 @@
 #endif /* _TRACE */
 /* USER CODE BEGIN Includes */
 #include "usbpd_user_services.h"
+#include "gui_api.h"
 /* USER CODE END Includes */
 
 /** @addtogroup STM32_USBPD_APPLICATION
@@ -266,8 +267,11 @@ void USBPD_DPM_Notification(uint8_t PortNum, USBPD_NotifyEventValue_TypeDef Even
   /* Manage event notified by the stack? */
   switch(EventVal)
   {
-//    case USBPD_NOTIFY_POWER_EXPLICIT_CONTRACT :
-//      break;
+    case USBPD_NOTIFY_POWER_EXPLICIT_CONTRACT :
+    	char _str[50];
+    	sprintf(_str,"POWER_EXPLICIT_CONTRACT notification as DPM notif");
+    	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, PortNum, 0, (uint8_t*)_str, strlen(_str));
+      break;
 //    case USBPD_NOTIFY_REQUEST_ACCEPTED:
 //      break;
 //    case USBPD_NOTIFY_REQUEST_REJECTED:
@@ -338,6 +342,22 @@ void USBPD_DPM_GetDataInfo(uint8_t PortNum, USBPD_CORE_DataInfoType_TypeDef Data
   USBPD_PWR_IF_GetPortPDOs(PortNum, DataId, Ptr, Size);
   *Size *= 4;
   break;
+
+  case USBPD_CORE_PPS_STATUS :
+	  {
+		/* Get current drawn by sink */
+		USBPD_PPSSDB_TypeDef pps_status = {0};
+
+		/* Disable VBUS & IBUS Measurements */
+		pps_status.fields.OutputVoltageIn20mVunits  = 0xFFFF;
+		pps_status.fields.OutputCurrentIn50mAunits  = 0xFF;
+		pps_status.fields.RealTimeFlags             = USBPD_PPS_REALTIMEFLAGS_PTF_NOT_SUPPORTED | USBPD_PPS_REALTIMEFLAGS_OMF_DISABLED;
+
+		*Size = 4;
+		(void)memcpy((uint8_t*)Ptr, (uint8_t *)&pps_status.d32, *Size);
+	  }
+	  break;
+
 //  case USBPD_CORE_DATATYPE_SNK_PDO:           /*!< Handling of port Sink PDO, requested by get sink capa*/
     // break;
 //  case USBPD_CORE_EXTENDED_CAPA:              /*!< Source Extended capability message content          */
@@ -622,47 +642,48 @@ USBPD_StatusTypeDef USBPD_DPM_RequestPing(uint8_t PortNum)
   */
 USBPD_StatusTypeDef USBPD_DPM_RequestMessageRequest(uint8_t PortNum, uint8_t IndexSrcPDO, uint16_t RequestedVoltage)
 {
-  USBPD_StatusTypeDef _status = USBPD_ERROR;
+    USBPD_StatusTypeDef _status = USBPD_ERROR;
 /* USER CODE BEGIN USBPD_DPM_RequestMessageRequest */
   /* To be adapted to call the PE function */
   /*       _status = USBPD_PE_Send_Request(PortNum, rdo.d32, pdo_object);*/
   //DPM_USER_DEBUG_TRACE(PortNum, "ADVICE: update USBPD_DPM_RequestMessageRequest");
   //Function declaration so one could ask for PDO with UCPD GUI
   //source: https://community.st.com/t5/stm32-mcus-other-solutions/message-rejected-for-this-port-configuration-on-the-stm32-x-cube/td-p/86358
-  uint32_t voltage, allowablepower;
-    USBPD_SNKRDO_TypeDef rdo;
-    USBPD_PDO_TypeDef  pdo;
-    USBPD_CORE_PDO_Type_TypeDef pdo_object;
-    USBPD_USER_SettingsTypeDef *puser = (USBPD_USER_SettingsTypeDef *)&DPM_USER_Settings[PortNum];
-    USBPD_DPM_SNKPowerRequestDetailsTypeDef request_details;
-    rdo.d32 = 0;
+    uint32_t voltage, allowablepower;
+	USBPD_SNKRDO_TypeDef rdo;
+	USBPD_PDO_TypeDef  pdo;
+	USBPD_CORE_PDO_Type_TypeDef pdo_object;
+	USBPD_USER_SettingsTypeDef *puser = (USBPD_USER_SettingsTypeDef *)&DPM_USER_Settings[PortNum];
+	USBPD_DPM_SNKPowerRequestDetailsTypeDef request_details;
+	rdo.d32 = 0;
 
-    /* selected SRC PDO */
-    pdo.d32 = DPM_Ports[PortNum].DPM_ListOfRcvSRCPDO[(IndexSrcPDO - 1)];
-    voltage = RequestedVoltage;
-    allowablepower = (puser->DPM_SNKRequestedPower.MaxOperatingCurrentInmAunits * RequestedVoltage) / 1000U;
+	/* selected SRC PDO */
+	pdo.d32 = DPM_Ports[PortNum].DPM_ListOfRcvSRCPDO[(IndexSrcPDO - 1)];
+	voltage = RequestedVoltage;
+	allowablepower = (puser->DPM_SNKRequestedPower.MaxOperatingCurrentInmAunits * RequestedVoltage) / 1000U;
 
-    if (USBPD_TRUE == USER_SERV_SNK_EvaluateMatchWithSRCPDO(PortNum, pdo.d32, &voltage, &allowablepower))
-    {
-      /* Check that voltage has been correctly selected */
-      if (RequestedVoltage == voltage)
-      {
-        request_details.RequestedVoltageInmVunits    = RequestedVoltage;
-        request_details.OperatingCurrentInmAunits    = (1000U * allowablepower)/RequestedVoltage;
-        request_details.MaxOperatingCurrentInmAunits = puser->DPM_SNKRequestedPower.MaxOperatingCurrentInmAunits;
-        request_details.MaxOperatingPowerInmWunits   = puser->DPM_SNKRequestedPower.MaxOperatingPowerInmWunits;
-        request_details.OperatingPowerInmWunits      = puser->DPM_SNKRequestedPower.OperatingPowerInmWunits;
+	if (USBPD_TRUE == USER_SERV_SNK_EvaluateMatchWithSRCPDO(PortNum, pdo.d32, &voltage, &allowablepower))
+	{
+	  /* Check that voltage has been correctly selected */
+	  if (RequestedVoltage == voltage)
+	  {
+		request_details.RequestedVoltageInmVunits    = RequestedVoltage;
+		request_details.OperatingCurrentInmAunits    = (1000U * allowablepower)/RequestedVoltage;
+		request_details.MaxOperatingCurrentInmAunits = puser->DPM_SNKRequestedPower.MaxOperatingCurrentInmAunits;
+		request_details.MaxOperatingPowerInmWunits   = puser->DPM_SNKRequestedPower.MaxOperatingPowerInmWunits;
+		request_details.OperatingPowerInmWunits      = puser->DPM_SNKRequestedPower.OperatingPowerInmWunits;
 
-        USER_SERV_SNK_BuildRDOfromSelectedPDO(PortNum, (IndexSrcPDO - 1), &request_details, &rdo, &pdo_object);
+		USER_SERV_SNK_BuildRDOfromSelectedPDO(PortNum, (IndexSrcPDO - 1), &request_details, &rdo, &pdo_object);
 
-        _status = USBPD_PE_Send_Request(PortNum, rdo.d32, pdo_object);
-      }
-    }
+		_status = USBPD_PE_Send_Request(PortNum, rdo.d32, pdo_object);
+	  }
+	}
 
-/* USER CODE END USBPD_DPM_RequestMessageRequest */
-  DPM_USER_ERROR_TRACE(PortNum, _status, "REQUEST not accepted by the stack");
-  return _status;
+	/* USER CODE END USBPD_DPM_RequestMessageRequest */
+	DPM_USER_ERROR_TRACE(PortNum, _status, "REQUEST not accepted by the stack");
+	return _status;
 }
+
 
 /**
   * @brief  Request the PE to send a GET_SRC_CAPA message
@@ -1039,6 +1060,22 @@ USBPD_StatusTypeDef USBPD_DPM_RequestSecurityRequest(uint8_t PortNum)
   */
 
 /* USER CODE BEGIN USBPD_USER_PRIVATE_FUNCTIONS */
+USBPD_StatusTypeDef DisplayVBUS(uint8_t PortNum, uint8_t * pData, uint16_t Size)
+{
+  if (memcmp(pData, "HELP", Size) == 0)
+  {
+	char _str[15];
+	sprintf(_str,"USE FREETEXT!");
+    USBPD_TRACE_Add(USBPD_TRACE_DEBUG, PortNum, 0, (uint8_t*)_str, strlen(_str));
+  }
+  else
+  {
+    char _str[10];
+    sprintf(_str,"VBUS:%lu", BSP_PWR_VBUSGetVoltage(PortNum));
+    USBPD_TRACE_Add(USBPD_TRACE_DEBUG, PortNum, 0, (uint8_t*)_str, strlen(_str));
+  }
+  return USBPD_OK;
+}
 
 /* USER CODE END USBPD_USER_PRIVATE_FUNCTIONS */
 

@@ -49,7 +49,7 @@ Application/app.o: ../Application/app.c ../Core/Inc/main.h \
  ../Application/app.h ../Application/max7219.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
  ../Drivers/CMSIS/Include/cmsis_compiler.h \
- ../USBPD/Target/usbpd_dpm_user.h
+ ../USBPD/Target/usbpd_dpm_user.h ../USBPD/usbpd_user_services.h
 ../Core/Inc/main.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:
 ../Core/Inc/stm32g0xx_hal_conf.h:
@@ -103,3 +103,4 @@ Application/app.o: ../Application/app.c ../Core/Inc/main.h \
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
 ../Drivers/CMSIS/Include/cmsis_compiler.h:
 ../USBPD/Target/usbpd_dpm_user.h:
+../USBPD/usbpd_user_services.h:

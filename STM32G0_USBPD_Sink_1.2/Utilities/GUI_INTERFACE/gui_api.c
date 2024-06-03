@@ -671,6 +671,7 @@ USBPD_FunctionalState GUI_Init(const uint8_t *(*CB_HWBoardVersion)(void), const 
 
   /* Register 2 callbacks for notification in DPM */
   USBPD_DPM_SetNotification_GUI(GUI_FormatAndSendNotification, GUI_PostNotificationMessage, GUI_SaveInfo);
+  GUI_RegisterCallback_FreeText(DisplayVBUS);
 
 #if !defined(USBPD_THREADX)
   _status = (USBPD_FunctionalState) GUI_InitOS(NULL);
