@@ -349,15 +349,15 @@ void USBPD_DPM_GetDataInfo(uint8_t PortNum, USBPD_CORE_DataInfoType_TypeDef Data
 		USBPD_PPSSDB_TypeDef pps_status = {0};
 
 		/* Disable VBUS & IBUS Measurements */
+		/*
 		pps_status.fields.OutputVoltageIn20mVunits  = 0xFFFF;
 		pps_status.fields.OutputCurrentIn50mAunits  = 0xFF;
-		pps_status.fields.RealTimeFlags             = USBPD_PPS_REALTIMEFLAGS_PTF_NOT_SUPPORTED | USBPD_PPS_REALTIMEFLAGS_OMF_DISABLED;
+		pps_status.fields.RealTimeFlags             = USBPD_PPS_REALTIMEFLAGS_PTF_NOT_SUPPORTED | USBPD_PPS_REALTIMEFLAGS_OMF_DISABLED;*/
 
 		*Size = 4;
 		(void)memcpy((uint8_t*)Ptr, (uint8_t *)&pps_status.d32, *Size);
 	  }
 	  break;
-
 //  case USBPD_CORE_DATATYPE_SNK_PDO:           /*!< Handling of port Sink PDO, requested by get sink capa*/
     // break;
 //  case USBPD_CORE_EXTENDED_CAPA:              /*!< Source Extended capability message content          */
@@ -399,6 +399,14 @@ void USBPD_DPM_SetDataInfo(uint8_t PortNum, USBPD_CORE_DataInfoType_TypeDef Data
     case USBPD_CORE_DATATYPE_RCV_SRC_PDO:         /*!< Storage of Received Source PDO values        */
        USBPD_USER_SERV_StoreSRCPDO(PortNum, Ptr, Size);
        break;
+
+    case USBPD_CORE_PPS_STATUS :
+	  {
+		uint8_t*  ext_capa;
+		ext_capa = (uint8_t*)&DPM_Ports[PortNum].DPM_RcvPPSStatus;
+		memcpy(ext_capa, Ptr, Size);
+	  }
+	  break;
 //  case USBPD_CORE_DATATYPE_RDO_POSITION:      /*!< Reset the PDO position selected by the sink only */
     // break;
 //  case USBPD_CORE_DATATYPE_RCV_SRC_PDO:       /*!< Storage of Received Source PDO values        */

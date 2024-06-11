@@ -29,6 +29,7 @@ int voltageMax = 2200; //voltage upper limit
 int integer_part;
 int num_digits;
 int indexAPDO;
+int indexSRCAPDO;
 uint8_t isMinVoltageAPDOInitialized = 0; // Flag to indicate if minvoltageAPDO has been initialized
 uint32_t maxvoltageAPDO;
 uint32_t minvoltageAPDO;
@@ -187,10 +188,11 @@ void request_button_isr(void){
 	#endif */
 
 	sourcecapa_limits();
-	USBPD_DPM_RequestMessageRequest(0, indexAPDO, voltage*10);
 
-	//Using this function one could also request power?
-	//USER_SERV_SNK_EvaluateMatchWithSRCPDO (uint8_t PortNum, uint32_t SrcPDO,uint32_t *PtrRequestedVoltage, uint32_t *PtrRequestedPower)
+	indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, voltage*10, 2500, PDO_SEL_METHOD_MAX_CUR);
+
+	USBPD_DPM_RequestMessageRequest(0, indexSRCAPDO, voltage*10);
+
 }
 
 

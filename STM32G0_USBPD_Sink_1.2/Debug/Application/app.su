@@ -2,10 +2,10 @@
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_tim.h:1839:22:LL_TIM_SetCounter	16	static
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_tim.h:4262:22:LL_TIM_ClearFlag_UPDATE	16	static
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_tim.h:4625:22:LL_TIM_EnableIT_UPDATE	16	static
-../Application/app.c:44:6:app_init	8	static
-../Application/app.c:62:6:app_loop	8	static
-../Application/app.c:71:6:encoder_turn_isr	8	static
-../Application/app.c:113:6:button_isr	8	static
-../Application/app.c:156:6:button_timer_isr	8	static
-../Application/app.c:168:6:request_button_isr	8	static
-../Application/app.c:204:13:sourcecapa_limits	136	static
+../Application/app.c:45:6:app_init	8	static
+../Application/app.c:63:6:app_loop	8	static
+../Application/app.c:72:6:encoder_turn_isr	8	static
+../Application/app.c:114:6:button_isr	8	static
+../Application/app.c:157:6:button_timer_isr	8	static
+../Application/app.c:169:6:request_button_isr	16	static
+../Application/app.c:206:13:sourcecapa_limits	136	static
