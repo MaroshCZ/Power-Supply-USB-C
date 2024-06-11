@@ -33,23 +33,23 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
  14 .iar_vfe_header 00000024  00000000  00000000  00034708  2**2
                   CONTENTS, READONLY
- 15 .debug_info   00033ff4  00000000  00000000  0003472c  2**0
+ 15 .debug_info   00033fb2  00000000  00000000  0003472c  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 16 .debug_abbrev 00008112  00000000  00000000  00068720  2**0
+ 16 .debug_abbrev 00008112  00000000  00000000  000686de  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 17 .debug_aranges 00002e50  00000000  00000000  00070838  2**3
+ 17 .debug_aranges 00002e50  00000000  00000000  000707f0  2**3
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 18 .debug_rnglists 00002487  00000000  00000000  00073688  2**0
+ 18 .debug_rnglists 00002487  00000000  00000000  00073640  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 19 .debug_macro  00029efe  00000000  00000000  00075b0f  2**0
+ 19 .debug_macro  00029efe  00000000  00000000  00075ac7  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 20 .debug_line   00034c1e  00000000  00000000  0009fa0d  2**0
+ 20 .debug_line   00034c6e  00000000  00000000  0009f9c5  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 21 .debug_str    000ee67d  00000000  00000000  000d462b  2**0
+ 21 .debug_str    000ee67d  00000000  00000000  000d4633  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 22 .debug_frame  0000baa4  00000000  00000000  001c2ca8  2**2
+ 22 .debug_frame  0000baa4  00000000  00000000  001c2cb0  2**2
                   CONTENTS, READONLY, DEBUGGING, OCTETS
- 23 .debug_line_str 0000006c  00000000  00000000  001ce74c  2**0
+ 23 .debug_line_str 0000006c  00000000  00000000  001ce754  2**0
                   CONTENTS, READONLY, DEBUGGING, OCTETS
 
 Disassembly of section .text:
@@ -55208,6 +55208,7 @@ void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
  8015128:	331c      	adds	r3, #28
  801512a:	681b      	ldr	r3, [r3, #0]
  801512c:	627b      	str	r3, [r7, #36]	; 0x24
+	//Get array list of SRC PDOs
 	ptpdoarray = DPM_Ports[PortNum].DPM_ListOfRcvSRCPDO;
  801512e:	68fa      	ldr	r2, [r7, #12]
  8015130:	0013      	movs	r3, r2
@@ -55243,11 +55244,11 @@ void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
  801515e:	d001      	beq.n	8015164 <USER_SERV_FindSRCIndex+0x80>
  8015160:	2b03      	cmp	r3, #3
  8015162:	d161      	bne.n	8015228 <USER_SERV_FindSRCIndex+0x144>
-		case USBPD_CORE_PDO_TYPE_APDO:
 		{
 			uint16_t srcmaxvoltage100mv;
 			uint16_t srcminvoltage100mv;
 			uint16_t srcmaxcurrent50ma;
+			//Extract voltage and current limits of given SRC APDO
 			srcmaxvoltage100mv = srcpdo.SRCSNKAPDO.MaxVoltageIn100mV;
  8015164:	2312      	movs	r3, #18
  8015166:	18fb      	adds	r3, r7, r3
@@ -55275,7 +55276,7 @@ void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
  801518e:	187b      	adds	r3, r7, r1
  8015190:	801a      	strh	r2, [r3, #0]
 
-			/*Check if reqvoltage falls within SRC_APDO range*/
+			/*Check if reqvoltage falls within SRC_APDO voltage range*/
 			if ( (PWR_DECODE_100MV(srcminvoltage100mv) <= reqvoltage) && (reqvoltage <= PWR_DECODE_100MV(srcmaxvoltage100mv)) )
  8015192:	193b      	adds	r3, r7, r4
  8015194:	881b      	ldrh	r3, [r3, #0]

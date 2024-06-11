@@ -9417,7 +9417,7 @@ Discarded input sections
  .rodata.SHIFT_TAB_OISx
                 0x0000000000000000        0x9 ./USBPD/usbpd_user_services.o
  .text.USER_SERV_SNK_BuildRequestedRDO
-                0x0000000000000000       0xa4 ./USBPD/usbpd_user_services.o
+                0x0000000000000000      0x1e0 ./USBPD/usbpd_user_services.o
  .debug_macro   0x0000000000000000      0xaae ./USBPD/usbpd_user_services.o
  .debug_macro   0x0000000000000000      0x130 ./USBPD/usbpd_user_services.o
  .debug_macro   0x0000000000000000       0x2e ./USBPD/usbpd_user_services.o
@@ -13286,7 +13286,7 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .iar_vfe_header
                 0x0000000000000020        0x4 ../Middlewares/ST/STM32_USBPD_Library/Core/lib\USBPDCORE_PD3_FULL_CM0PLUS_wc32.a(usbpd_prl.o)
 
-.debug_info     0x0000000000000000    0x33ff4
+.debug_info     0x0000000000000000    0x33fb2
  .debug_info    0x0000000000000000      0xd20 ./Application/app.o
  .debug_info    0x0000000000000d20      0xd75 ./Application/max7219.o
  .debug_info    0x0000000000001a95     0x2958 ./Core/Src/main.o
@@ -13335,12 +13335,12 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_info    0x0000000000027d8c      0x6cf ./USBPD/App/usbpd_pwr_if.o
  .debug_info    0x000000000002845b     0x2df8 ./USBPD/Target/usbpd_dpm_user.o
  .debug_info    0x000000000002b253     0x1063 ./USBPD/Target/usbpd_pwr_user.o
- .debug_info    0x000000000002c2b6     0x1a5b ./USBPD/usbpd_user_services.o
- .debug_info    0x000000000002dd11      0xef8 ./Utilities/GUI_INTERFACE/bsp_gui.o
- .debug_info    0x000000000002ec09      0x3cf ./Utilities/GUI_INTERFACE/data_struct_tlv.o
- .debug_info    0x000000000002efd8     0x33d9 ./Utilities/GUI_INTERFACE/gui_api.o
- .debug_info    0x00000000000323b1      0x6fa ./Utilities/TRACER_EMB/tracer_emb.o
- .debug_info    0x0000000000032aab     0x1549 ./Utilities/TRACER_EMB/tracer_emb_hw.o
+ .debug_info    0x000000000002c2b6     0x1a19 ./USBPD/usbpd_user_services.o
+ .debug_info    0x000000000002dccf      0xef8 ./Utilities/GUI_INTERFACE/bsp_gui.o
+ .debug_info    0x000000000002ebc7      0x3cf ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+ .debug_info    0x000000000002ef96     0x33d9 ./Utilities/GUI_INTERFACE/gui_api.o
+ .debug_info    0x000000000003236f      0x6fa ./Utilities/TRACER_EMB/tracer_emb.o
+ .debug_info    0x0000000000032a69     0x1549 ./Utilities/TRACER_EMB/tracer_emb_hw.o
 
 .debug_abbrev   0x0000000000000000     0x8112
  .debug_abbrev  0x0000000000000000      0x292 ./Application/app.o
@@ -13799,7 +13799,7 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_macro   0x0000000000029881      0x33d ./Utilities/TRACER_EMB/tracer_emb.o
  .debug_macro   0x0000000000029bbe      0x340 ./Utilities/TRACER_EMB/tracer_emb_hw.o
 
-.debug_line     0x0000000000000000    0x34c1e
+.debug_line     0x0000000000000000    0x34c6e
  .debug_line    0x0000000000000000      0xe14 ./Application/app.o
  .debug_line    0x0000000000000e14      0xbea ./Application/max7219.o
  .debug_line    0x00000000000019fe     0x14bf ./Core/Src/main.o
@@ -13848,12 +13848,12 @@ LOAD C:/ST/STM32CubeIDE_1.14.0/STM32CubeIDE/plugins/com.st.stm32cube.ide.mcu.ext
  .debug_line    0x000000000002ae79      0xd6b ./USBPD/App/usbpd_pwr_if.o
  .debug_line    0x000000000002bbe4     0x15f7 ./USBPD/Target/usbpd_dpm_user.o
  .debug_line    0x000000000002d1db     0x109b ./USBPD/Target/usbpd_pwr_user.o
- .debug_line    0x000000000002e276     0x10c3 ./USBPD/usbpd_user_services.o
- .debug_line    0x000000000002f339     0x11d6 ./Utilities/GUI_INTERFACE/bsp_gui.o
- .debug_line    0x000000000003050f      0x99e ./Utilities/GUI_INTERFACE/data_struct_tlv.o
- .debug_line    0x0000000000030ead     0x1f86 ./Utilities/GUI_INTERFACE/gui_api.o
- .debug_line    0x0000000000032e33      0xd30 ./Utilities/TRACER_EMB/tracer_emb.o
- .debug_line    0x0000000000033b63     0x10bb ./Utilities/TRACER_EMB/tracer_emb_hw.o
+ .debug_line    0x000000000002e276     0x1113 ./USBPD/usbpd_user_services.o
+ .debug_line    0x000000000002f389     0x11d6 ./Utilities/GUI_INTERFACE/bsp_gui.o
+ .debug_line    0x000000000003055f      0x99e ./Utilities/GUI_INTERFACE/data_struct_tlv.o
+ .debug_line    0x0000000000030efd     0x1f86 ./Utilities/GUI_INTERFACE/gui_api.o
+ .debug_line    0x0000000000032e83      0xd30 ./Utilities/TRACER_EMB/tracer_emb.o
+ .debug_line    0x0000000000033bb3     0x10bb ./Utilities/TRACER_EMB/tracer_emb_hw.o
 
 .debug_str      0x0000000000000000    0xee67d
  .debug_str     0x0000000000000000    0xcca10 ./Application/app.o

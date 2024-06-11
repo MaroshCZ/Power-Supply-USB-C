@@ -755,9 +755,9 @@ void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
 }
 
 /**
-  * @brief  Build user request RDO to later find the appropriate SRCPDOIndex
+  * @brief  Build user request RDO based on specified SRC PDO index and user request values
   * @param  PortNum           Port number
-  * @param  PtrRequestPowerDetails  Sink requested power details structure pointer
+  * @param  IndexSrcPDO       Index of requested SRC PDO
   * @param  Rdo               Pointer on the RDO
   * @param  Voltage_mV	      Requested voltage
   * @param  Current_mA		  Requested current
@@ -765,33 +765,70 @@ void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
   * @retval None
   */
 void USER_SERV_SNK_BuildRequestedRDO(uint8_t PortNum,
-                                                  USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
+                                                  uint16_t IndexSrcPDO,
 												  uint16_t Voltage_mV, uint16_t Current_mA,
                                                   USBPD_SNKRDO_TypeDef *Rdo,
                                                   USBPD_CORE_PDO_Type_TypeDef *PtrPowerObject)
 {
-  uint32_t mv = 0;
-  uint32_t ma = 0;
-  uint32_t size;
+  uint32_t mv = Voltage_mV;
+  uint32_t ma = Current_mA;
   USBPD_PDO_TypeDef  pdo;
   USBPD_SNKRDO_TypeDef rdo;
   USBPD_HandleTypeDef *pdhandle = &DPM_Ports[PortNum];
-  USBPD_USER_SettingsTypeDef *puser = (USBPD_USER_SettingsTypeDef *)&DPM_USER_Settings[PortNum];
-  uint32_t snkpdolist[USBPD_MAX_NB_PDO];
-  USBPD_PDO_TypeDef snk_fixed_pdo;
 
   /* Initialize RDO */
   rdo.d32 = 0;
+  rdo.GenericRDO.USBCommunicationsCapable = 0; //snk_fixed_pdo.SNKFixedPDO.USBCommunicationsCapable;
+                                               //Shall only be set for Sources capable of communication over the USB data lines
+  rdo.GenericRDO.NoUSBSuspend             = 1; //Sinks May indicate to the Source that they would prefer to have the USB Suspend Supported flag cleared by setting
+                                               //the No USB Suspend flag in a Request Message
+  rdo.GenericRDO.ObjectPosition = IndexSrcPDO;
 
-  /* Read SNK PDO list for retrieving useful data to fill in RDO */
-  USBPD_PWR_IF_GetPortPDOs(PortNum, USBPD_CORE_DATATYPE_SNK_PDO, (uint8_t *)&snkpdolist[0], &size);
+  /* Initialize PDO */
+  pdo.d32 = pdhandle->DPM_ListOfRcvSRCPDO[IndexSrcPDO-1];
+  *PtrPowerObject = pdo.GenericPDO.PowerObject;
 
-  /* Store value of 1st SNK PDO (Fixed) in local variable */
-  snk_fixed_pdo.d32 = snkpdolist[0];
+  /* Build RDO*/
+  switch (pdo.GenericPDO.PowerObject)
+    {
+      case USBPD_CORE_PDO_TYPE_FIXED:
+      {
+        DPM_Ports[PortNum].DPM_RequestedCurrent           = ma;
+        rdo.FixedVariableRDO.OperatingCurrentIn10mAunits  = ma / 10U;
+        rdo.FixedVariableRDO.MaxOperatingCurrent10mAunits = ma / 10U;
+      }
+      break;
 
-  /* Set common fields in RDO */
-  pdo.d32 = pdhandle->DPM_ListOfRcvSRCPDO[0];
-  rdo.GenericRDO.USBCommunicationsCapable     = snk_fixed_pdo.SNKFixedPDO.USBCommunicationsCapable;
+      case USBPD_CORE_PDO_TYPE_APDO:
+      {
+        DPM_Ports[PortNum].DPM_RequestedCurrent    = ma;
+        rdo.ProgRDO.ObjectPosition                 = IndexSrcPDO;
+        rdo.ProgRDO.OperatingCurrentIn50mAunits    = ma / 50U;
+        rdo.ProgRDO.OutputVoltageIn20mV            = mv / 20U;
+      }
+      break;
+
+      default:
+        break;
+    }
+ /*
+  DPM_RequestDOMsg;           !< Request Power Data Object message to be sent
+  DPM_RDOPosition;            !< RDO Position of requested DO in Source list of capabilities
+  DPM_RDOPositionPrevious;    !< RDO Position of requested DO in Source list of capabilities
+  DPM_RequestedVoltage;       !< Value of requested voltage
+  DPM_RequestedCurrent;       !< Value of requested current
+  */
+
+  /*Assign request values to pdhandle*/
+  pdhandle->DPM_RDOPositionPrevious = pdhandle->DPM_RDOPosition;
+  pdhandle->DPM_RDOPosition = IndexSrcPDO; //pdhandle->DPM_RDOPosition  = rdo.GenericRDO.ObjectPosition;
+  pdhandle->DPM_RequestedVoltage = mv;
+  pdhandle->DPM_RequestedCurrent = ma;
+
+  pdhandle->DPM_RequestDOMsg = rdo.d32;
+  Rdo->d32 = pdhandle->DPM_RequestDOMsg;
+
+
 }
 
 /**
@@ -832,6 +869,7 @@ uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
 
 	//Get number of source PDOs
 	nbsrcpdo = DPM_Ports[PortNum].DPM_NumberOfRcvSRCPDO;
+	//Get array list of SRC PDOs
 	ptpdoarray = DPM_Ports[PortNum].DPM_ListOfRcvSRCPDO;
 
 	/* Check SRC PDO value according to its type */
@@ -851,11 +889,12 @@ uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
 			uint16_t srcmaxvoltage100mv;
 			uint16_t srcminvoltage100mv;
 			uint16_t srcmaxcurrent50ma;
+			//Extract voltage and current limits of given SRC APDO
 			srcmaxvoltage100mv = srcpdo.SRCSNKAPDO.MaxVoltageIn100mV;
 			srcminvoltage100mv = srcpdo.SRCSNKAPDO.MinVoltageIn100mV;
 			srcmaxcurrent50ma = srcpdo.SRCSNKAPDO.MaxCurrentIn50mAunits;
 
-			/*Check if reqvoltage falls within SRC_APDO range*/
+			/*Check if reqvoltage falls within SRC_APDO voltage range*/
 			if ( (PWR_DECODE_100MV(srcminvoltage100mv) <= reqvoltage) && (reqvoltage <= PWR_DECODE_100MV(srcmaxvoltage100mv)) )
 			{
 				/*Check that reqcurrent is smaller or equal to srcmaxcurrent*/
