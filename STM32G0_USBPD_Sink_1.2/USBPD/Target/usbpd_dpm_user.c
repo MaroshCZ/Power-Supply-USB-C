@@ -692,6 +692,33 @@ USBPD_StatusTypeDef USBPD_DPM_RequestMessageRequest(uint8_t PortNum, uint8_t Ind
 	return _status;
 }
 
+/**
+  * @brief  Request the PE to send a request message.
+  * @param  PortNum     The current port number
+  * @param  IndexSrcPDO Index on the selected SRC PDO (value between 1 to 7)
+  * @param  RequestedVoltage Requested voltage (in MV and use mainly for APDO)
+  * @param  RequestedCurrent Requested current (in MA and use mainly for APDO)
+  * @retval USBPD Status
+  */
+USBPD_StatusTypeDef USBPD_DPM_RequestSRCPDO(uint8_t PortNum, uint8_t IndexSrcPDO, uint16_t RequestedVoltage, uint16_t RequestedCurrent)
+{
+	USBPD_StatusTypeDef _status = USBPD_ERROR;
+	USBPD_SNKRDO_TypeDef rdo;
+	USBPD_CORE_PDO_Type_TypeDef pdo_object;
+
+	/* Initialize RDO object*/
+	rdo.d32 = 0;
+
+	USER_SERV_SNK_BuildRequestedRDO(PortNum,IndexSrcPDO, RequestedVoltage, RequestedCurrent, &rdo, &pdo_object);
+
+	/*Send requested rdo to Policy Engine */
+	_status = USBPD_PE_Send_Request(PortNum, rdo.d32, pdo_object);
+
+    /* USER CODE END USBPD_DPM_RequestMessageRequest */
+	DPM_USER_ERROR_TRACE(PortNum, _status, "REQUEST not accepted by the stack");
+	return _status;
+}
+
 
 /**
   * @brief  Request the PE to send a GET_SRC_CAPA message

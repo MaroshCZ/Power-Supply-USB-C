@@ -190,8 +190,7 @@ void request_button_isr(void){
 	sourcecapa_limits();
 
 	indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, voltage*10, 2500, PDO_SEL_METHOD_MAX_CUR);
-
-	USBPD_DPM_RequestMessageRequest(0, indexSRCAPDO, voltage*10);
+	USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, voltage*10, 2500);
 
 }
 
@@ -207,7 +206,7 @@ static void sourcecapa_limits(void)
 {
   uint8_t _str[30];
   uint8_t _max = DPM_Ports[0].DPM_NumberOfRcvSRCPDO;
-  uint8_t _start, _end, _pos = 0;
+  uint8_t _start, _end = 0;
 
   /*
   if (hmode == MODE_STANDALONE)

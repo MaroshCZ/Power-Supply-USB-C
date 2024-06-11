@@ -135,6 +135,11 @@ void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
 											  USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
 											  USBPD_SNKRDO_TypeDef *Rdo,
 											  USBPD_CORE_PDO_Type_TypeDef *PtrPowerObject);
+void USER_SERV_SNK_BuildRequestedRDO(uint8_t PortNum,
+                                                  uint16_t IndexSrcPDO,
+												  uint16_t Voltage_mV, uint16_t Current_mA,
+                                                  USBPD_SNKRDO_TypeDef *Rdo,
+                                                  USBPD_CORE_PDO_Type_TypeDef *PtrPowerObject);
 uint32_t USER_SERV_FindVoltageIndex(uint32_t PortNum,
 								   USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
 								   uint8_t Method);

@@ -8,4 +8,4 @@
 ../Application/app.c:114:6:button_isr	8	static
 ../Application/app.c:157:6:button_timer_isr	8	static
 ../Application/app.c:169:6:request_button_isr	16	static
-../Application/app.c:206:13:sourcecapa_limits	136	static
+../Application/app.c:205:13:sourcecapa_limits	128	static
