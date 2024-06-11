@@ -258,7 +258,7 @@ MAX7219_Digits max7219_PrintFtos(MAX7219_Digits position, float value, uint8_t n
 	return position;
 }
 
-max7219_BlinkDigit(int *valuePtr, uint8_t n, uint32_t ms) {
+void max7219_BlinkDigit(int *valuePtr, uint8_t n, uint32_t ms) {
 	uint32_t blinkDelay = ms; // Delay in milliseconds (adjust as needed)
 	uint16_t blinkDigit = n; // Digit to blink (0-3)
 

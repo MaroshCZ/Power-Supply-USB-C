@@ -35,7 +35,7 @@
 
 /* Define   ------------------------------------------------------------------*/
 #define PORT0_NB_SOURCEPDO         0U   /* Number of Source PDOs (applicable for port 0)   */
-#define PORT0_NB_SINKPDO           7U   /* Number of Sink PDOs (applicable for port 0)     */
+#define PORT0_NB_SINKPDO           3U   /* Number of Sink PDOs (applicable for port 0)     */
 #define PORT1_NB_SOURCEPDO         0U   /* Number of Source PDOs (applicable for port 1)   */
 #define PORT1_NB_SINKPDO           0U   /* Number of Sink PDOs (applicable for port 1)     */
 
@@ -141,27 +141,13 @@ uint32_t PORT0_PDO_ListSNK[USBPD_MAX_NB_PDO] =
   /* PDO 3 */
         (0x0603C096U),
   /* PDO 4 */
-		/*
-		( (((PWR_A_50MA(USBPD_PDO_APDO_9VPROG_45W_MAX_CURRENT)) << USBPD_PDO_SNK_APDO_MAX_CURRENT_Pos) & (USBPD_PDO_SNK_APDO_MAX_CURRENT_Msk))  |
-		          (((PWR_V_100MV(USBPD_PDO_APDO_9VPROG_MIN_VOLTAGE)) << USBPD_PDO_SNK_APDO_MIN_VOLTAGE_Pos) & (USBPD_PDO_SNK_APDO_MIN_VOLTAGE_Msk)) |
-		          (((PWR_V_100MV(USBPD_PDO_APDO_9VPROG_MAX_VOLTAGE)) << USBPD_PDO_SNK_APDO_MAX_VOLTAGE_Pos) & (USBPD_PDO_SNK_APDO_MAX_VOLTAGE_Msk)) |
-		           USBPD_PDO_TYPE_APDO
-		        ),*/
-		(0x00000000U),
-
+        (0x00000000U),
   /* PDO 5 */
         (0x00000000U),
   /* PDO 6 */
         (0x00000000U),
   /* PDO 7 */
-
-		/*( (((PWR_A_50MA(USBPD_PDO_APDO_20VPROG_100W_MAX_CURRENT)) << USBPD_PDO_SNK_APDO_MAX_CURRENT_Pos) & (USBPD_PDO_SNK_APDO_MAX_CURRENT_Msk))  |
-				          (((PWR_V_100MV(USBPD_PDO_APDO_20VPROG_MIN_VOLTAGE)) << USBPD_PDO_SNK_APDO_MIN_VOLTAGE_Pos) & (USBPD_PDO_SNK_APDO_MIN_VOLTAGE_Msk)) |
-				          (((PWR_V_100MV(USBPD_PDO_APDO_20VPROG_MAX_VOLTAGE)) << USBPD_PDO_SNK_APDO_MAX_VOLTAGE_Pos) & (USBPD_PDO_SNK_APDO_MAX_VOLTAGE_Msk)) |
-				           USBPD_PDO_TYPE_APDO
-				        ),*/
-
-		(0x00000000U),
+        (0x00000000U)
 };
 
 #endif

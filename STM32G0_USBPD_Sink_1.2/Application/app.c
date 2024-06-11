@@ -133,7 +133,7 @@ void button_isr(void){
 	//Choose addition value based on encoderPress val,
 	switch (encoderPress) {
 		case 1:
-			val = 5;
+			val = 2;
 			break;
 		case 2:
 			val = 10;

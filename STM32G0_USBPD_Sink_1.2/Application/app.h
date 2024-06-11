@@ -8,6 +8,13 @@
 #ifndef APP_H_
 #define APP_H_
 
+//
+typedef enum
+{
+  CHANGE_VOLTAGE,
+  CHANGE_CURRENT
+} USBPD_USER_SERV_StateTypeDef;
+
 //declaration of functions
 void app_init(void);
 void app_loop(void);

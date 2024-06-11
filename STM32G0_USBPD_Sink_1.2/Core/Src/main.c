@@ -639,8 +639,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(USER_BUTTON_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : REQUEST_BUTTON_Pin ENCODER_BUTTON_Pin */
-  GPIO_InitStruct.Pin = REQUEST_BUTTON_Pin|ENCODER_BUTTON_Pin;
+  /*Configure GPIO pins : VOL_CUR_BUTTON_Pin REQUEST_BUTTON_Pin ENCODER_BUTTON_Pin */
+  GPIO_InitStruct.Pin = VOL_CUR_BUTTON_Pin|REQUEST_BUTTON_Pin|ENCODER_BUTTON_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -666,6 +666,9 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(DB_OUT_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
+  HAL_NVIC_SetPriority(EXTI0_1_IRQn, 3, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
+
   HAL_NVIC_SetPriority(EXTI2_3_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(EXTI2_3_IRQn);
 

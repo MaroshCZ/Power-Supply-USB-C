@@ -853,7 +853,6 @@ uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
 {
 	USBPD_PDO_TypeDef srcpdo;
 	uint32_t *ptpdoarray;
-	uint32_t voltage;
 	uint32_t reqvoltage = Voltage_mV;
 	uint32_t reqcurrent = Current_mA;
 	uint32_t nbsrcpdo;
