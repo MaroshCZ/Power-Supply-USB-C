@@ -26,6 +26,10 @@ int voltage = 330; //final voltage value
 int voltageTemp = 0; //temporary voltage value
 int voltageMin = 0; //voltage down limit
 int voltageMax = 2200; //voltage upper limit
+int current = 1423;
+int currentTemp = 0;
+int currentMin = 0;
+int currentMax = 3000;
 int integer_part;
 int num_digits;
 int indexAPDO;
@@ -38,6 +42,17 @@ USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
 USBPD_StatusTypeDef powerProfiles;
 
 int g = 0;
+
+typedef enum {
+	ADJUSTMENT_CURRENT = 0x0u, /*!< Current adjustment state */
+	ADJUSTMENT_VOLTAGE = 0x1u /*!< Voltage adjustment state */
+} AdjustmentState;
+
+// Define a typedef for the state variable
+typedef AdjustmentState Adjustment_StateTypedef;
+
+// Declare a variable to hold the current state
+volatile Adjustment_StateTypedef currentState = ADJUSTMENT_VOLTAGE;
 
 /*
  * Initialization function
@@ -54,6 +69,10 @@ void app_init(void){
 	max7219_Init( 7 );
 	max7219_Decode_On();
 
+	//Print decimal points and initial values
+	max7219_PrintItos(8, current, 8);
+	max7219_PrintItos(4, voltage, 3);
+
 
 }
 
@@ -61,8 +80,23 @@ void app_init(void){
  * Loop function
  */
 void app_loop(void){
-	//Blink currently selected digit
-	max7219_BlinkDigit(&voltage, encoderPress, 500); //pass voltage address to BlinkDigit function
+
+	//Blink digit based on specified adjustment
+	switch(currentState)
+	{
+	case(ADJUSTMENT_VOLTAGE):
+	{
+		//Blink currently selected digit
+		max7219_BlinkDigit(&voltage, encoderPress, 500); //pass voltage address to BlinkDigit function
+	}
+	 break;
+	case(ADJUSTMENT_CURRENT):
+	{
+		//Blink currently selected digit
+		max7219_BlinkDigit(&current, encoderPress+4, 500); //pass voltage address to BlinkDigit function
+	}
+	break;
+	}
 }
 
 
@@ -75,35 +109,76 @@ void encoder_turn_isr(void) {
 
 	if (encoderVal != encoderValPrev){
 
-		//Get direction of encoder turning
-		if (encoderVal > encoderValPrev) {
-			voltageTemp += val;
-		} else {
-			voltageTemp -= val;
+		switch(currentState)
+		{
+		case ADJUSTMENT_VOLTAGE:
+		{
+			//Get direction of encoder turning
+			if (encoderVal > encoderValPrev) {
+				voltageTemp += val;
+			} else {
+				voltageTemp -= val;
+			}
+
+			//If required temp value is within limits, assign it to voltage
+			if (voltageMin <= voltageTemp && voltageTemp <= voltageMax) {
+				voltage = voltageTemp;
+			} else {
+				voltageTemp = voltage;
+			}
+
+			// Get number of int numbers in voltage var
+			integer_part = (int)voltage;
+			num_digits = 0;
+
+			while (integer_part) {
+				integer_part = integer_part/10;
+				num_digits++;
+			}
+
+			//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
+			max7219_PrintItos(num_digits, voltage, 3);
+
+			//Save TIM2 CNT value to ValPrev
+			encoderValPrev = encoderVal;
 		}
+		break;
 
-		//If required temp value is within limits, assign it to voltage
-		if (voltageMin <= voltageTemp && voltageTemp <= voltageMax) {
-			voltage = voltageTemp;
-		} else {
-			voltageTemp = voltage;
+		case ADJUSTMENT_CURRENT:
+		{
+			//Get direction of encoder turning
+			if (encoderVal > encoderValPrev) {
+				currentTemp += val;
+			} else {
+				currentTemp -= val;
+			}
+
+			//If required temp value is within limits, assign it to voltage
+			if (currentMin <= currentTemp && currentTemp <= currentMax) {
+				current = currentTemp;
+			} else {
+				currentTemp = current;
+			}
+
+			// Get number of int numbers in voltage var
+			integer_part = (int)current;
+			num_digits = 0;
+
+			while (integer_part) {
+				integer_part = integer_part/10;
+				num_digits++;
+			}
+
+			//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
+			max7219_PrintItos(num_digits+4, current, 8);
+
+			//Save TIM2 CNT value to ValPrev
+			encoderValPrev = encoderVal;
+
 		}
+		break;
 
-
-		// Get number of int numbers in voltage var
-		integer_part = (int)voltage;
-		num_digits = 0;
-
-		while (integer_part) {
-			integer_part = integer_part/10;
-			num_digits++;
 		}
-
-		//Print the voltage to the display, set decimal point at position 3 (display 1 has positions 4-1)
-		max7219_PrintItos(num_digits, voltage, 3);
-
-		//Save TIM2 CNT value to ValPrev
-		encoderValPrev = encoderVal;
 	}
 }
 
@@ -130,20 +205,40 @@ void button_isr(void){
 		encoderPress = 4;
 	}
 
-	//Choose addition value based on encoderPress val,
-	switch (encoderPress) {
-		case 1:
-			val = 2;
-			break;
-		case 2:
-			val = 10;
-			break;
-		case 3:
-			val = 100;
-			break;
-		case 4:
-			val = 1000;
-			break;
+	//Choose addition value based on encoderPress val and current ADJUSTMENT_STATE (voltage/current)
+	switch (currentState){
+		case ADJUSTMENT_VOLTAGE:
+			switch (encoderPress) {
+			case 1:
+				val = 2;
+				break;
+			case 2:
+				val = 10;
+				break;
+			case 3:
+				val = 100;
+				break;
+			case 4:
+				val = 1000;
+				break;
+			}
+		 break;
+		case ADJUSTMENT_CURRENT:
+			switch (encoderPress) {
+			case 1:
+				val = 5;
+				break;
+			case 2:
+				val = 10;
+				break;
+			case 3:
+				val = 100;
+				break;
+			case 4:
+				val = 1000;
+				break;
+			}
+		 break;
 	}
 
 
@@ -155,16 +250,17 @@ void button_isr(void){
  * Timer interrupt routine
  */
 void button_timer_isr(void){
-	//Unmask exti line 2 and 3
+	//Unmask exti line 1, 2 and 3
 	EXTI->IMR1 |= EXTI_IMR1_IM3; //unmask interrupt mask register on exti line 3 (PC3)
 	EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask interrupt mask register on exti line 2 (PC2)
+	EXTI->IMR1 |= EXTI_IMR1_IM1; //unmask interrupt mask register on exti line 1 (PC1)
 
 	//Clear update flag on TIM7
 	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
 }
 
 /*
- * Request button interrupt routine
+ * Request button interrupt routine, request APDO with user voltage and current
  */
 void request_button_isr(void){
 	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PC2)
@@ -189,11 +285,36 @@ void request_button_isr(void){
 
 	sourcecapa_limits();
 
-	indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, voltage*10, 2500, PDO_SEL_METHOD_MAX_CUR);
-	USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, voltage*10, 2500);
+	indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, voltage*10, current, PDO_SEL_METHOD_MAX_CUR);
+	USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, voltage*10, current);
 
 }
 
+/*
+ * Change between current and voltage ADJUSTMENT_STATE
+ */
+void cur_vol_button_isr(void){
+	//Mask unwanted button interrupts caused by debouncing on exti line 1 (PC1)
+	EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
+
+	//Set debouncing time in ms
+	TIM7->ARR = 200;
+
+	//Zero TIM7 counter and start counting
+	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
+	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
+
+	// Toggle the state
+	if (currentState == ADJUSTMENT_CURRENT)
+	{
+		currentState = ADJUSTMENT_VOLTAGE;
+	}
+	else
+	{
+		currentState = ADJUSTMENT_CURRENT;
+	}
+	encoderPress = 3;
+}
 
 #define MAX_LINE_PDO      7u
 /**

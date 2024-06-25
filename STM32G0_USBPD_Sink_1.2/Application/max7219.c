@@ -261,11 +261,13 @@ MAX7219_Digits max7219_PrintFtos(MAX7219_Digits position, float value, uint8_t n
 void max7219_BlinkDigit(int *valuePtr, uint8_t n, uint32_t ms) {
 	uint32_t blinkDelay = ms; // Delay in milliseconds (adjust as needed)
 	uint16_t blinkDigit = n; // Digit to blink (0-3)
+	uint8_t digit;
 
-	//Print the BLANK and also decimal point for position 3
-	if (blinkDigit== 3) {
+	//Print the BLANK and also decimal point for position 3 and 8
+	if (blinkDigit == 3 || blinkDigit == 8) {
 		max7219_PrintDigit(blinkDigit, BLANK, true);
 	}
+	//Print the BLANK without decimal point
 	else {
 		max7219_PrintDigit(blinkDigit, BLANK, false);
 	}
@@ -275,12 +277,20 @@ void max7219_BlinkDigit(int *valuePtr, uint8_t n, uint32_t ms) {
 	while (HAL_GetTick() < blinkTimer);
 
 	// Get the digit value at n position
-	uint8_t digit = (*valuePtr / lcdPow10(blinkDigit-1)) % 10;
+	// For case of using the higher display 8-5, we need to lower down the lcdpow10 by 4
+	if (blinkDigit > 4) {
+		digit = (*valuePtr / lcdPow10(blinkDigit-1-4)) % 10;
+	}
+	// For case of using the lower display 4-1
+	else {
+		digit = (*valuePtr / lcdPow10(blinkDigit-1)) % 10;
+	}
 
-	// Print the digit and also decimal point for position 3
-	if (blinkDigit== 3) {
+	//Print the BLANK and also decimal point for position 3 and 8
+	if (blinkDigit == 3 || blinkDigit == 8) {
 		max7219_PrintDigit(blinkDigit, digit, true);
 	}
+	//Print the BLANK without decimal point
 	else {
 		max7219_PrintDigit(blinkDigit, digit, false);
 	}

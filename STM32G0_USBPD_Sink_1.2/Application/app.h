@@ -23,6 +23,10 @@ void app_loop(void);
 void encoder_turn_isr(void);
 void button_isr(void);
 void button_timer_isr(void);
+void cur_vol_button_isr(void);
+
 
 static void sourcecapa_limits(void);
+
+
 #endif /* APP_H_ */

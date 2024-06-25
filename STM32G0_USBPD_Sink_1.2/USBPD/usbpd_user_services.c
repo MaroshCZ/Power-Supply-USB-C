@@ -811,13 +811,6 @@ void USER_SERV_SNK_BuildRequestedRDO(uint8_t PortNum,
       default:
         break;
     }
- /*
-  DPM_RequestDOMsg;           !< Request Power Data Object message to be sent
-  DPM_RDOPosition;            !< RDO Position of requested DO in Source list of capabilities
-  DPM_RDOPositionPrevious;    !< RDO Position of requested DO in Source list of capabilities
-  DPM_RequestedVoltage;       !< Value of requested voltage
-  DPM_RequestedCurrent;       !< Value of requested current
-  */
 
   /*Assign request values to pdhandle*/
   pdhandle->DPM_RDOPositionPrevious = pdhandle->DPM_RDOPosition;
@@ -828,7 +821,6 @@ void USER_SERV_SNK_BuildRequestedRDO(uint8_t PortNum,
   pdhandle->DPM_RequestDOMsg = rdo.d32;
   Rdo->d32 = pdhandle->DPM_RequestDOMsg;
 
-
 }
 
 /**
@@ -836,10 +828,6 @@ void USER_SERV_SNK_BuildRequestedRDO(uint8_t PortNum,
   * @param  PortNum Port number
   * @param  PtrRequestPowerDetails  Sink requested power details structure pointer
   * @param  Method  Method used to find the "best" PDO. This parameter can be one of the following values:
-  *         @arg @ref PDO_SEL_METHOD_MAX_PWR
-  *         @arg @ref PDO_SEL_METHOD_MIN_PWR
-  *         @arg @ref PDO_SEL_METHOD_MAX_VOLT
-  *         @arg @ref PDO_SEL_METHOD_MIN_VOLT
   *         @arg @ref PDO_SEL_METHOD_MAX_CUR
   *         @arg @ref PDO_SEL_METHOD_MIN_CUR
   * @retval Index of PDO within source capabilities message (DPM_NO_SRC_PDO_FOUND indicating not found)
@@ -933,17 +921,6 @@ uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
 		}
 
 		}
-	}
-
-	if (curr_index != DPM_NO_SRC_PDO_FOUND)
-	{
-		// Fill the request power details
-		/*
-	    PtrRequestPowerDetails->MaxOperatingCurrentInmAunits = puser->DPM_SNKRequestedPower.MaxOperatingCurrentInmAunits;
-	    PtrRequestPowerDetails->OperatingCurrentInmAunits    = (1000U * selpower) / reqvoltage;
-	    PtrRequestPowerDetails->MaxOperatingPowerInmWunits   = puser->DPM_SNKRequestedPower.MaxOperatingPowerInmWunits;
-	    PtrRequestPowerDetails->OperatingPowerInmWunits      = selpower;
-	    PtrRequestPowerDetails->RequestedVoltageInmVunits    = reqvoltage;*/
 	}
 
 	return curr_index+1;
