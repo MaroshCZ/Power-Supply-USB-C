@@ -11,5 +11,5 @@
 ../Application/max7219.c:202:16:max7219_PrintNtos	4
 ../Application/max7219.c:227:16:max7219_PrintFtos	5
 ../Application/max7219.c:261:6:max7219_BlinkDigit	8
-../Application/max7219.c:299:17:getSymbol	1
-../Application/max7219.c:304:17:lcdPow10	2
+../Application/max7219.c:303:17:getSymbol	1
+../Application/max7219.c:308:17:lcdPow10	2

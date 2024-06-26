@@ -1,4 +1,9 @@
-USBPD/Target/usbpd_dpm_user.o: ../USBPD/Target/usbpd_dpm_user.c \
+Application/demo_app.o: ../Application/demo_app.c \
+ ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h \
+ ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
+ ../Drivers/CMSIS/Include/cmsis_compiler.h \
+ ../Drivers/CMSIS/Include/cmsis_gcc.h ../USBPD/App/usbpd_dpm_core.h \
+ ../USBPD/Target/usbpd_dpm_conf.h ../USBPD/App/usbpd_pdo_defs.h \
  ../Core/Inc/main.h ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h \
  ../Core/Inc/stm32g0xx_hal_conf.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal_rcc.h \
@@ -8,7 +13,6 @@ USBPD/Target/usbpd_dpm_user.o: ../USBPD/Target/usbpd_dpm_user.c \
  ../Drivers/CMSIS/Include/core_cm0plus.h \
  ../Drivers/CMSIS/Include/cmsis_version.h \
  ../Drivers/CMSIS/Include/cmsis_compiler.h \
- ../Drivers/CMSIS/Include/cmsis_gcc.h \
  ../Drivers/CMSIS/Include/mpu_armv7.h \
  ../Drivers/CMSIS/Device/ST/STM32G0xx/Include/system_stm32g0xx.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h \
@@ -46,15 +50,12 @@ USBPD/Target/usbpd_dpm_user.o: ../USBPD/Target/usbpd_dpm_user.c \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_gpio.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_dma.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_exti.h \
- ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
- ../Drivers/CMSIS/Include/cmsis_compiler.h \
- ../USBPD/Target/usbpd_dpm_user.h ../USBPD/App/usbpd_pdo_defs.h \
- ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
- ../USBPD/App/usbpd_dpm_core.h ../USBPD/Target/usbpd_dpm_conf.h \
- ../USBPD/Target/usbpd_vdm_user.h ../Utilities/GUI_INTERFACE/gui_api.h \
- ../Core/Inc/usbpd_gui_memmap.h ../USBPD/App/usbpd_pwr_if.h \
- ../USBPD/Target/usbpd_pwr_user.h \
+ ../USBPD/Target/usbpd_dpm_user.h ../USBPD/Target/usbpd_vdm_user.h \
+ ../Utilities/GUI_INTERFACE/gui_api.h ../Core/Inc/usbpd_gui_memmap.h \
+ ../USBPD/Target/usbpd_dpm_user.h ../USBPD/Target/usbpd_devices_conf.h \
+ ../USBPD/Target/usbpd_pwr_user.h ../USBPD/App/usbpd_pwr_if.h \
+ ../Application/demo_app.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
@@ -66,9 +67,14 @@ USBPD/Target/usbpd_dpm_user.o: ../USBPD/Target/usbpd_dpm_user.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
- ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_trace.h \
- ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h \
- ../USBPD/usbpd_user_services.h ../Application/demo_app.h
+ ../Application/max7219.h ../Application/app.h
+../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h:
+../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
+../Drivers/CMSIS/Include/cmsis_compiler.h:
+../Drivers/CMSIS/Include/cmsis_gcc.h:
+../USBPD/App/usbpd_dpm_core.h:
+../USBPD/Target/usbpd_dpm_conf.h:
+../USBPD/App/usbpd_pdo_defs.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:
 ../Core/Inc/stm32g0xx_hal_conf.h:
@@ -79,7 +85,6 @@ USBPD/Target/usbpd_dpm_user.o: ../USBPD/Target/usbpd_dpm_user.c \
 ../Drivers/CMSIS/Include/core_cm0plus.h:
 ../Drivers/CMSIS/Include/cmsis_version.h:
 ../Drivers/CMSIS/Include/cmsis_compiler.h:
-../Drivers/CMSIS/Include/cmsis_gcc.h:
 ../Drivers/CMSIS/Include/mpu_armv7.h:
 ../Drivers/CMSIS/Device/ST/STM32G0xx/Include/system_stm32g0xx.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/Legacy/stm32_hal_legacy.h:
@@ -117,19 +122,16 @@ USBPD/Target/usbpd_dpm_user.o: ../USBPD/Target/usbpd_dpm_user.c \
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_gpio.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_dma.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_exti.h:
-../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
-../Drivers/CMSIS/Include/cmsis_compiler.h:
 ../USBPD/Target/usbpd_dpm_user.h:
-../USBPD/App/usbpd_pdo_defs.h:
-../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
-../USBPD/App/usbpd_dpm_core.h:
-../USBPD/Target/usbpd_dpm_conf.h:
 ../USBPD/Target/usbpd_vdm_user.h:
 ../Utilities/GUI_INTERFACE/gui_api.h:
 ../Core/Inc/usbpd_gui_memmap.h:
-../USBPD/App/usbpd_pwr_if.h:
+../USBPD/Target/usbpd_dpm_user.h:
+../USBPD/Target/usbpd_devices_conf.h:
 ../USBPD/Target/usbpd_pwr_user.h:
+../USBPD/App/usbpd_pwr_if.h:
+../Application/demo_app.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
@@ -141,7 +143,5 @@ USBPD/Target/usbpd_dpm_user.o: ../USBPD/Target/usbpd_dpm_user.c \
 ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
-../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_trace.h:
-../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h:
-../USBPD/usbpd_user_services.h:
-../Application/demo_app.h:
+../Application/max7219.h:
+../Application/app.h:

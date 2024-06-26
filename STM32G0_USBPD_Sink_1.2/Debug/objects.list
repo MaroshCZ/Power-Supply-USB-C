@@ -1,4 +1,5 @@
 "./Application/app.o"
+"./Application/demo_app.o"
 "./Application/max7219.o"
 "./Core/Src/app_freertos.o"
 "./Core/Src/main.o"

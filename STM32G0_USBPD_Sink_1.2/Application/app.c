@@ -66,8 +66,8 @@ void app_init(void){
 	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
 
 	//Init 7 segment display
-	max7219_Init( 7 );
-	max7219_Decode_On();
+	//max7219_Init( 7 );
+	//max7219_Decode_On();
 
 	//Print decimal points and initial values
 	max7219_PrintItos(8, current, 8);

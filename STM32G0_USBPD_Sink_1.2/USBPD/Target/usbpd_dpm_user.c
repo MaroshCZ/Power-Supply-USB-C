@@ -38,6 +38,7 @@
 /* USER CODE BEGIN Includes */
 #include "usbpd_user_services.h"
 #include "gui_api.h"
+#include "demo_app.h"
 /* USER CODE END Includes */
 
 /** @addtogroup STM32_USBPD_APPLICATION
@@ -156,6 +157,8 @@ GUI_SAVE_INFO                 DPM_GUI_SaveInfo                  = NULL;
 USBPD_StatusTypeDef USBPD_DPM_UserInit(void)
 {
 /* USER CODE BEGIN USBPD_DPM_UserInit */
+  /* Demo initialisation */
+  DEMO_Init();
   return USBPD_OK;
 /* USER CODE END USBPD_DPM_UserInit */
 }
