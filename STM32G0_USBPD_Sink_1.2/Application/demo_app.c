@@ -32,6 +32,10 @@ DEMO_ErrorCode DEMO_Init(void)
   max7219_Init( 7 );
   max7219_Decode_On();
 
+  /*Print initial values*/
+  max7219_PrintItos(SEGMENT_1, 4, 3300, 3);
+  max7219_PrintItos(SEGMENT_2, 4, 0, 4);
+
  return DEMO_OK;
 }
 

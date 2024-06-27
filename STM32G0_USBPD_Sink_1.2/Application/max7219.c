@@ -33,6 +33,7 @@ static uint8_t SYMBOLS[] = {
 
 static uint16_t getSymbol(uint8_t number);
 static uint32_t lcdPow10(uint8_t n);
+static MAX7219_Digits mapPosition(MAX7219_Digits newPosition, MAX7219_Segments segment);
 
 void max7219_Init(uint8_t intensivity)
 {
@@ -97,9 +98,39 @@ void max7219_Decode_Off(void)
 	max7219_SendData(REG_DECODE_MODE, decodeMode);
 }
 
-void max7219_PrintDigit(MAX7219_Digits position, MAX7219_Numeric numeric, bool point)
+/**
+  * @brief  Function to map positions based on segment (for segment 2 map 4->8, 3->7 etc.)
+  * @param  segment: Specify which segment (1/2) should be used
+  * @param  newPosition: Starting position of printing
+  * @retval MAX7219_Digits: return new mapped Position
+  */
+
+static MAX7219_Digits mapPosition(MAX7219_Digits newPosition, MAX7219_Segments segment)
 {
-	if(position > NUMBER_OF_DIGITS)
+	if (segment == 1)
+	{
+		return newPosition;
+	}
+	else if (segment == 2)
+	{
+		return newPosition +4;
+	}
+	return 0; // In case of invalid position
+}
+
+/**
+  * @brief  Function to print a single digit value
+  * @param  segment: Specify which segment (1/2) should be used
+  * @param  position: Position of printing
+  * @param  numeric: Digit value to be displayed
+  * @param  point: Specify if decimal point should be displayed or not
+  * @retval None
+  */
+
+void max7219_PrintDigit(MAX7219_Segments segment, MAX7219_Digits position, MAX7219_Numeric numeric, bool point)
+{
+	MAX7219_Digits mappedPosition = mapPosition(position, segment);
+	if(mappedPosition > NUMBER_OF_DIGITS)
 	{
 		return;
 	}
@@ -108,27 +139,36 @@ void max7219_PrintDigit(MAX7219_Digits position, MAX7219_Numeric numeric, bool p
 	{
 		if(decodeMode == 0x00)
 		{
-			max7219_SendData(position, getSymbol(numeric) | (1 << 7));
+			max7219_SendData(mappedPosition, getSymbol(numeric) | (1 << 7));
 		}
 		else if(decodeMode == 0xFF)
 		{
-			max7219_SendData(position, numeric | (1 << 7));
+			max7219_SendData(mappedPosition, numeric | (1 << 7));
 		}
 	}
 	else
 	{
 		if(decodeMode == 0x00)
 		{
-			max7219_SendData(position, getSymbol(numeric) & (~(1 << 7)));
+			max7219_SendData(mappedPosition, getSymbol(numeric) & (~(1 << 7)));
 		}
 		else if(decodeMode == 0xFF)
 		{
-			max7219_SendData(position, numeric & (~(1 << 7)));
+			max7219_SendData(mappedPosition, numeric & (~(1 << 7)));
 		}
 	}
 }
 
-MAX7219_Digits max7219_PrintItos(MAX7219_Digits position, int value, uint8_t decimal_position)
+/**
+  * @brief  Function to display integer value with possibility to print decimal point
+  * @param  segment: Specify which segment (1/2) should be used
+  * @param  position: Starting position of printing
+  * @param  value: Numeric value to be displayed
+  * @param  decimal_position: Place of decimal point
+  * @retval MAX7219_Digits: current cursor position
+  */
+
+MAX7219_Digits max7219_PrintItos(MAX7219_Segments segment, MAX7219_Digits position, int value, uint8_t decimal_position)
 {
 	max7219_SendData(REG_DECODE_MODE, 0xFF);
 
@@ -168,10 +208,10 @@ MAX7219_Digits max7219_PrintItos(MAX7219_Digits position, int value, uint8_t dec
 	//Print leading zeros and check for decimal point
 	for (int j= 4; j > num_digits; j--) {
 		if(j == decimal_position) {
-			max7219_PrintDigit(j, 0, true);
+			max7219_PrintDigit(segment, j, 0, true);
 		}
 		else {
-			max7219_SendData(j, 0);
+			max7219_PrintDigit(segment, j, 0, false);
 		}
 	}
 
@@ -182,10 +222,10 @@ MAX7219_Digits max7219_PrintItos(MAX7219_Digits position, int value, uint8_t dec
 		if(position > 0)
 		{	//If current number position is decimal point, print also decimal point
 			if(position == decimal_position) {
-				max7219_PrintDigit(position, (value % (i * 10)) / i, true);
+				max7219_PrintDigit(segment, position, (value % (i * 10)) / i, true);
 			}
 			else {
-				max7219_SendData(position, (value % (i * 10)) / i);
+				max7219_PrintDigit(segment, position, (value % (i * 10)) / i, false);
 			}
 			position--;
 		}
@@ -198,8 +238,16 @@ MAX7219_Digits max7219_PrintItos(MAX7219_Digits position, int value, uint8_t dec
 
 	return position;
 }
+/**
+  * @brief  Function to print number of INT type with a fixed number of digits
+  * @param  segment: Specify which segment (1/2) should be used
+  * @param  position: Starting position of printing (4-1)
+  * @param  value: Number to be printed
+  * @param  n: Number of digits to be printed
+  * @retval MAX7219_Digits: current cursor position
+  */
 
-MAX7219_Digits max7219_PrintNtos(MAX7219_Digits position, uint32_t value, uint8_t n)
+MAX7219_Digits max7219_PrintNtos(MAX7219_Segments segment, MAX7219_Digits position, uint32_t value, uint8_t n)
 {
 	max7219_SendData(REG_DECODE_MODE, 0xFF);
 
@@ -211,7 +259,7 @@ MAX7219_Digits max7219_PrintNtos(MAX7219_Digits position, uint32_t value, uint8_
 		{
 			if(position > 0u)
 			{
-				max7219_SendData(position, (value / i) % 10u);
+				max7219_PrintDigit(segment, position, (value / i) % 10u, false);
 				position--;
 			}
 
@@ -224,7 +272,15 @@ MAX7219_Digits max7219_PrintNtos(MAX7219_Digits position, uint32_t value, uint8_
 	return position;
 }
 
-MAX7219_Digits max7219_PrintFtos(MAX7219_Digits position, float value, uint8_t n)
+/**
+  * @brief  Function to print floating point numbers
+  * @param  segment: Specify which segment (1/2) should be used
+  * @param  position: Starting position of printing (4-1)
+  * @param  value: Float numerical value to be displayed
+  * @param  n: Number of characters after comma
+  */
+
+MAX7219_Digits max7219_PrintFtos(MAX7219_Segments segment, MAX7219_Digits position, float value, uint8_t n)
 {
 	if(n > 4)
 	{
@@ -237,62 +293,64 @@ MAX7219_Digits max7219_PrintFtos(MAX7219_Digits position, float value, uint8_t n
 	{
 		if(position > 0)
 		{
-			max7219_SendData(position, MINUS);
+			max7219_PrintDigit(segment, position, MINUS, false);
 			position--;
 		}
 
 		value = -value;
 	}
 
-	position = max7219_PrintItos(position, (int32_t) value, 0);
+	position = max7219_PrintItos(segment, position, (int32_t) value, 0);
 
 	if (n > 0u)
 	{
-		max7219_PrintDigit(position + 1, ((int32_t) value) % 10, true);
+		max7219_PrintDigit(segment, position + 1, ((int32_t) value) % 10, true);
 
-		position = max7219_PrintNtos(position, (uint32_t) (value * (float) lcdPow10(n)), n);
+		position = max7219_PrintNtos(segment, position, (uint32_t) (value * (float) lcdPow10(n)), n);
 	}
 
 	max7219_SendData(REG_DECODE_MODE, decodeMode);
 
 	return position;
 }
+/**
+  * @brief  Function to blink a digit on specific position
+  * @param  segment: Specify which segment (1/2) should be used
+  * @param  valuePtr: Address of the value
+  * @param  n: Digit which should be blinked
+  * @param  ms: Blink delay in milliseconds
+  * @param  decimal_position: place of decimal point
+  * @retval None
+  */
 
-void max7219_BlinkDigit(int *valuePtr, uint8_t n, uint32_t ms) {
+void max7219_BlinkDigit(MAX7219_Segments segment, int *valuePtr, uint8_t n, uint32_t ms, uint8_t decimal_position) {
 	uint32_t blinkDelay = ms; // Delay in milliseconds (adjust as needed)
 	uint16_t blinkDigit = n; // Digit to blink (0-3)
 	uint8_t digit;
 
-	//Print the BLANK and also decimal point for position 3 and 8
-	if (blinkDigit == 3 || blinkDigit == 8) {
-		max7219_PrintDigit(blinkDigit, BLANK, true);
+	//Print the BLANK and also decimal point
+	if (blinkDigit == decimal_position) {
+		max7219_PrintDigit(segment, blinkDigit, BLANK, true);
 	}
 	//Print the BLANK without decimal point
 	else {
-		max7219_PrintDigit(blinkDigit, BLANK, false);
+		max7219_PrintDigit(segment, blinkDigit, BLANK, false);
 	}
 
 	//Delay
 	uint32_t blinkTimer = HAL_GetTick() + blinkDelay;
 	while (HAL_GetTick() < blinkTimer);
 
-	// Get the digit value at n position
-	// For case of using the higher display 8-5, we need to lower down the lcdpow10 by 4
-	if (blinkDigit > 4) {
-		digit = (*valuePtr / lcdPow10(blinkDigit-1-4)) % 10;
-	}
-	// For case of using the lower display 4-1
-	else {
-		digit = (*valuePtr / lcdPow10(blinkDigit-1)) % 10;
-	}
+	// Get the specific digit value at n position
+    digit = (*valuePtr / lcdPow10(blinkDigit-1)) % 10;
 
-	//Print the BLANK and also decimal point for position 3 and 8
-	if (blinkDigit == 3 || blinkDigit == 8) {
-		max7219_PrintDigit(blinkDigit, digit, true);
+	//Print back the original digit and also decimal point
+	if (blinkDigit == decimal_position) {
+		max7219_PrintDigit(segment, blinkDigit, digit, true);
 	}
-	//Print the BLANK without decimal point
+	//Print back the original digit without a decimal point
 	else {
-		max7219_PrintDigit(blinkDigit, digit, false);
+		max7219_PrintDigit(segment, blinkDigit, digit, false);
 	}
 
 	//Delay

@@ -26,7 +26,7 @@ int voltage = 330; //final voltage value
 int voltageTemp = 0; //temporary voltage value
 int voltageMin = 0; //voltage down limit
 int voltageMax = 2200; //voltage upper limit
-int current = 1423;
+int current = 0;
 int currentTemp = 0;
 int currentMin = 0;
 int currentMax = 3000;
@@ -70,8 +70,8 @@ void app_init(void){
 	//max7219_Decode_On();
 
 	//Print decimal points and initial values
-	max7219_PrintItos(8, current, 8);
-	max7219_PrintItos(4, voltage, 3);
+	//max7219_PrintItos(SEGMENT_2, 4, current, 4);
+	//max7219_PrintItos(SEGMENT_1, 4, voltage, 3);
 
 
 }
@@ -87,13 +87,13 @@ void app_loop(void){
 	case(ADJUSTMENT_VOLTAGE):
 	{
 		//Blink currently selected digit
-		max7219_BlinkDigit(&voltage, encoderPress, 500); //pass voltage address to BlinkDigit function
+		max7219_BlinkDigit(SEGMENT_1, &voltage, encoderPress, 500, 3); //pass voltage address to BlinkDigit function
 	}
 	 break;
 	case(ADJUSTMENT_CURRENT):
 	{
 		//Blink currently selected digit
-		max7219_BlinkDigit(&current, encoderPress+4, 500); //pass voltage address to BlinkDigit function
+		max7219_BlinkDigit(SEGMENT_2, &current, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
 	}
 	break;
 	}
@@ -137,7 +137,7 @@ void encoder_turn_isr(void) {
 			}
 
 			//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
-			max7219_PrintItos(num_digits, voltage, 3);
+			max7219_PrintItos(SEGMENT_1, num_digits, voltage, 3);
 
 			//Save TIM2 CNT value to ValPrev
 			encoderValPrev = encoderVal;
@@ -170,7 +170,7 @@ void encoder_turn_isr(void) {
 			}
 
 			//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
-			max7219_PrintItos(num_digits+4, current, 8);
+			max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
 
 			//Save TIM2 CNT value to ValPrev
 			encoderValPrev = encoderVal;
