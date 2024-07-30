@@ -159,6 +159,15 @@ USBPD_StatusTypeDef USBPD_DPM_UserInit(void)
 /* USER CODE BEGIN USBPD_DPM_UserInit */
   /* Demo initialisation */
   DEMO_Init();
+
+  /* PWR SET UP */
+  /*
+  if(USBPD_OK !=  USBPD_PWR_IF_Init())
+  {
+	return USBPD_ERROR;
+  }*/
+
+
   return USBPD_OK;
 /* USER CODE END USBPD_DPM_UserInit */
 }

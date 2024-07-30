@@ -24,9 +24,19 @@ void encoder_turn_isr(void);
 void button_isr(void);
 void button_timer_isr(void);
 void cur_vol_button_isr(void);
-
+void request_button_isr(void);
 
 static void sourcecapa_limits(void);
+
+#define ADC_NUM_OF_SAMPLES 2
+extern ADC_HandleTypeDef hadc1;
+
+/* Variable containing ADC conversions results
+   aADCxConvertedValues[0u]: VSENSE
+   aADCxConvertedValues[1u]: ISENSE
+*/
+extern __IO uint16_t aADCxConvertedValues[ADC_NUM_OF_SAMPLES];
+//__IO: Indicates that this variable can change at any time, usually due to hardware activity.
 
 
 #endif /* APP_H_ */

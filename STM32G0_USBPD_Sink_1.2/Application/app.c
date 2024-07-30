@@ -15,8 +15,6 @@
 #include "string.h"
 #include "stdio.h"
 
-
-
 //Variables declaration
 int encoderVal; //TIM2 CNT register reading
 int encoderValPrev;
@@ -40,6 +38,8 @@ uint32_t minvoltageAPDO;
 uint32_t srcPdoIndex; //variable that holds Pdo index from FindVoltageIndex
 USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
 USBPD_StatusTypeDef powerProfiles;
+
+__IO uint16_t aADCxConvertedValues[ADC_NUM_OF_SAMPLES] = {0};
 
 int g = 0;
 
@@ -65,6 +65,10 @@ void app_init(void){
 	LL_TIM_EnableIT_UPDATE(TIM7); //Enable interrupt generation when timer goes to max value and UPDATE event flag is set
 	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
 
+	//Calibrate and start ADC sensing with DMA
+	HAL_ADCEx_Calibration_Start(&hadc1);
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&aADCxConvertedValues, ADC_NUM_OF_SAMPLES);
+
 	//Init 7 segment display
 	//max7219_Init( 7 );
 	//max7219_Decode_On();
@@ -75,6 +79,27 @@ void app_init(void){
 
 
 }
+
+
+
+/**
+ * @brief  Start I/V sense on both Type-C ports.
+ * @retval 0 success else fail
+ */
+/*
+static uint8_t PWR_StartVBusSensing(void)
+{
+  uint8_t ret = 0u;
+
+  //Start ADCx conversions
+  if (HAL_ADC_Start_DMA(&hadc1, (uint32_t *)aADCxConvertedValues, 2u) != HAL_OK)
+  {
+    ret++;
+  }
+
+  return ret;
+}
+*/
 
 /*
  * Loop function
@@ -187,6 +212,10 @@ void encoder_turn_isr(void) {
  * Button interrupt service routine
  */
 void button_isr(void){
+	/*
+	const char response[] = "POWER is ON\r\n";
+	        LPUART_Transmit(LPUART1, (const uint8_t*)response, sizeof(response) - 1);*/
+
 	//Mask unwanted button interrupts caused by debouncing on exti line 3 (PC3)
 	EXTI->IMR1 &= ~(EXTI_IMR1_IM3);
 
@@ -412,3 +441,4 @@ static void sourcecapa_limits(void)
 	}
   }
 }
+

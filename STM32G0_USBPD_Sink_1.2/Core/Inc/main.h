@@ -88,6 +88,8 @@ void Error_Handler(void);
 #define CC1_G4_GPIO_Port GPIOB
 #define VSENSE_Pin GPIO_PIN_1
 #define VSENSE_GPIO_Port GPIOB
+#define ISENSE_Pin GPIO_PIN_2
+#define ISENSE_GPIO_Port GPIOB
 #define CS_MAX7219_Pin GPIO_PIN_7
 #define CS_MAX7219_GPIO_Port GPIOC
 #define CC2_G4_Pin GPIO_PIN_4
