@@ -52,7 +52,9 @@ typedef enum {
 	ADJUSTMENT_VOLTAGE = 0x1u /*!< Voltage adjustment state */
 } AdjustmentState;
 
+//USB communication
 uint8_t *data = "Hello World from USB CDC\n";
+uint8_t usb_buffer[64];
 
 // Define a typedef for the state variable
 typedef AdjustmentState Adjustment_StateTypedef;
@@ -496,25 +498,26 @@ void LPUART_Transmit(USART_TypeDef *LPUARTx, const uint8_t *pData, uint16_t Size
     // Wait until TC flag is set (Transmission complete)
     while (!LL_LPUART_IsActiveFlag_TC(LPUARTx));
 }
+*/
 
-void processCommand(uint8_t* command, uint32_t length)
+void processUSBCommand(uint8_t* command, uint32_t length)
 {
     if (strncmp((char*)command, "POWERON", length) == 0)
     {
         const char* response = "POWER is ON\r\n";
-        LPUART_Transmit(LPUART2, (const uint8_t*)response, strlen(response));
+        CDC_Transmit_FS((uint8_t*)response, strlen(response));
     }
     else if (strncmp((char*)command, "POWEROFF", length) == 0)
     {
         const char* response = "POWER is OFF\r\n";
-        LPUART_Transmit(LPUART2, (const uint8_t*)response, strlen(response));
+        CDC_Transmit_FS((uint8_t*)response, strlen(response));
     }
     else
     {
         const char* response = "Unknown command\r\n";
-        LPUART_Transmit(LPUART2, (const uint8_t*)response, strlen(response));
+        CDC_Transmit_FS((uint8_t*)response, strlen(response));
     }
-}*/
+}
 
 
 
