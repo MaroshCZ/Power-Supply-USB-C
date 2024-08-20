@@ -58,6 +58,7 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern PCD_HandleTypeDef hpcd_USB_DRD_FS;
 extern DMA_HandleTypeDef hdma_adc1;
 extern TIM_HandleTypeDef htim2;
 extern TIM_HandleTypeDef htim6;
@@ -165,6 +166,7 @@ void USB_UCPD1_2_IRQHandler(void)
   /* USER CODE BEGIN USB_UCPD1_2_IRQn 0 */
 
   /* USER CODE END USB_UCPD1_2_IRQn 0 */
+  HAL_PCD_IRQHandler(&hpcd_USB_DRD_FS);
   USBPD_PORT0_IRQHandler();
 
   /* USER CODE BEGIN USB_UCPD1_2_IRQn 1 */

@@ -38,5 +38,7 @@ extern ADC_HandleTypeDef hadc1;
 extern __IO uint16_t aADCxConvertedValues[ADC_NUM_OF_SAMPLES];
 //__IO: Indicates that this variable can change at any time, usually due to hardware activity.
 
+void usart2_lupart2_handler(void);
+
 
 #endif /* APP_H_ */

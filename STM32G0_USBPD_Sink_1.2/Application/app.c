@@ -15,6 +15,10 @@
 #include "string.h"
 #include "stdio.h"
 
+#include "usb_device.h"
+#include "usbd_cdc_if.h"
+
+
 //Variables declaration
 int encoderVal; //TIM2 CNT register reading
 int encoderValPrev;
@@ -48,11 +52,19 @@ typedef enum {
 	ADJUSTMENT_VOLTAGE = 0x1u /*!< Voltage adjustment state */
 } AdjustmentState;
 
+uint8_t *data = "Hello World from USB CDC\n";
+
 // Define a typedef for the state variable
 typedef AdjustmentState Adjustment_StateTypedef;
 
 // Declare a variable to hold the current state
 volatile Adjustment_StateTypedef currentState = ADJUSTMENT_VOLTAGE;
+
+/*Add variables for LUPART2*/
+#define RX_BUFFER_SIZE 64
+static uint8_t rxBuffer[RX_BUFFER_SIZE];
+static uint32_t rxIndex = 0;
+
 
 /*
  * Initialization function
@@ -122,6 +134,8 @@ void app_loop(void){
 	}
 	break;
 	}
+
+	CDC_Transmit_FS(data, strlen(data));
 }
 
 
@@ -214,7 +228,7 @@ void encoder_turn_isr(void) {
 void button_isr(void){
 	/*
 	const char response[] = "POWER is ON\r\n";
-	        LPUART_Transmit(LPUART1, (const uint8_t*)response, sizeof(response) - 1);*/
+	        LPUART_Transmit(LPUART2, (const uint8_t*)response, sizeof(response) - 1);*/
 
 	//Mask unwanted button interrupts caused by debouncing on exti line 3 (PC3)
 	EXTI->IMR1 &= ~(EXTI_IMR1_IM3);
@@ -441,4 +455,66 @@ static void sourcecapa_limits(void)
 	}
   }
 }
+
+/*
+void usart2_lupart2_handler(void)
+{
+    if (LL_LPUART_IsActiveFlag_RXNE_RXFNE(LPUART2) && LL_LPUART_IsEnabledIT_RXNE_RXFNE(LPUART2))
+    {
+        uint8_t received_char = LL_LPUART_ReceiveData8(LPUART2);
+        if (rxIndex < RX_BUFFER_SIZE-1)
+        {
+            rxBuffer[rxIndex++] = received_char;
+            if (rxIndex >= 2 && rxBuffer[rxIndex-2] == '\r' && rxBuffer[rxIndex-1] == '\n')
+            {
+            	// Check for CRLF ending
+				rxBuffer[rxIndex-2] = '\0';  // Null-terminate the string, removing CRLF
+
+				// Print received command for debugging
+				LPUART_Transmit(LPUART2, (const uint8_t*)"Received: ", 10);
+				LPUART_Transmit(LPUART2, rxBuffer, rxIndex-2);
+				LPUART_Transmit(LPUART2, (const uint8_t*)"\r\n", 2);
+
+                processCommand(rxBuffer, rxIndex);
+                rxIndex = 0;
+            }
+        }
+    }
+}
+
+void LPUART_Transmit(USART_TypeDef *LPUARTx, const uint8_t *pData, uint16_t Size)
+{
+    for (uint16_t i = 0; i < Size; i++)
+    {
+        // Wait until TXE flag is set (Transmit data register empty)
+        while (!LL_LPUART_IsActiveFlag_TXE(LPUARTx));
+
+        // Transmit 8-bit data
+        LL_LPUART_TransmitData8(LPUARTx, pData[i]);
+    }
+
+    // Wait until TC flag is set (Transmission complete)
+    while (!LL_LPUART_IsActiveFlag_TC(LPUARTx));
+}
+
+void processCommand(uint8_t* command, uint32_t length)
+{
+    if (strncmp((char*)command, "POWERON", length) == 0)
+    {
+        const char* response = "POWER is ON\r\n";
+        LPUART_Transmit(LPUART2, (const uint8_t*)response, strlen(response));
+    }
+    else if (strncmp((char*)command, "POWEROFF", length) == 0)
+    {
+        const char* response = "POWER is OFF\r\n";
+        LPUART_Transmit(LPUART2, (const uint8_t*)response, strlen(response));
+    }
+    else
+    {
+        const char* response = "Unknown command\r\n";
+        LPUART_Transmit(LPUART2, (const uint8_t*)response, strlen(response));
+    }
+}*/
+
+
 
