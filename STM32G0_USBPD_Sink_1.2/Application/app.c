@@ -181,7 +181,7 @@ void encoder_turn_isr(void) {
 			max7219_PrintItos(SEGMENT_1, num_digits, voltage, 3);
 
 			//Print to debug
-			char _str[20];
+			char _str[30];
 			sprintf(_str,"VBUS selected: %lu mV", voltage*10);
 			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 
@@ -219,7 +219,7 @@ void encoder_turn_isr(void) {
 			max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
 
 			//Print to debug
-			char _str[20];
+			char _str[30];
 			sprintf(_str,"IBUS selected: %lu mA", current);
 			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 
@@ -342,7 +342,7 @@ void request_button_isr(void){
 
 	indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, voltage*10, current, PDO_SEL_METHOD_MAX_CUR);
 	//Print to debug
-	char _str[40];
+	char _str[70];
 	sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, voltage*10, current);
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 	USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, voltage*10, current);
