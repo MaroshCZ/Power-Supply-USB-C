@@ -4,10 +4,10 @@
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_tim.h:4625:22:LL_TIM_EnableIT_UPDATE	16	static
 ../Application/app.c:74:6:app_init	8	static
 ../Application/app.c:121:6:app_loop	24	static
-../Application/app.c:147:6:encoder_turn_isr	8	static
-../Application/app.c:230:6:button_isr	8	static
-../Application/app.c:297:6:button_timer_isr	8	static
-../Application/app.c:310:6:request_button_isr	16	static
-../Application/app.c:341:6:cur_vol_button_isr	8	static
-../Application/app.c:371:13:sourcecapa_limits	128	static
-../Application/app.c:503:6:processUSBCommand	32	static
+../Application/app.c:147:6:encoder_turn_isr	64	static
+../Application/app.c:240:6:button_isr	8	static
+../Application/app.c:307:6:button_timer_isr	8	static
+../Application/app.c:320:6:request_button_isr	64	static
+../Application/app.c:355:6:cur_vol_button_isr	8	static
+../Application/app.c:385:13:sourcecapa_limits	128	static
+../Application/app.c:517:6:processUSBCommand	32	static

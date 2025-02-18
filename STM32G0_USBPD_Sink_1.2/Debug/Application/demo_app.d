@@ -70,7 +70,9 @@ Application/demo_app.o: ../Application/demo_app.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
- ../Application/max7219.h ../Application/app.h
+ ../Application/max7219.h ../Application/app.h \
+ ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_trace.h \
+ ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
 ../Drivers/CMSIS/Include/cmsis_compiler.h:
@@ -151,3 +153,5 @@ Application/demo_app.o: ../Application/demo_app.c \
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
 ../Application/max7219.h:
 ../Application/app.h:
+../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_trace.h:
+../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h:

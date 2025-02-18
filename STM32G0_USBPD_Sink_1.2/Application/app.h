@@ -8,6 +8,8 @@
 #ifndef APP_H_
 #define APP_H_
 
+#include <usbpd_trace.h>
+
 //
 typedef enum
 {

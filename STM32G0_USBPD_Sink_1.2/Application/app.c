@@ -22,13 +22,13 @@
 //Variables declaration
 int encoderVal; //TIM2 CNT register reading
 int encoderValPrev;
-int encoderPress = 4; //currently selected digit
-int val = 1000; //variable holding current voltage addition
-int voltage = 330; //final voltage value
+int encoderPress = 2; //currently selected digit
+int val = 10; //variable holding current voltage addition
+volatile int voltage = 600; //final voltage value
 int voltageTemp = 0; //temporary voltage value
 int voltageMin = 0; //voltage down limit
 int voltageMax = 2200; //voltage upper limit
-int current = 0;
+int current = 1000;
 int currentTemp = 0;
 int currentMin = 0;
 int currentMax = 3000;
@@ -180,6 +180,11 @@ void encoder_turn_isr(void) {
 			//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
 			max7219_PrintItos(SEGMENT_1, num_digits, voltage, 3);
 
+			//Print to debug
+			char _str[20];
+			sprintf(_str,"VBUS selected: %lu mV", voltage*10);
+			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+
 			//Save TIM2 CNT value to ValPrev
 			encoderValPrev = encoderVal;
 		}
@@ -212,6 +217,11 @@ void encoder_turn_isr(void) {
 
 			//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
 			max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
+
+			//Print to debug
+			char _str[20];
+			sprintf(_str,"IBUS selected: %lu mA", current);
+			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 
 			//Save TIM2 CNT value to ValPrev
 			encoderValPrev = encoderVal;
@@ -331,6 +341,10 @@ void request_button_isr(void){
 	sourcecapa_limits();
 
 	indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, voltage*10, current, PDO_SEL_METHOD_MAX_CUR);
+	//Print to debug
+	char _str[40];
+	sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, voltage*10, current);
+	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 	USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, voltage*10, current);
 
 }
@@ -441,7 +455,7 @@ static void sourcecapa_limits(void)
 		if (!isMinVoltageAPDOInitialized || minvoltageAPDOtemp < minvoltageAPDO) {
 			minvoltageAPDO = minvoltageAPDOtemp;
 			voltageMin = (int)minvoltageAPDOtemp/10;
-			voltage = voltageMin/10;
+			//voltage = voltageMin/10;
 			isMinVoltageAPDOInitialized = 1; // Set the flag to indicate it has been initialized
 		}
 

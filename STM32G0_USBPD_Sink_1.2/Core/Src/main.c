@@ -20,6 +20,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "usbpd.h"
+//#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -647,6 +648,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
+  __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(CS_MAX7219_GPIO_Port, CS_MAX7219_Pin, GPIO_PIN_RESET);
@@ -669,12 +671,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(VOL_CUR_BUTTON_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : REQUEST_BUTTON_Pin */
-  GPIO_InitStruct.Pin = REQUEST_BUTTON_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(REQUEST_BUTTON_GPIO_Port, &GPIO_InitStruct);
-
   /*Configure GPIO pin : ENCODER_BUTTON_Pin */
   GPIO_InitStruct.Pin = ENCODER_BUTTON_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
@@ -693,6 +689,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : REQUEST_BUTTON_Pin */
+  GPIO_InitStruct.Pin = REQUEST_BUTTON_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(REQUEST_BUTTON_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : DB_OUT_Pin */
   GPIO_InitStruct.Pin = DB_OUT_Pin;
