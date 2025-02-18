@@ -139,7 +139,8 @@ USBPD_StatusTypeDef USBPD_DPM_RequestGetBatteryCapability(uint8_t PortNum, uint8
 USBPD_StatusTypeDef USBPD_DPM_RequestGetBatteryStatus(uint8_t PortNum, uint8_t *pBatteryStatusRef);
 USBPD_StatusTypeDef USBPD_DPM_RequestSecurityRequest(uint8_t PortNum);
 /* USER CODE BEGIN Function */
-
+USBPD_StatusTypeDef DisplayVBUS(uint8_t PortNum, uint8_t * pData, uint16_t Size);
+USBPD_StatusTypeDef USBPD_DPM_RequestSRCPDO(uint8_t PortNum, uint8_t IndexSrcPDO, uint16_t RequestedVoltage, uint16_t RequestedCurrent);
 /* USER CODE END Function */
 /**
   * @}

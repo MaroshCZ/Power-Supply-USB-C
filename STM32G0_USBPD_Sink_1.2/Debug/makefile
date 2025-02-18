@@ -11,6 +11,8 @@ RM := rm -rf
 -include sources.mk
 -include Utilities/TRACER_EMB/subdir.mk
 -include Utilities/GUI_INTERFACE/subdir.mk
+-include USB_Device/Target/subdir.mk
+-include USB_Device/App/subdir.mk
 -include USBPD/Target/subdir.mk
 -include USBPD/App/subdir.mk
 -include USBPD/subdir.mk
@@ -18,11 +20,14 @@ RM := rm -rf
 -include Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM0/subdir.mk
 -include Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/subdir.mk
 -include Middlewares/Third_Party/FreeRTOS/Source/subdir.mk
+-include Middlewares/ST/STM32_USB_Device_Library/Core/Src/subdir.mk
+-include Middlewares/ST/STM32_USB_Device_Library/Class/CDC/Src/subdir.mk
 -include Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/src/subdir.mk
 -include Middlewares/ST/STM32_USBPD_Library/Core/src/subdir.mk
 -include Drivers/STM32G0xx_HAL_Driver/Src/subdir.mk
 -include Core/Startup/subdir.mk
 -include Core/Src/subdir.mk
+-include Application/subdir.mk
 -include objects.mk
 
 ifneq ($(MAKECMDGOALS),clean)

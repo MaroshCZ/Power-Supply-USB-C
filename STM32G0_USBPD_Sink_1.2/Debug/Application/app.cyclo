@@ -1,0 +1,13 @@
+../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_tim.h:1586:22:LL_TIM_EnableCounter	1
+../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_tim.h:1839:22:LL_TIM_SetCounter	1
+../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_tim.h:4262:22:LL_TIM_ClearFlag_UPDATE	1
+../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_tim.h:4625:22:LL_TIM_EnableIT_UPDATE	1
+../Application/app.c:74:6:app_init	1
+../Application/app.c:121:6:app_loop	3
+../Application/app.c:147:6:encoder_turn_isr	12
+../Application/app.c:240:6:button_isr	16
+../Application/app.c:307:6:button_timer_isr	1
+../Application/app.c:320:6:request_button_isr	1
+../Application/app.c:355:6:cur_vol_button_isr	2
+../Application/app.c:385:13:sourcecapa_limits	12
+../Application/app.c:517:6:processUSBCommand	3

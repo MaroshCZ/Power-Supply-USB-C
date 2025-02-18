@@ -28,6 +28,7 @@
 
 /* USER CODE BEGIN include */
 #include "main.h"
+#include "app.h"
 /* USER CODE END include */
 
 /** @addtogroup BSP
@@ -51,7 +52,12 @@
 * @{
 */
 /* USER CODE BEGIN POWER_Private_Constants */
-
+/* Resistor voltage divider */
+#define R7      200000u
+#define R6       40200u
+#define R_IN      1100u
+#define R_OUT    10000u
+#define R_SENSE  0.110
 /* USER CODE END POWER_Private_Constants */
 /**
   * @}
@@ -287,7 +293,6 @@ __weak uint32_t BSP_PWR_VBUSGetVoltage(uint32_t PortId)
   uint32_t voltage = 0;
 
   (void)BSP_USBPD_PWR_VBUSGetVoltage(PortId, &voltage);
-
   return voltage;
 /* USER CODE END BSP_PWR_VBUSGetVoltage */
 }
@@ -924,15 +929,19 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetVoltage(uint32_t Instance, uint32_t *pVoltag
   }
   else
   {
-	  uint32_t val;
-	  val = __LL_ADC_CALC_DATA_TO_VOLTAGE( VDDA_APPLI, \
-	  LL_ADC_REG_ReadConversionData12(ADC1), \
-	  LL_ADC_RESOLUTION_12B); /* mV */
+	  uint32_t vadc;
+	  uint32_t vsense;
+
+
+	  vadc = __LL_ADC_CALC_DATA_TO_VOLTAGE( VDDA_APPLI, \
+			  aADCxConvertedValues[0], \
+			  LL_ADC_RESOLUTION_12B); /* mV */
+
+
 	  /* X-NUCLEO-SNK1M1 board is used */
 	  /* Value is multiplied by 5.97 (Divider R6/R7 (40.2K/200K) for VSENSE) */
-	  val *= 597;
-	  val /= 100;
-	  *pVoltage = val;
+	  vsense = vadc * (R7 + R6)/R6;
+	  *pVoltage = vsense;
   }
   return ret;
 
@@ -957,10 +966,20 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetCurrent(uint32_t Instance, int32_t *pCurrent
   if ((Instance >= USBPD_PWR_INSTANCES_NBR) || (NULL == pCurrent))
   {
     ret = BSP_ERROR_WRONG_PARAM;
+    *pCurrent = 0;
   }
   else
   {
-	*pCurrent = 0;
+	 uint32_t vout_adc;
+	 uint32_t isense;
+
+     //Convert raw ADC measurement into real voltage value
+	 vout_adc = __LL_ADC_CALC_DATA_TO_VOLTAGE( VDDA_APPLI, \
+	  			  aADCxConvertedValues[1], \
+	  			  LL_ADC_RESOLUTION_12B); /* mV */
+
+	 isense = vout_adc * R_IN / (R_SENSE*R_OUT);
+	*pCurrent = isense;
     ret = BSP_ERROR_FEATURE_NOT_SUPPORTED;
   }
   /* !!!

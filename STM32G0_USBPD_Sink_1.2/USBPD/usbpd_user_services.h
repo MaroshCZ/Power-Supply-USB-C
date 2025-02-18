@@ -127,14 +127,28 @@ void USBPD_USER_SERV_EvaluateCapa(uint8_t PortNum,
                                   uint32_t *PtrRequestData,
                                   USBPD_CORE_PDO_Type_TypeDef *PtrPowerObjectType);
 uint32_t  USER_SERV_SNK_EvaluateMatchWithSRCPDO(uint8_t PortNum,
-                                                      uint32_t SrcPDO,
-                                                      uint32_t *PtrRequestedVoltage,
-                                                      uint32_t *PtrRequestedPower);
+												  uint32_t SrcPDO,
+												  uint32_t *PtrRequestedVoltage,
+												  uint32_t *PtrRequestedPower);
 void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
-                                                      uint8_t IndexSrcPDO,
-                                                      USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
-                                                      USBPD_SNKRDO_TypeDef *Rdo,
-                                                      USBPD_CORE_PDO_Type_TypeDef *PtrPowerObject);
+											  uint8_t IndexSrcPDO,
+											  USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
+											  USBPD_SNKRDO_TypeDef *Rdo,
+											  USBPD_CORE_PDO_Type_TypeDef *PtrPowerObject);
+void USER_SERV_SNK_BuildRequestedRDO(uint8_t PortNum,
+                                                  uint16_t IndexSrcPDO,
+												  uint16_t Voltage_mV, uint16_t Current_mA,
+                                                  USBPD_SNKRDO_TypeDef *Rdo,
+                                                  USBPD_CORE_PDO_Type_TypeDef *PtrPowerObject);
+uint32_t USER_SERV_FindVoltageIndex(uint32_t PortNum,
+								   USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
+								   uint8_t Method);
+
+uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
+        									USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
+											uint16_t Voltage_mV,
+											uint16_t Current_mA,
+											uint8_t Method);
 #endif /* _SNK */
 /* USER CODE BEGIN Private_Variables */
 extern USBPD_HandleTypeDef DPM_Ports[USBPD_PORT_COUNT];

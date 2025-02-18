@@ -61,6 +61,30 @@
 #define USBPD_CORE_PDO_SRC_FIXED_MAX_CURRENT 3
 #define USBPD_CORE_PDO_SNK_FIXED_MAX_CURRENT 1500
 
+ /* Definitions for APDO values */
+ /* PDP = 7.5W */
+ #define USBPD_PDO_APDO_5VPROG_7P5W_MAX_CURRENT 1.5 /* Max Current in A (PDP / 5) */
+
+ /* PDP = 15W */
+ #define USBPD_PDO_APDO_5VPROG_15W_MAX_CURRENT  3   /* Max Current in A (PDP / 5) */
+
+ /* PDP = 45W */
+ #define USBPD_PDO_APDO_9VPROG_45W_MAX_CURRENT  3   /* Max Current in A */
+ #define USBPD_PDO_APDO_15VPROG_45W_MAX_CURRENT 3   /* Max Current in A (PDP / 5) */
+
+ /* PDP = 100W*/
+ #define USBPD_PDO_APDO_20VPROG_100W_MAX_CURRENT 5   /* Max Current in A (PDP / 5) */
+
+ /* Programmable Power Supply Voltage Ranges */
+ #define USBPD_PDO_APDO_5VPROG_MIN_VOLTAGE 3.3   /* Min voltage in V */
+ #define USBPD_PDO_APDO_5VPROG_MAX_VOLTAGE 5.9 /* Max voltage in V */
+ #define USBPD_PDO_APDO_9VPROG_MIN_VOLTAGE 3.3   /* Min voltage in V */
+ #define USBPD_PDO_APDO_9VPROG_MAX_VOLTAGE 11  /* Max voltage in V */
+ #define USBPD_PDO_APDO_15VPROG_MIN_VOLTAGE 3.3   /* Min voltage in V */
+ #define USBPD_PDO_APDO_15VPROG_MAX_VOLTAGE 16  /* Max voltage in V */
+ #define USBPD_PDO_APDO_20VPROG_MIN_VOLTAGE 3.3   /* Min voltage in V */
+ #define USBPD_PDO_APDO_20VPROG_MAX_VOLTAGE 20  /* Max voltage in V */
+
 /* USER CODE END Exported_Define */
 
 /* Exported constants --------------------------------------------------------*/
@@ -117,27 +141,13 @@ uint32_t PORT0_PDO_ListSNK[USBPD_MAX_NB_PDO] =
   /* PDO 3 */
         (0x0603C096U),
   /* PDO 4 */
-		( ((PWR_A_10MA(1.5)) << USBPD_PDO_SRC_FIXED_MAX_CURRENT_Pos) |
-		   ((PWR_V_100MV(12)) << USBPD_PDO_SRC_FIXED_VOLTAGE_Pos)
-		),
+        (0x00000000U),
   /* PDO 5 */
-		( ((PWR_A_10MA(2.25)) << USBPD_PDO_SNK_APDO_MAX_CURRENT_Pos)    |
-	      ((PWR_V_100MV(3.3)) << USBPD_PDO_SNK_APDO_MIN_VOLTAGE_Pos) |
-		  ((PWR_V_100MV(11)) << USBPD_PDO_SNK_APDO_MAX_VOLTAGE_Pos)  |
-		  USBPD_PDO_TYPE_APDO
-		),
+        (0x00000000U),
   /* PDO 6 */
-		( ((PWR_A_10MA(3)) << USBPD_PDO_SNK_APDO_MAX_CURRENT_Pos)    |
-		  ((PWR_V_100MV(3.3)) << USBPD_PDO_SNK_APDO_MIN_VOLTAGE_Pos) |
-		  ((PWR_V_100MV(16)) << USBPD_PDO_SNK_APDO_MAX_VOLTAGE_Pos)  |
-		  USBPD_PDO_TYPE_APDO
-		),
+        (0x00000000U),
   /* PDO 7 */
-        ( ((PWR_A_10MA(2.5)) << USBPD_PDO_SNK_APDO_MAX_CURRENT_Pos)  |
-          ((PWR_V_100MV(3.3)) << USBPD_PDO_SNK_APDO_MIN_VOLTAGE_Pos) |
-          ((PWR_V_100MV(21)) << USBPD_PDO_SNK_APDO_MAX_VOLTAGE_Pos)  |
-          USBPD_PDO_TYPE_APDO
-        ),
+        (0x00000000U)
 };
 
 #endif

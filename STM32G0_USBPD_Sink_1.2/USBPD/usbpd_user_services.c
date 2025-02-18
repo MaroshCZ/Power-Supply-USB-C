@@ -67,7 +67,7 @@ uint32_t USER_SERV_SNK_EvaluateMatchWithSRCPDO(uint8_t PortNum,
                                                       uint32_t *PtrRequestedVoltage,
                                                       uint32_t *PtrRequestedPower);
 
-static uint32_t USER_SERV_FindVoltageIndex(uint32_t PortNum,
+uint32_t USER_SERV_FindVoltageIndex(uint32_t PortNum,
                                            USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
                                            uint8_t Method);
 
@@ -76,6 +76,12 @@ void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
                                                       USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
                                                       USBPD_SNKRDO_TypeDef *Rdo,
                                                       USBPD_CORE_PDO_Type_TypeDef *PtrPowerObject);
+
+uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
+        									USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
+											uint16_t Voltage_mV,
+											uint16_t Current_mA,
+											uint8_t Method);
 #endif /* _SNK */
 /* USER CODE END USBPD_USER_PRIVATE_FUNCTIONS_Prototypes */
 
@@ -217,7 +223,14 @@ void USBPD_USER_SERV_StoreSRCPDO(uint8_t PortNum, uint8_t *Ptr, uint32_t Size)
     {
       rdo = (uint8_t *)&DPM_Ports[PortNum].DPM_ListOfRcvSRCPDO[index];
       (void)memcpy(rdo, (Ptr + (index * 4U)), (4U * sizeof(uint8_t)));
+
+      /*
+      // Copy PDO data in SINK pdo definition
+      rdo = (uint8_t *)&PORT0_PDO_ListSNK[index];
+      (void)memcpy(rdo, (Ptr + (index * 4U)), (4U * sizeof(uint8_t)));
+      */
     }
+
   }
 }
 
@@ -496,7 +509,7 @@ uint32_t USER_SERV_SNK_EvaluateMatchWithSRCPDO(uint8_t PortNum,
   *         @arg @ref PDO_SEL_METHOD_MIN_CUR
   * @retval Index of PDO within source capabilities message (DPM_NO_SRC_PDO_FOUND indicating not found)
   */
-static uint32_t USER_SERV_FindVoltageIndex(uint32_t PortNum,
+uint32_t USER_SERV_FindVoltageIndex(uint32_t PortNum,
                                            USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
                                            uint8_t Method)
 {
@@ -740,5 +753,178 @@ void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
   /* Get the requested voltage */
   pdhandle->DPM_RequestedVoltage = mv;
 }
+
+/**
+  * @brief  Build user request RDO based on specified SRC PDO index and user request values
+  * @param  PortNum           Port number
+  * @param  IndexSrcPDO       Index of requested SRC PDO
+  * @param  Rdo               Pointer on the RDO
+  * @param  Voltage_mV	      Requested voltage
+  * @param  Current_mA		  Requested current
+  * @param  PtrPowerObject    Pointer on the selected power object
+  * @retval None
+  */
+void USER_SERV_SNK_BuildRequestedRDO(uint8_t PortNum,
+                                                  uint16_t IndexSrcPDO,
+												  uint16_t Voltage_mV, uint16_t Current_mA,
+                                                  USBPD_SNKRDO_TypeDef *Rdo,
+                                                  USBPD_CORE_PDO_Type_TypeDef *PtrPowerObject)
+{
+  uint32_t mv = Voltage_mV;
+  uint32_t ma = Current_mA;
+  USBPD_PDO_TypeDef  pdo;
+  USBPD_SNKRDO_TypeDef rdo;
+  USBPD_HandleTypeDef *pdhandle = &DPM_Ports[PortNum];
+
+  /* Initialize RDO */
+  rdo.d32 = 0;
+  rdo.GenericRDO.USBCommunicationsCapable = 0; //snk_fixed_pdo.SNKFixedPDO.USBCommunicationsCapable;
+                                               //Shall only be set for Sources capable of communication over the USB data lines
+  rdo.GenericRDO.NoUSBSuspend             = 1; //Sinks May indicate to the Source that they would prefer to have the USB Suspend Supported flag cleared by setting
+                                               //the No USB Suspend flag in a Request Message
+  rdo.GenericRDO.ObjectPosition = IndexSrcPDO;
+
+  /* Initialize PDO */
+  pdo.d32 = pdhandle->DPM_ListOfRcvSRCPDO[IndexSrcPDO-1];
+  *PtrPowerObject = pdo.GenericPDO.PowerObject;
+
+  /* Build RDO*/
+  switch (pdo.GenericPDO.PowerObject)
+    {
+      case USBPD_CORE_PDO_TYPE_FIXED:
+      {
+        DPM_Ports[PortNum].DPM_RequestedCurrent           = ma;
+        rdo.FixedVariableRDO.OperatingCurrentIn10mAunits  = ma / 10U;
+        rdo.FixedVariableRDO.MaxOperatingCurrent10mAunits = ma / 10U;
+      }
+      break;
+
+      case USBPD_CORE_PDO_TYPE_APDO:
+      {
+        DPM_Ports[PortNum].DPM_RequestedCurrent    = ma;
+        rdo.ProgRDO.ObjectPosition                 = IndexSrcPDO;
+        rdo.ProgRDO.OperatingCurrentIn50mAunits    = ma / 50U;
+        rdo.ProgRDO.OutputVoltageIn20mV            = mv / 20U;
+      }
+      break;
+
+      default:
+        break;
+    }
+
+  /*Assign request values to pdhandle*/
+  pdhandle->DPM_RDOPositionPrevious = pdhandle->DPM_RDOPosition;
+  pdhandle->DPM_RDOPosition = IndexSrcPDO; //pdhandle->DPM_RDOPosition  = rdo.GenericRDO.ObjectPosition;
+  pdhandle->DPM_RequestedVoltage = mv;
+  pdhandle->DPM_RequestedCurrent = ma;
+
+  pdhandle->DPM_RequestDOMsg = rdo.d32;
+  Rdo->d32 = pdhandle->DPM_RequestDOMsg;
+
+}
+
+/**
+  * @brief  Find best SRC (A)PDO index depending on user requested voltage and selection method: max/min power, voltage, or current.
+  * @param  PortNum Port number
+  * @param  PtrRequestPowerDetails  Sink requested power details structure pointer
+  * @param  Method  Method used to find the "best" PDO. This parameter can be one of the following values:
+  *         @arg @ref PDO_SEL_METHOD_MAX_CUR
+  *         @arg @ref PDO_SEL_METHOD_MIN_CUR
+  * @retval Index of PDO within source capabilities message (DPM_NO_SRC_PDO_FOUND indicating not found)
+  */
+uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
+											USBPD_DPM_SNKPowerRequestDetailsTypeDef *PtrRequestPowerDetails,
+											uint16_t Voltage_mV,
+											uint16_t Current_mA,
+											uint8_t Method)
+
+{
+	USBPD_PDO_TypeDef srcpdo;
+	uint32_t *ptpdoarray;
+	uint32_t reqvoltage = Voltage_mV;
+	uint32_t reqcurrent = Current_mA;
+	uint32_t nbsrcpdo;
+	uint32_t allowablepower;
+	uint32_t selpower;
+	uint32_t allowablecurrent;
+	uint32_t selcurrent;
+	uint32_t curr_index = DPM_NO_SRC_PDO_FOUND;
+	uint32_t temp_index;
+	USBPD_USER_SettingsTypeDef *puser = (USBPD_USER_SettingsTypeDef *)&DPM_USER_Settings[PortNum];
+
+	selcurrent     = 0;
+
+	//Get number of source PDOs
+	nbsrcpdo = DPM_Ports[PortNum].DPM_NumberOfRcvSRCPDO;
+	//Get array list of SRC PDOs
+	ptpdoarray = DPM_Ports[PortNum].DPM_ListOfRcvSRCPDO;
+
+	/* Check SRC PDO value according to its type */
+	for (temp_index = 0; temp_index < nbsrcpdo; temp_index++)
+	{
+		srcpdo.d32 = ptpdoarray[temp_index];
+
+		switch (srcpdo.GenericPDO.PowerObject)
+		{
+		/* SRC Fixed Supply PDO */
+		case USBPD_CORE_PDO_TYPE_FIXED:
+		{
+		}
+		/* Augmented Power Data Object (APDO) */
+		case USBPD_CORE_PDO_TYPE_APDO:
+		{
+			uint16_t srcmaxvoltage100mv;
+			uint16_t srcminvoltage100mv;
+			uint16_t srcmaxcurrent50ma;
+			//Extract voltage and current limits of given SRC APDO
+			srcmaxvoltage100mv = srcpdo.SRCSNKAPDO.MaxVoltageIn100mV;
+			srcminvoltage100mv = srcpdo.SRCSNKAPDO.MinVoltageIn100mV;
+			srcmaxcurrent50ma = srcpdo.SRCSNKAPDO.MaxCurrentIn50mAunits;
+
+			/*Check if reqvoltage falls within SRC_APDO voltage range*/
+			if ( (PWR_DECODE_100MV(srcminvoltage100mv) <= reqvoltage) && (reqvoltage <= PWR_DECODE_100MV(srcmaxvoltage100mv)) )
+			{
+				/*Check that reqcurrent is smaller or equal to srcmaxcurrent*/
+				if ( (reqcurrent <= PWR_DECODE_50MA(srcmaxcurrent50ma)) && (reqcurrent != 0) )
+				{
+					/*Convert srcmaxcurrent into mV*/
+					allowablecurrent = PWR_DECODE_50MA(srcmaxcurrent50ma);
+
+					/*Find the best APDO index based on the method */
+					switch(Method)
+					{
+					case PDO_SEL_METHOD_MAX_CUR:
+						if (allowablecurrent > selcurrent)
+						{
+							/* Consider the current PDO the best one until now */
+							curr_index = temp_index;
+							selcurrent = allowablecurrent;
+						}
+						break;
+
+					case PDO_SEL_METHOD_MIN_CUR:
+						if ((allowablecurrent < selcurrent) || (selcurrent == 0))
+						{
+							/* Consider the current PDO the best one until now */
+							curr_index = temp_index;
+							selcurrent = allowablecurrent;
+						}
+						break;
+
+					default:
+						/* Default behavior: last PDO is selected */
+						curr_index = temp_index;
+						selcurrent = allowablecurrent;
+					}
+				}
+			}
+		}
+
+		}
+	}
+
+	return curr_index+1;
+}
+
 #endif /* _SNK */
 /* USER CODE END USBPD_USER_PRIVATE_FUNCTIONS */

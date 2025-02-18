@@ -24,6 +24,7 @@
 #include "tracer_emb.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "app.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -57,7 +58,10 @@
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern PCD_HandleTypeDef hpcd_USB_DRD_FS;
+extern DMA_HandleTypeDef hdma_adc1;
 extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN EV */
 
@@ -104,6 +108,43 @@ void HardFault_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles EXTI line 0 and line 1 interrupts.
+  */
+void EXTI0_1_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI0_1_IRQn 0 */
+  if (__HAL_GPIO_EXTI_GET_IT(VOL_CUR_BUTTON_Pin) != RESET){
+	  cur_vol_button_isr();
+  }
+  /* USER CODE END EXTI0_1_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(VOL_CUR_BUTTON_Pin);
+  /* USER CODE BEGIN EXTI0_1_IRQn 1 */
+
+  /* USER CODE END EXTI0_1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI line 2 and line 3 interrupts.
+  */
+void EXTI2_3_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI2_3_IRQn 0 */
+  if (__HAL_GPIO_EXTI_GET_IT(ENCODER_BUTTON_Pin) != RESET){
+	  button_isr();
+  }
+  if (__HAL_GPIO_EXTI_GET_IT(REQUEST_BUTTON_Pin) != RESET){
+  	  request_button_isr();
+  }
+
+  /* USER CODE END EXTI2_3_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(REQUEST_BUTTON_Pin);
+  HAL_GPIO_EXTI_IRQHandler(ENCODER_BUTTON_Pin);
+  /* USER CODE BEGIN EXTI2_3_IRQn 1 */
+
+  /* USER CODE END EXTI2_3_IRQn 1 */
+}
+
+/**
   * @brief This function handles EXTI line 4 to 15 interrupts.
   */
 void EXTI4_15_IRQHandler(void)
@@ -125,6 +166,7 @@ void USB_UCPD1_2_IRQHandler(void)
   /* USER CODE BEGIN USB_UCPD1_2_IRQn 0 */
 
   /* USER CODE END USB_UCPD1_2_IRQn 0 */
+  HAL_PCD_IRQHandler(&hpcd_USB_DRD_FS);
   USBPD_PORT0_IRQHandler();
 
   /* USER CODE BEGIN USB_UCPD1_2_IRQn 1 */
@@ -161,17 +203,59 @@ void DMA1_Channel2_3_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles DMA1 Ch4 to Ch7, DMA2 Ch1 to Ch5 and DMAMUX1 Overrun Interrupts.
+  */
+void DMA1_Ch4_7_DMA2_Ch1_5_DMAMUX1_OVR_IRQHandler(void)
+{
+  /* USER CODE BEGIN DMA1_Ch4_7_DMA2_Ch1_5_DMAMUX1_OVR_IRQn 0 */
+
+  /* USER CODE END DMA1_Ch4_7_DMA2_Ch1_5_DMAMUX1_OVR_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_adc1);
+  /* USER CODE BEGIN DMA1_Ch4_7_DMA2_Ch1_5_DMAMUX1_OVR_IRQn 1 */
+
+  /* USER CODE END DMA1_Ch4_7_DMA2_Ch1_5_DMAMUX1_OVR_IRQn 1 */
+}
+
+/**
   * @brief This function handles TIM2 global interrupt.
   */
 void TIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM2_IRQn 0 */
-
+  encoder_turn_isr();
   /* USER CODE END TIM2_IRQn 0 */
   HAL_TIM_IRQHandler(&htim2);
   /* USER CODE BEGIN TIM2_IRQn 1 */
 
   /* USER CODE END TIM2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM6, DAC and LPTIM1 global Interrupts.
+  */
+void TIM6_DAC_LPTIM1_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM6_DAC_LPTIM1_IRQn 0 */
+
+  /* USER CODE END TIM6_DAC_LPTIM1_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim6);
+  /* USER CODE BEGIN TIM6_DAC_LPTIM1_IRQn 1 */
+
+  /* USER CODE END TIM6_DAC_LPTIM1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM7 and LPTIM2 global Interrupt.
+  */
+void TIM7_LPTIM2_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM7_LPTIM2_IRQn 0 */
+  button_timer_isr();
+  /* USER CODE END TIM7_LPTIM2_IRQn 0 */
+
+  /* USER CODE BEGIN TIM7_LPTIM2_IRQn 1 */
+
+  /* USER CODE END TIM7_LPTIM2_IRQn 1 */
 }
 
 /**
