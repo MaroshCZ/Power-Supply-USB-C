@@ -60,7 +60,7 @@
 /* External variables --------------------------------------------------------*/
 extern PCD_HandleTypeDef hpcd_USB_DRD_FS;
 extern DMA_HandleTypeDef hdma_adc1;
-extern TIM_HandleTypeDef htim2;
+extern TIM_HandleTypeDef htim3;
 extern TIM_HandleTypeDef htim6;
 
 /* USER CODE BEGIN EV */
@@ -113,11 +113,11 @@ void HardFault_Handler(void)
 void EXTI0_1_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_1_IRQn 0 */
-  if (__HAL_GPIO_EXTI_GET_IT(VOL_CUR_BUTTON_Pin) != RESET){
-	  cur_vol_button_isr();
+  if (__HAL_GPIO_EXTI_GET_IT(SW3_OFF_ON_Pin) != RESET){
+	  request_button_isr();
   }
   /* USER CODE END EXTI0_1_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(VOL_CUR_BUTTON_Pin);
+  HAL_GPIO_EXTI_IRQHandler(SW3_OFF_ON_Pin);
   /* USER CODE BEGIN EXTI0_1_IRQn 1 */
 
   /* USER CODE END EXTI0_1_IRQn 1 */
@@ -129,16 +129,12 @@ void EXTI0_1_IRQHandler(void)
 void EXTI2_3_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI2_3_IRQn 0 */
-  if (__HAL_GPIO_EXTI_GET_IT(ENCODER_BUTTON_Pin) != RESET){
-	  button_isr();
-  }
-  if (__HAL_GPIO_EXTI_GET_IT(REQUEST_BUTTON_Pin) != RESET){
-  	  request_button_isr();
-  }
 
+  if (__HAL_GPIO_EXTI_GET_IT(SW1_TOGGLE_I_V_Pin) != RESET){
+  	  cur_vol_button_isr();
+    }
   /* USER CODE END EXTI2_3_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(REQUEST_BUTTON_Pin);
-  HAL_GPIO_EXTI_IRQHandler(ENCODER_BUTTON_Pin);
+  HAL_GPIO_EXTI_IRQHandler(SW1_TOGGLE_I_V_Pin);
   /* USER CODE BEGIN EXTI2_3_IRQn 1 */
 
   /* USER CODE END EXTI2_3_IRQn 1 */
@@ -150,9 +146,12 @@ void EXTI2_3_IRQHandler(void)
 void EXTI4_15_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI4_15_IRQn 0 */
-
+  if (__HAL_GPIO_EXTI_GET_IT(ENC_TOGGLE_UNITS_Pin) != RESET){
+	  button_isr();
+  }
   /* USER CODE END EXTI4_15_IRQn 0 */
-  HAL_GPIO_EXTI_IRQHandler(USER_BUTTON_Pin);
+  HAL_GPIO_EXTI_IRQHandler(SW2_DEBUG_BTN_Pin);
+  HAL_GPIO_EXTI_IRQHandler(ENC_TOGGLE_UNITS_Pin);
   /* USER CODE BEGIN EXTI4_15_IRQn 1 */
 
   /* USER CODE END EXTI4_15_IRQn 1 */
@@ -217,17 +216,17 @@ void DMA1_Ch4_7_DMA2_Ch1_5_DMAMUX1_OVR_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles TIM2 global interrupt.
+  * @brief This function handles TIM3, TIM4 global Interrupt.
   */
-void TIM2_IRQHandler(void)
+void TIM3_TIM4_IRQHandler(void)
 {
-  /* USER CODE BEGIN TIM2_IRQn 0 */
+  /* USER CODE BEGIN TIM3_TIM4_IRQn 0 */
   encoder_turn_isr();
-  /* USER CODE END TIM2_IRQn 0 */
-  HAL_TIM_IRQHandler(&htim2);
-  /* USER CODE BEGIN TIM2_IRQn 1 */
+  /* USER CODE END TIM3_TIM4_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim3);
+  /* USER CODE BEGIN TIM3_TIM4_IRQn 1 */
 
-  /* USER CODE END TIM2_IRQn 1 */
+  /* USER CODE END TIM3_TIM4_IRQn 1 */
 }
 
 /**

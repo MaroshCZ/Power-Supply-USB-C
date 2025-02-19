@@ -13,7 +13,7 @@
 #include "app.h"
 
 #define NUMBER_OF_DIGITS	8
-#define SPI_PORT			hspi1
+#define SPI_PORT			hspi2
 
 extern SPI_HandleTypeDef 	SPI_PORT;
 

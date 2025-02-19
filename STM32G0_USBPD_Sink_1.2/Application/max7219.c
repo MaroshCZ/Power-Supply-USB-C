@@ -71,8 +71,8 @@ void max7219_Clean()
 void max7219_SendData(uint8_t addr, uint8_t data)
 {
 	CS_SET();
-	HAL_SPI_Transmit(&hspi1, &addr, 1, HAL_MAX_DELAY);
-	HAL_SPI_Transmit(&hspi1, &data, 1, HAL_MAX_DELAY);
+	HAL_SPI_Transmit(&SPI_PORT, &addr, 1, HAL_MAX_DELAY);
+	HAL_SPI_Transmit(&SPI_PORT, &data, 1, HAL_MAX_DELAY);
 	CS_RESET();
 }
 
