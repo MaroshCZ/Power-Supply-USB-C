@@ -146,7 +146,7 @@ void app_loop(void){
  */
 void encoder_turn_isr(void) {
 	//Get the TIM2 value from CNT register
-	encoderVal = (TIM2 -> CNT) >> 2;
+	encoderVal = (TIM3 -> CNT) >> 2;
 
 	if (encoderVal != encoderValPrev){
 
@@ -242,8 +242,8 @@ void button_isr(void){
 	const char response[] = "POWER is ON\r\n";
 	        LPUART_Transmit(LPUART2, (const uint8_t*)response, sizeof(response) - 1);*/
 
-	//Mask unwanted button interrupts caused by debouncing on exti line 3 (PC3)
-	EXTI->IMR1 &= ~(EXTI_IMR1_IM3);
+	//Mask unwanted button interrupts caused by debouncing on exti line 3 (PD8)
+	EXTI->IMR1 &= ~(EXTI_IMR1_IM8);
 
 	//Set debouncing time in ms
 	TIM7->ARR = 200;
@@ -306,9 +306,9 @@ void button_isr(void){
  */
 void button_timer_isr(void){
 	//Unmask exti line 1, 2 and 3
-	EXTI->IMR1 |= EXTI_IMR1_IM3; //unmask interrupt mask register on exti line 3 (PC3)
-	EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask interrupt mask register on exti line 2 (PC2)
-	EXTI->IMR1 |= EXTI_IMR1_IM1; //unmask interrupt mask register on exti line 1 (PC1)
+	EXTI->IMR1 |= EXTI_IMR1_IM8; //unmask interrupt mask register on exti line 3 (PD8)
+	EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask interrupt mask register on exti line 2 (PB2)
+	EXTI->IMR1 |= EXTI_IMR1_IM1; //unmask interrupt mask register on exti line 1 (PB1)
 
 	//Clear update flag on TIM7
 	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
@@ -318,8 +318,8 @@ void button_timer_isr(void){
  * Request button interrupt routine, request APDO with user voltage and current
  */
 void request_button_isr(void){
-	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PC2)
-	EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
+	//Mask unwanted button interrupts caused by debouncing on exti line 1 (PB1)
+	EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
 
 	//Zero TIM7 counter and start counting
 	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
@@ -353,8 +353,8 @@ void request_button_isr(void){
  * Change between current and voltage ADJUSTMENT_STATE
  */
 void cur_vol_button_isr(void){
-	//Mask unwanted button interrupts caused by debouncing on exti line 1 (PC1)
-	EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
+	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PB2)
+	EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
 
 	//Set debouncing time in ms
 	TIM7->ARR = 200;
