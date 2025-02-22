@@ -29,6 +29,7 @@
 #include <usbpd_trace.h>
 #include <app.h>
 
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -124,9 +125,9 @@ int main(void)
   MX_ADC1_Init();
   MX_LPUART1_UART_Init();
   MX_TIM7_Init();
-  MX_USB_Device_Init();
   MX_SPI2_Init();
   MX_TIM3_Init();
+  MX_USB_Device_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
   app_init();
@@ -650,7 +651,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(DB_OUT_GPIO_Port, DB_OUT_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(DB_OUT_TCPP_GPIO_Port, DB_OUT_TCPP_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, CS_MAX7219_Pin|OCP_RESET_Pin, GPIO_PIN_RESET);
@@ -658,12 +659,18 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pin : DB_OUT_Pin */
-  GPIO_InitStruct.Pin = DB_OUT_Pin;
+  /*Configure GPIO pins : OCP_DAC_LIMIT_Pin FLT_IN_TCPP_Pin */
+  GPIO_InitStruct.Pin = OCP_DAC_LIMIT_Pin|FLT_IN_TCPP_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : DB_OUT_TCPP_Pin */
+  GPIO_InitStruct.Pin = DB_OUT_TCPP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(DB_OUT_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(DB_OUT_TCPP_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SW2_DEBUG_BTN_Pin */
   GPIO_InitStruct.Pin = SW2_DEBUG_BTN_Pin;
@@ -671,8 +678,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(SW2_DEBUG_BTN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CC1_G4_Pin CC2_G4_Pin */
-  GPIO_InitStruct.Pin = CC1_G4_Pin|CC2_G4_Pin;
+  /*Configure GPIO pins : CC1_G4_Pin CC2_G4_Pin OCP_ALERT_Pin */
+  GPIO_InitStruct.Pin = CC1_G4_Pin|CC2_G4_Pin|OCP_ALERT_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -729,10 +736,16 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
 is pressed */
 	{
 		//Get Voltage level into TRACE
-		char _str[20];
-		BSP_PWR_VBUSGetVoltage(0);
-		sprintf(_str,"VBUS:%lu", BSP_PWR_VBUSGetVoltage(0));
+		char _str[40];
+		//BSP_PWR_VBUSGetVoltage(0);
+		uint32_t voltage = BSP_PWR_VBUSGetVoltage(0);
+		uint32_t current= BSP_PWR_VBUSGetCurrent(0);
+
+		// Use snprintf to limit the number of characters written
+		int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA", voltage, current);
+
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+
 
 	}
 

@@ -72,8 +72,12 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define VDDA_APPLI 3300
-#define DB_OUT_Pin GPIO_PIN_4
-#define DB_OUT_GPIO_Port GPIOA
+#define OCP_DAC_LIMIT_Pin GPIO_PIN_0
+#define OCP_DAC_LIMIT_GPIO_Port GPIOA
+#define FLT_IN_TCPP_Pin GPIO_PIN_1
+#define FLT_IN_TCPP_GPIO_Port GPIOA
+#define DB_OUT_TCPP_Pin GPIO_PIN_4
+#define DB_OUT_TCPP_GPIO_Port GPIOA
 #define VSENSE_Pin GPIO_PIN_5
 #define VSENSE_GPIO_Port GPIOA
 #define ISENSE_Pin GPIO_PIN_7
@@ -100,6 +104,8 @@ void Error_Handler(void);
 #define ENC_TOGGLE_UNITS_EXTI_IRQn EXTI4_15_IRQn
 #define CC2_G4_Pin GPIO_PIN_4
 #define CC2_G4_GPIO_Port GPIOB
+#define OCP_ALERT_Pin GPIO_PIN_6
+#define OCP_ALERT_GPIO_Port GPIOB
 #define OCP_RESET_Pin GPIO_PIN_8
 #define OCP_RESET_GPIO_Port GPIOB
 #define RELAY_ON_OFF_Pin GPIO_PIN_10

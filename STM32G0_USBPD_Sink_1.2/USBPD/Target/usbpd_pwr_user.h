@@ -304,7 +304,7 @@ PWR_StatusTypeDef BSP_PWR_VBUSSetVoltage_APDO(uint32_t PortId,
                                               int32_t Delta);
 uint32_t BSP_PWR_VBUSGetVoltage(uint32_t PortId);
 
-int32_t BSP_PWR_VBUSGetCurrent(uint32_t PortId);
+uint32_t BSP_PWR_VBUSGetCurrent(uint32_t PortId);
 
 PWR_StatusTypeDef BSP_PWR_VCONNInit(uint32_t PortId,
                                     uint32_t CCPinId);
@@ -379,7 +379,7 @@ int32_t BSP_USBPD_PWR_VBUSSetVoltage_APDO(uint32_t Instance,
 
 int32_t BSP_USBPD_PWR_VBUSGetVoltage(uint32_t Instance, uint32_t *pVoltage);
 
-int32_t BSP_USBPD_PWR_VBUSGetCurrent(uint32_t Instance, int32_t *pCurrent);
+int32_t BSP_USBPD_PWR_VBUSGetCurrent(uint32_t Instance, uint32_t *pCurrent);
 
 int32_t BSP_USBPD_PWR_VCONNInit(uint32_t Instance,
                                 uint32_t CCPinId);

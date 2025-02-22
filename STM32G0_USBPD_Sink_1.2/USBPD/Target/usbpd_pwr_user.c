@@ -53,11 +53,10 @@
 */
 /* USER CODE BEGIN POWER_Private_Constants */
 /* Resistor voltage divider */
-#define R7      200000u
-#define R6       40200u
-#define R_IN      1100u
-#define R_OUT    10000u
-#define R_SENSE  0.110
+#define R_A         200000u // 200 kOhms
+#define R_B          40200u // 40.2 kOhms
+#define R_SENSE_MOHMS   30u // 30 mOhms
+#define G               20u // V/V
 /* USER CODE END POWER_Private_Constants */
 /**
   * @}
@@ -306,11 +305,11 @@ __weak uint32_t BSP_PWR_VBUSGetVoltage(uint32_t PortId)
   *         @arg TYPE_C_PORT_2
   * @retval Current measured current level (in mA)
   */
-__weak int32_t BSP_PWR_VBUSGetCurrent(uint32_t PortId)
+__weak uint32_t BSP_PWR_VBUSGetCurrent(uint32_t PortId)
 {
   PWR_DEBUG_TRACE(PortId, "ADVICE: Obsolete BSP_PWR_VBUSGetCurrent");
 /* USER CODE BEGIN BSP_PWR_VBUSGetCurrent */
-  int32_t current = 0;
+  uint32_t current = 0;
 
   (void)BSP_USBPD_PWR_VBUSGetCurrent(PortId, &current);
 
@@ -915,6 +914,27 @@ __weak int32_t BSP_USBPD_PWR_VBUSSetVoltage_APDO(uint32_t Instance,
   *         @arg @ref USBPD_PWR_TYPE_C_PORT_1
   *         @arg @ref USBPD_PWR_TYPE_C_PORT_2
   * @param  pVoltage Pointer on measured voltage level (in mV)
+  * @note   Voltage is measured trough a voltage divider
+  *
+  *
+  *  PD_sense --------.       PD_sense(VBUS) = ADC_V * (R_A + R_B) / R_B
+  * 				  |
+  * 				.---.
+  *                 |R_A|
+  *                 '---'
+  *                   |
+  *                   .------ ADC_V (MCU)
+  * 				  |
+  * 				.---.
+  *                 |R_B|
+  *                 '---'
+  * 				  |
+  * 			   .-----.
+  * 				\GND/
+  * 				 'V'
+  * R_A = 200kOhms
+  * R_B = 40.2kOhms
+  * Vref(VDD) ~ 3.3V
   * @retval BSP status
   */
 __weak int32_t BSP_USBPD_PWR_VBUSGetVoltage(uint32_t Instance, uint32_t *pVoltage)
@@ -932,15 +952,15 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetVoltage(uint32_t Instance, uint32_t *pVoltag
 	  uint32_t vadc;
 	  uint32_t vsense;
 
-
+	  //Calculate vadc(mV) on ADC pin based on ADC resolution and reference voltage VDDA
 	  vadc = __LL_ADC_CALC_DATA_TO_VOLTAGE( VDDA_APPLI, \
 			  aADCxConvertedValues[0], \
 			  LL_ADC_RESOLUTION_12B); /* mV */
 
 
-	  /* X-NUCLEO-SNK1M1 board is used */
-	  /* Value is multiplied by 5.97 (Divider R6/R7 (40.2K/200K) for VSENSE) */
-	  vsense = vadc * (R7 + R6)/R6;
+	  /* Calculate VBUS on PD_sense line*/
+	  /* Value is multiplied by 5.97 (Divider R_B/R_A (40.2K/200K) for VSENSE) */
+	  vsense = vadc * (R_A + R_B)/R_B;
 	  *pVoltage = vsense;
   }
   return ret;
@@ -955,9 +975,27 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetVoltage(uint32_t Instance, uint32_t *pVoltag
   *         @arg @ref USBPD_PWR_TYPE_C_PORT_1
   *         @arg @ref USBPD_PWR_TYPE_C_PORT_2
   * @param  pCurrent Pointer on measured current level (in mA)
+  * @note   Current level on PD_sense line measured with MCP6C02T-020 amplifier
+  * @note   It amplifies voltage difference on shunt resistor R_SENSE(R_S)
+  *
+  *  PD_sense--.                        PD_sense(isense) = ADC_I/(G * Rsense)
+  *       	   |   .-------------.
+  *       	   .---> MCP6C02-020 |
+  *        	   |   |             |
+  *       	 .---. |             |
+  *       	 |R_S| |             >------ADC_I (MCU)
+  *       	 '---' |             |
+  *       	   |   |             |
+  *       	   .--->             |
+  *       	   |   '-------------'
+  *       	   .
+  *       	   .
+  *
+  * R_SENSE (R_S) = 30 mOhms
+  * Gain (G)      = 20 V/V
   * @retval BSP status
   */
-__weak int32_t BSP_USBPD_PWR_VBUSGetCurrent(uint32_t Instance, int32_t *pCurrent)
+__weak int32_t BSP_USBPD_PWR_VBUSGetCurrent(uint32_t Instance, uint32_t *pCurrent)
 {
   /* USER CODE BEGIN BSP_USBPD_PWR_VBUSGetCurrent */
   /* Check if instance is valid       */
@@ -973,12 +1011,13 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetCurrent(uint32_t Instance, int32_t *pCurrent
 	 uint32_t vout_adc;
 	 uint32_t isense;
 
-     //Convert raw ADC measurement into real voltage value
+	 //Calculate vout_adc(mV) on ADC pin based on ADC resolution and reference voltage VDDA and raw ADC value
 	 vout_adc = __LL_ADC_CALC_DATA_TO_VOLTAGE( VDDA_APPLI, \
 	  			  aADCxConvertedValues[1], \
 	  			  LL_ADC_RESOLUTION_12B); /* mV */
 
-	 isense = vout_adc * R_IN / (R_SENSE*R_OUT);
+	 //Calculate isense on PD_sense based on R_SENSE and G of amplifier
+	 isense = vout_adc * 1000 / (G*R_SENSE_MOHMS); /* mA */
 	*pCurrent = isense;
     ret = BSP_ERROR_FEATURE_NOT_SUPPORTED;
   }
