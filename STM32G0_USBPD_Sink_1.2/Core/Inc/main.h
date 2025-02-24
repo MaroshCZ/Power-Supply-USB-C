@@ -72,14 +72,14 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define VDDA_APPLI 3300
-#define OCP_DAC_LIMIT_Pin GPIO_PIN_0
-#define OCP_DAC_LIMIT_GPIO_Port GPIOA
 #define FLT_IN_TCPP_Pin GPIO_PIN_1
 #define FLT_IN_TCPP_GPIO_Port GPIOA
-#define DB_OUT_TCPP_Pin GPIO_PIN_4
-#define DB_OUT_TCPP_GPIO_Port GPIOA
+#define OCP_DAC_LIMIT_Pin GPIO_PIN_4
+#define OCP_DAC_LIMIT_GPIO_Port GPIOA
 #define VSENSE_Pin GPIO_PIN_5
 #define VSENSE_GPIO_Port GPIOA
+#define OCP_ADC_I_Pin GPIO_PIN_6
+#define OCP_ADC_I_GPIO_Port GPIOA
 #define ISENSE_Pin GPIO_PIN_7
 #define ISENSE_GPIO_Port GPIOA
 #define SW2_DEBUG_BTN_Pin GPIO_PIN_4

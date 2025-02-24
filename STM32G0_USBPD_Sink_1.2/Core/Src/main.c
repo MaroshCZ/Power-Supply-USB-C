@@ -20,7 +20,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "usbpd.h"
-//#include "usb_device.h"
+#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -50,6 +50,8 @@
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
+
+DAC_HandleTypeDef hdac1;
 
 SPI_HandleTypeDef hspi2;
 
@@ -81,6 +83,7 @@ static void MX_LPUART1_UART_Init(void);
 static void MX_TIM7_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_DAC1_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -128,6 +131,7 @@ int main(void)
   MX_SPI2_Init();
   MX_TIM3_Init();
   MX_USB_Device_Init();
+  MX_DAC1_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
   app_init();
@@ -261,7 +265,7 @@ static void MX_ADC1_Init(void)
   hadc1.Init.LowPowerAutoWait = DISABLE;
   hadc1.Init.LowPowerAutoPowerOff = DISABLE;
   hadc1.Init.ContinuousConvMode = ENABLE;
-  hadc1.Init.NbrOfConversion = 2;
+  hadc1.Init.NbrOfConversion = 3;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
   hadc1.Init.DMAContinuousRequests = ENABLE;
@@ -293,8 +297,60 @@ static void MX_ADC1_Init(void)
   {
     Error_Handler();
   }
+
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_6;
+  sConfig.Rank = ADC_REGULAR_RANK_3;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
   /* USER CODE BEGIN ADC1_Init 2 */
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief DAC1 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_DAC1_Init(void)
+{
+
+  /* USER CODE BEGIN DAC1_Init 0 */
+
+  /* USER CODE END DAC1_Init 0 */
+
+  DAC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN DAC1_Init 1 */
+
+  /* USER CODE END DAC1_Init 1 */
+
+  /** DAC Initialization
+  */
+  hdac1.Instance = DAC1;
+  if (HAL_DAC_Init(&hdac1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** DAC channel OUT1 config
+  */
+  sConfig.DAC_SampleAndHold = DAC_SAMPLEANDHOLD_DISABLE;
+  sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
+  sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
+  sConfig.DAC_ConnectOnChipPeripheral = DAC_CHIPCONNECT_DISABLE;
+  sConfig.DAC_UserTrimming = DAC_TRIMMING_FACTORY;
+  if (HAL_DAC_ConfigChannel(&hdac1, &sConfig, DAC_CHANNEL_1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN DAC1_Init 2 */
+
+  /* USER CODE END DAC1_Init 2 */
 
 }
 
@@ -651,26 +707,16 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(DB_OUT_TCPP_GPIO_Port, DB_OUT_TCPP_Pin, GPIO_PIN_SET);
-
-  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, CS_MAX7219_Pin|OCP_RESET_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_SET);
 
-  /*Configure GPIO pins : OCP_DAC_LIMIT_Pin FLT_IN_TCPP_Pin */
-  GPIO_InitStruct.Pin = OCP_DAC_LIMIT_Pin|FLT_IN_TCPP_Pin;
+  /*Configure GPIO pin : FLT_IN_TCPP_Pin */
+  GPIO_InitStruct.Pin = FLT_IN_TCPP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : DB_OUT_TCPP_Pin */
-  GPIO_InitStruct.Pin = DB_OUT_TCPP_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(DB_OUT_TCPP_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(FLT_IN_TCPP_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SW2_DEBUG_BTN_Pin */
   GPIO_InitStruct.Pin = SW2_DEBUG_BTN_Pin;
