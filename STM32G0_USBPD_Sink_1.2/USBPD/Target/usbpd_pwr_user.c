@@ -56,7 +56,13 @@
 #define R_A         200000u // 200 kOhms
 #define R_B          40200u // 40.2 kOhms
 #define R_SENSE_MOHMS   30u // 30 mOhms
-#define G               20u // V/V
+#define G_SENSE         20u // V/V
+#define G_OCP          100u // V/V
+#define R_OCP_MOHMS      5u // 5 mOhms
+#define RANK_0           0u // ADC rank 0, PA5 (VSENSE)
+#define RANK_1           1u // ADC rank 1, PA6 (OCP_ADC_I)
+#define RANK_2           2u // ADC rank 2, PA7 (ISENSE)
+
 /* USER CODE END POWER_Private_Constants */
 /**
   * @}
@@ -91,7 +97,8 @@
   * @{
   */
 /* USER CODE BEGIN POWER_Private_Prototypes */
-
+int32_t BSP_USBPD_PWR_VBUSGetCurrentOCP(uint32_t Instance, int32_t *pCurrentOCP);
+int32_t BSP_PWR_VBUSGetCurrentOCP(uint32_t PortId);
 /* USER CODE END POWER_Private_Prototypes */
 /**
   * @}
@@ -309,7 +316,7 @@ __weak int32_t BSP_PWR_VBUSGetCurrent(uint32_t PortId)
 {
   PWR_DEBUG_TRACE(PortId, "ADVICE: Obsolete BSP_PWR_VBUSGetCurrent");
 /* USER CODE BEGIN BSP_PWR_VBUSGetCurrent */
-  uint32_t current = 0;
+  int32_t current = 0;
 
   (void)BSP_USBPD_PWR_VBUSGetCurrent(PortId, &current);
 
@@ -933,7 +940,7 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetVoltage(uint32_t Instance, uint32_t *pVoltag
 
 	  //Calculate vadc(mV) on ADC pin based on ADC resolution and reference voltage VDDA
 	  vadc = __LL_ADC_CALC_DATA_TO_VOLTAGE( VDDA_APPLI, \
-			  aADCxConvertedValues[0], \
+			  aADCxConvertedValues[RANK_0], \
 			  LL_ADC_RESOLUTION_12B); /* mV */
 
 
@@ -974,11 +981,11 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetCurrent(uint32_t Instance, int32_t *pCurrent
 
 	 //Calculate vout_adc(mV) on ADC pin based on ADC resolution and reference voltage VDDA and raw ADC value
 	 vout_adc = __LL_ADC_CALC_DATA_TO_VOLTAGE( VDDA_APPLI, \
-	  			  aADCxConvertedValues[1], \
+	  			  aADCxConvertedValues[RANK_2], \
 	  			  LL_ADC_RESOLUTION_12B); /* mV */
 
 	 //Calculate isense on PD_sense based on R_SENSE and G of amplifier
-	 isense = vout_adc * 1000 / (G*R_SENSE_MOHMS); /* mA */
+	 isense = vout_adc * 1000 / (G_SENSE*R_SENSE_MOHMS); /* mA */
 	*pCurrent = isense;
     ret = BSP_ERROR_FEATURE_NOT_SUPPORTED;
   }
@@ -1305,6 +1312,66 @@ __weak void BSP_USBPD_PWR_EventCallback(uint32_t Instance)
   */
 
 /* USER CODE BEGIN POWER_Private_Functions */
+
+/**
+  * @brief  Get actual current level measured on the VBUS line.
+  * @param  Instance Type-C port identifier
+  *         This parameter can be take one of the following values:
+  *         @arg @ref USBPD_PWR_TYPE_C_PORT_1
+  *         @arg @ref USBPD_PWR_TYPE_C_PORT_2
+  * @param  pCurrent Pointer on measured current level (in mA)
+  * @retval BSP status
+  */
+__weak int32_t BSP_USBPD_PWR_VBUSGetCurrentOCP(uint32_t Instance, int32_t *pCurrentOCP)
+{
+  /* USER CODE BEGIN BSP_USBPD_PWR_VBUSGetCurrent */
+  /* Check if instance is valid       */
+  int32_t ret;
+
+  if ((Instance >= USBPD_PWR_INSTANCES_NBR) || (NULL == pCurrentOCP))
+  {
+    ret = BSP_ERROR_WRONG_PARAM;
+    *pCurrentOCP = 0;
+  }
+  else
+  {
+	 uint32_t vout_adc;
+	 uint32_t isense;
+
+	 //Calculate vout_adc(mV) on ADC pin based on ADC resolution and reference voltage VDDA and raw ADC value
+	 vout_adc = __LL_ADC_CALC_DATA_TO_VOLTAGE( VDDA_APPLI, \
+	  			  aADCxConvertedValues[RANK_1], \
+	  			  LL_ADC_RESOLUTION_12B); /* mV */
+
+	 //Calculate OCP current on PD_OCP line based on R_OCP and G of amplifier INA301
+	 isense = vout_adc * 1000 / (G_OCP*R_OCP_MOHMS); /* mA */
+	*pCurrentOCP = isense;
+    ret = BSP_ERROR_FEATURE_NOT_SUPPORTED;
+  }
+
+  return ret;
+  /* USER CODE END BSP_USBPD_PWR_VBUSGetCurrent */
+}
+/**
+  * @brief  Get actual current level measured on the VBUS line.
+  * @note   Obsolete interface, new interface should be called.
+  * @param  PortId Type-C port identifier
+  *         This parameter can be take one of the following values:
+  *         @arg TYPE_C_PORT_1
+  *         @arg TYPE_C_PORT_2
+  * @retval Current measured current level (in mA)
+  */
+__weak int32_t BSP_PWR_VBUSGetCurrentOCP(uint32_t PortId)
+{
+  PWR_DEBUG_TRACE(PortId, "ADVICE: Obsolete BSP_PWR_VBUSGetCurrent");
+/* USER CODE BEGIN BSP_PWR_VBUSGetCurrent */
+  int32_t currentOCP = 0;
+
+  (void)BSP_USBPD_PWR_VBUSGetCurrentOCP(PortId, &currentOCP);
+
+  return currentOCP;
+/* USER CODE END BSP_PWR_VBUSGetCurrent */
+}
 
 /* USER CODE END POWER_Private_Functions */
 

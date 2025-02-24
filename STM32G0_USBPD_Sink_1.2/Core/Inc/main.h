@@ -74,8 +74,8 @@ void Error_Handler(void);
 #define VDDA_APPLI 3300
 #define FLT_IN_TCPP_Pin GPIO_PIN_1
 #define FLT_IN_TCPP_GPIO_Port GPIOA
-#define OCP_DAC_LIMIT_Pin GPIO_PIN_4
-#define OCP_DAC_LIMIT_GPIO_Port GPIOA
+#define OCP_DAC_LIMI_Pin GPIO_PIN_4
+#define OCP_DAC_LIMI_GPIO_Port GPIOA
 #define VSENSE_Pin GPIO_PIN_5
 #define VSENSE_GPIO_Port GPIOA
 #define OCP_ADC_I_Pin GPIO_PIN_6

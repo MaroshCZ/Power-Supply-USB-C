@@ -14,7 +14,8 @@
 typedef enum
 {
   CHANGE_VOLTAGE,
-  CHANGE_CURRENT
+  CHANGE_CURRENT,
+  CHANGE_OCP
 } USBPD_USER_SERV_StateTypeDef;
 
 //declaration of functions
@@ -30,7 +31,7 @@ void request_button_isr(void);
 
 static void sourcecapa_limits(void);
 
-#define ADC_NUM_OF_SAMPLES 2
+#define ADC_NUM_OF_SAMPLES 3
 extern ADC_HandleTypeDef hadc1;
 
 /* Variable containing ADC conversions results

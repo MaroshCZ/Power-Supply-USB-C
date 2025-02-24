@@ -20,7 +20,7 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "usbpd.h"
-#include "usb_device.h"
+//#include "usb_device.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -291,7 +291,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_7;
+  sConfig.Channel = ADC_CHANNEL_6;
   sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -300,7 +300,7 @@ static void MX_ADC1_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_6;
+  sConfig.Channel = ADC_CHANNEL_7;
   sConfig.Rank = ADC_REGULAR_RANK_3;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
@@ -782,13 +782,14 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
 is pressed */
 	{
 		//Get Voltage level into TRACE
-		char _str[40];
+		char _str[60];
 		//BSP_PWR_VBUSGetVoltage(0);
 		uint32_t voltage = BSP_PWR_VBUSGetVoltage(0);
 		uint32_t current= BSP_PWR_VBUSGetCurrent(0);
+		uint32_t currentOCP= BSP_PWR_VBUSGetCurrentOCP(0);
 
 		// Use snprintf to limit the number of characters written
-		int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA", voltage, current);
+		int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltage, current, currentOCP);
 
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 

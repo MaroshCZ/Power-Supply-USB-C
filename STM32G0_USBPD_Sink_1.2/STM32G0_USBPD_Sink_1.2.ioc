@@ -1,7 +1,7 @@
 #MicroXplorer Configuration settings - do not modify
 ADC1.Channel-0\#ChannelRegularConversion=ADC_CHANNEL_5
-ADC1.Channel-1\#ChannelRegularConversion=ADC_CHANNEL_7
-ADC1.Channel-2\#ChannelRegularConversion=ADC_CHANNEL_6
+ADC1.Channel-1\#ChannelRegularConversion=ADC_CHANNEL_6
+ADC1.Channel-2\#ChannelRegularConversion=ADC_CHANNEL_7
 ADC1.ClockPrescaler=ADC_CLOCK_SYNC_PCLK_DIV4
 ADC1.ContinuousConvMode=ENABLE
 ADC1.DMAContinuousRequests=ENABLE
@@ -215,7 +215,7 @@ PA3.Locked=true
 PA3.Mode=Asynchronous
 PA3.Signal=LPUART1_RX
 PA4.GPIOParameters=GPIO_Label
-PA4.GPIO_Label=OCP_DAC_LIMIT
+PA4.GPIO_Label=OCP_DAC_LIMI
 PA4.Locked=true
 PA4.Signal=COMP_DAC11_group
 PA5.GPIOParameters=GPIO_Label
