@@ -14,9 +14,11 @@
 #include "usbpd_user_services.h"
 #include "string.h"
 #include "stdio.h"
+#include <stm32g0xx_ll_adc.h>
 
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
+#include <usbpd_trace.h>
 
 
 //Variables declaration
@@ -29,7 +31,9 @@ int voltageTemp = 0; //temporary voltage value
 int voltageMin = 0; //voltage down limit
 int voltageMax = 2200; //voltage upper limit
 int current = 1000;
+int currentOCP = 1000;
 int currentTemp = 0;
+int currentOCPTemp = 0;
 int currentMin = 0;
 int currentMax = 3000;
 int integer_part;
@@ -48,8 +52,9 @@ __IO uint16_t aADCxConvertedValues[ADC_NUM_OF_SAMPLES] = {0};
 int g = 0;
 
 typedef enum {
-	ADJUSTMENT_CURRENT = 0x0u, /*!< Current adjustment state */
-	ADJUSTMENT_VOLTAGE = 0x1u /*!< Voltage adjustment state */
+	ADJUSTMENT_CURRENT = 0x0u,      /*!< Current adjustment state */
+	ADJUSTMENT_VOLTAGE = 0x1u,      /*!< Voltage adjustment state */
+	ADJUSTMENT_CURRENT_OCP = 0x2u   /*!< CurrentOCP adjustment state */
 } AdjustmentState;
 
 //USB communication
@@ -82,6 +87,7 @@ void app_init(void){
 	//Calibrate and start ADC sensing with DMA
 	HAL_ADCEx_Calibration_Start(&hadc1);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&aADCxConvertedValues, ADC_NUM_OF_SAMPLES);
+	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
 
 	//Init 7 segment display
 	//max7219_Init( 7 );
@@ -123,18 +129,31 @@ void app_loop(void){
 	//Blink digit based on specified adjustment
 	switch(currentState)
 	{
-	case(ADJUSTMENT_VOLTAGE):
-	{
-		//Blink currently selected digit
-		max7219_BlinkDigit(SEGMENT_1, &voltage, encoderPress, 500, 3); //pass voltage address to BlinkDigit function
-	}
-	 break;
-	case(ADJUSTMENT_CURRENT):
-	{
-		//Blink currently selected digit
-		max7219_BlinkDigit(SEGMENT_2, &current, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
-	}
-	break;
+		case(ADJUSTMENT_VOLTAGE):
+		{
+			//Blink currently selected digit
+			max7219_BlinkDigit(SEGMENT_1, &voltage, encoderPress, 500, 3); //pass voltage address to BlinkDigit function
+		}
+		 break;
+		case(ADJUSTMENT_CURRENT):
+		{
+			//Blink currently selected digit
+			max7219_BlinkDigit(SEGMENT_2, &current, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
+		}
+		 break;
+		case(ADJUSTMENT_CURRENT_OCP):
+		{
+			//Based on user selected currentOCP calculate the required DAC out...
+			int V_TRIP = (currentOCP * R_OCP_MOHMS * G_OCP)/1000; // mV (mA * mOhms * Gain)
+			//Convert DAC_OUT voltage to 12B resolution
+			int dac_value = (V_TRIP / VDDA_APPLI) * __LL_ADC_DIGITAL_SCALE(LL_ADC_RESOLUTION_12B);
+
+			//Write output with DAC..
+			HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
+			//Blink currently selected digit
+			max7219_BlinkDigit(SEGMENT_2, &currentOCP, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
+		}
+		break;
 	}
 
 	CDC_Transmit_FS(data, strlen(data));
@@ -182,7 +201,7 @@ void encoder_turn_isr(void) {
 
 			//Print to debug
 			char _str[30];
-			sprintf(_str,"VBUS selected: %lu mV", voltage*10);
+			snprintf(_str,"VBUS selected: %d mV", voltage*10);
 			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 
 			//Save TIM2 CNT value to ValPrev
@@ -220,7 +239,7 @@ void encoder_turn_isr(void) {
 
 			//Print to debug
 			char _str[30];
-			sprintf(_str,"IBUS selected: %lu mA", current);
+			snprintf(_str,"IBUS selected: %d mA", current);
 			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 
 			//Save TIM2 CNT value to ValPrev
@@ -228,6 +247,45 @@ void encoder_turn_isr(void) {
 
 		}
 		break;
+
+		case ADJUSTMENT_CURRENT_OCP:
+				{
+					//Get direction of encoder turning
+					if (encoderVal > encoderValPrev) {
+						currentOCPTemp += val;
+					} else {
+						currentOCPTemp -= val;
+					}
+
+					//If required temp value is within limits, assign it to voltage
+					if (currentMin <= currentOCPTemp && currentOCPTemp <= currentMax) {
+						current = currentOCPTemp;
+					} else {
+						currentOCPTemp = current;
+					}
+
+					// Get number of int numbers in voltage var
+					integer_part = (int)currentOCP;
+					num_digits = 0;
+
+					while (integer_part) {
+						integer_part = integer_part/10;
+						num_digits++;
+					}
+
+					//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
+					max7219_PrintItos(SEGMENT_2, num_digits, currentOCP, 4);
+
+					//Print to debug
+					char _str[30];
+					snprintf(_str,"OCP_I selected: %d mA", currentOCP);
+					USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+
+					//Save TIM2 CNT value to ValPrev
+					encoderValPrev = encoderVal;
+
+				}
+				break;
 
 		}
 	}
@@ -264,34 +322,19 @@ void button_isr(void){
 	switch (currentState){
 		case ADJUSTMENT_VOLTAGE:
 			switch (encoderPress) {
-			case 1:
-				val = 2;
-				break;
-			case 2:
-				val = 10;
-				break;
-			case 3:
-				val = 100;
-				break;
-			case 4:
-				val = 1000;
-				break;
+			case 1: val = 2; break;
+			case 2: val = 10; break;
+			case 3: val = 100; break;
+			case 4: val = 1000; break;
 			}
 		 break;
+		case ADJUSTMENT_CURRENT_OCP:
 		case ADJUSTMENT_CURRENT:
 			switch (encoderPress) {
-			case 1:
-				val = 5;
-				break;
-			case 2:
-				val = 10;
-				break;
-			case 3:
-				val = 100;
-				break;
-			case 4:
-				val = 1000;
-				break;
+			case 1: val = 5; break;
+			case 2: val = 10; break;
+			case 3: val = 100; break;
+			case 4: val = 1000; break;
 			}
 		 break;
 	}
@@ -343,7 +386,7 @@ void request_button_isr(void){
 	indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, voltage*10, current, PDO_SEL_METHOD_MAX_CUR);
 	//Print to debug
 	char _str[70];
-	sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, voltage*10, current);
+	snprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*voltage, current);
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 	USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, voltage*10, current);
 
@@ -364,13 +407,17 @@ void cur_vol_button_isr(void){
 	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
 
 	// Toggle the state
-	if (currentState == ADJUSTMENT_CURRENT)
+	if (currentState == ADJUSTMENT_CURRENT_OCP)
 	{
 		currentState = ADJUSTMENT_VOLTAGE;
 	}
-	else
+	else if (currentState == ADJUSTMENT_VOLTAGE)
 	{
 		currentState = ADJUSTMENT_CURRENT;
+	}
+	else
+	{
+		currentState = ADJUSTMENT_CURRENT_OCP;
 	}
 	encoderPress = 3;
 }
