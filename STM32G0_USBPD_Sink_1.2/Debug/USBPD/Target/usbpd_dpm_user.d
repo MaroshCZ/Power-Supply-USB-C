@@ -51,11 +51,11 @@ USBPD/Target/usbpd_dpm_user.o: ../USBPD/Target/usbpd_dpm_user.c \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_gpio.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_dma.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_exti.h \
- ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
  ../Drivers/CMSIS/Include/cmsis_compiler.h \
- ../USBPD/Target/usbpd_dpm_user.h ../USBPD/App/usbpd_pdo_defs.h \
+ ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
+ ../USBPD/Target/usbpd_dpm_user.h ../USBPD/App/usbpd_pdo_defs.h \
  ../USBPD/App/usbpd_dpm_core.h ../USBPD/Target/usbpd_dpm_conf.h \
  ../USBPD/Target/usbpd_vdm_user.h ../Utilities/GUI_INTERFACE/gui_api.h \
  ../Core/Inc/usbpd_gui_memmap.h ../USBPD/App/usbpd_pwr_if.h \
@@ -127,12 +127,12 @@ USBPD/Target/usbpd_dpm_user.o: ../USBPD/Target/usbpd_dpm_user.c \
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_gpio.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_dma.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_exti.h:
-../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
 ../Drivers/CMSIS/Include/cmsis_compiler.h:
+../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h:
+../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
 ../USBPD/Target/usbpd_dpm_user.h:
 ../USBPD/App/usbpd_pdo_defs.h:
-../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
 ../USBPD/App/usbpd_dpm_core.h:
 ../USBPD/Target/usbpd_dpm_conf.h:
 ../USBPD/Target/usbpd_vdm_user.h:

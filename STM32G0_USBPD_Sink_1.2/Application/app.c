@@ -12,6 +12,7 @@
 #include "usbpd_def.h"
 #include "usbpd_dpm_user.h"
 #include "usbpd_user_services.h"
+#include "usbpd_def.h"
 #include "string.h"
 #include "stdio.h"
 #include <stm32g0xx_ll_adc.h>
@@ -32,8 +33,10 @@ int voltageMin = 0; //voltage down limit
 int voltageMax = 2200; //voltage upper limit
 int current = 1000;
 int currentOCP = 1000;
+int V_TRIP;
+int dac_value = 500;
 int currentTemp = 0;
-int currentOCPTemp = 0;
+int currentOCPTemp = 1000;
 int currentMin = 0;
 int currentMax = 3000;
 int integer_part;
@@ -73,6 +76,7 @@ static uint8_t rxBuffer[RX_BUFFER_SIZE];
 static uint32_t rxIndex = 0;
 
 
+
 /*
  * Initialization function
  */
@@ -88,14 +92,16 @@ void app_init(void){
 	HAL_ADCEx_Calibration_Start(&hadc1);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&aADCxConvertedValues, ADC_NUM_OF_SAMPLES);
 	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
+	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
 
 	//Init 7 segment display
-	//max7219_Init( 7 );
-	//max7219_Decode_On();
+	max7219_Init( 7 );
+	max7219_Decode_On();
 
 	//Print decimal points and initial values
-	//max7219_PrintItos(SEGMENT_2, 4, current, 4);
-	//max7219_PrintItos(SEGMENT_1, 4, voltage, 3);
+	max7219_PrintItos(SEGMENT_2, 4, current, 4);
+	max7219_PrintItos(SEGMENT_1, 4, voltage, 3);
+
 
 
 }
@@ -143,13 +149,7 @@ void app_loop(void){
 		 break;
 		case(ADJUSTMENT_CURRENT_OCP):
 		{
-			//Based on user selected currentOCP calculate the required DAC out...
-			int V_TRIP = (currentOCP * R_OCP_MOHMS * G_OCP)/1000; // mV (mA * mOhms * Gain)
-			//Convert DAC_OUT voltage to 12B resolution
-			int dac_value = (V_TRIP / VDDA_APPLI) * __LL_ADC_DIGITAL_SCALE(LL_ADC_RESOLUTION_12B);
 
-			//Write output with DAC..
-			HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
 			//Blink currently selected digit
 			max7219_BlinkDigit(SEGMENT_2, &currentOCP, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
 		}
@@ -200,8 +200,8 @@ void encoder_turn_isr(void) {
 			max7219_PrintItos(SEGMENT_1, num_digits, voltage, 3);
 
 			//Print to debug
-			char _str[30];
-			snprintf(_str,"VBUS selected: %d mV", voltage*10);
+			char _str[40];
+			sprintf(_str,"VBUS selected: %d mV", voltage*10);
 			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 
 			//Save TIM2 CNT value to ValPrev
@@ -238,8 +238,8 @@ void encoder_turn_isr(void) {
 			max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
 
 			//Print to debug
-			char _str[30];
-			snprintf(_str,"IBUS selected: %d mA", current);
+			char _str[40];
+			sprintf(_str,"IBUS selected: %d mA", current);
 			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 
 			//Save TIM2 CNT value to ValPrev
@@ -259,9 +259,9 @@ void encoder_turn_isr(void) {
 
 					//If required temp value is within limits, assign it to voltage
 					if (currentMin <= currentOCPTemp && currentOCPTemp <= currentMax) {
-						current = currentOCPTemp;
+						currentOCP = currentOCPTemp;
 					} else {
-						currentOCPTemp = current;
+						currentOCPTemp = currentOCP;
 					}
 
 					// Get number of int numbers in voltage var
@@ -273,12 +273,20 @@ void encoder_turn_isr(void) {
 						num_digits++;
 					}
 
+					//Based on user selected currentOCP calculate the required DAC out...
+					V_TRIP = (currentOCP * R_OCP_MOHMS * G_OCP)/1000; // mV (mA * mOhms * Gain)
+					//Convert DAC_OUT voltage to 12B resolution
+					dac_value = (V_TRIP *4095) / VDDA_APPLI;//__LL_ADC_DIGITAL_SCALE(LL_ADC_RESOLUTION_12B);
+
+					//Write output with DAC..
+					HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
+
 					//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
 					max7219_PrintItos(SEGMENT_2, num_digits, currentOCP, 4);
 
 					//Print to debug
-					char _str[30];
-					snprintf(_str,"OCP_I selected: %d mA", currentOCP);
+					char _str[50];
+					sprintf(_str,"OCP_I selected: %d mA", currentOCP);
 					USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 
 					//Save TIM2 CNT value to ValPrev
@@ -361,8 +369,15 @@ void button_timer_isr(void){
  * Request button interrupt routine, request APDO with user voltage and current
  */
 void request_button_isr(void){
+	//HAL_GPIO_TogglePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin);
+	//Read SRC capability
+	//USBPD_StatusTypeDef status = USBPD_ERROR;
+	//status = USBPD_DPM_RequestGetSourceCapability(0);
+
 	//Mask unwanted button interrupts caused by debouncing on exti line 1 (PB1)
 	EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
+
+	//HAL_GPIO_WritePin(OCP_ALERT_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_RESET);
 
 	//Zero TIM7 counter and start counting
 	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
@@ -386,10 +401,11 @@ void request_button_isr(void){
 	indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, voltage*10, current, PDO_SEL_METHOD_MAX_CUR);
 	//Print to debug
 	char _str[70];
-	snprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*voltage, current);
+	sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*voltage, current);
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 	USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, voltage*10, current);
-
+	//HAL_Delay(2);
+	//HAL_GPIO_WritePin(OCP_ALERT_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_SET);
 }
 
 /*

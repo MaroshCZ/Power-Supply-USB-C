@@ -45,7 +45,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "usbpd_def.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -72,6 +72,8 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define VDDA_APPLI 3300
+#define HighZ_Pin GPIO_PIN_0
+#define HighZ_GPIO_Port GPIOA
 #define FLT_IN_TCPP_Pin GPIO_PIN_1
 #define FLT_IN_TCPP_GPIO_Port GPIOA
 #define OCP_DAC_LIMI_Pin GPIO_PIN_4
@@ -106,6 +108,7 @@ void Error_Handler(void);
 #define CC2_G4_GPIO_Port GPIOB
 #define OCP_ALERT_Pin GPIO_PIN_6
 #define OCP_ALERT_GPIO_Port GPIOB
+#define OCP_ALERT_EXTI_IRQn EXTI4_15_IRQn
 #define OCP_RESET_Pin GPIO_PIN_8
 #define OCP_RESET_GPIO_Port GPIOB
 #define RELAY_ON_OFF_Pin GPIO_PIN_10

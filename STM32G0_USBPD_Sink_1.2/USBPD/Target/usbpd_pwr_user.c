@@ -1363,7 +1363,7 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetCurrentOCP(uint32_t Instance, int32_t *pCurr
   */
 __weak int32_t BSP_PWR_VBUSGetCurrentOCP(uint32_t PortId)
 {
-  PWR_DEBUG_TRACE(PortId, "ADVICE: Obsolete BSP_PWR_VBUSGetCurrent");
+  PWR_DEBUG_TRACE(PortId, "ADVICE: Obsolete BSP_PWR_VBUSGetCurrentOCP");
 /* USER CODE BEGIN BSP_PWR_VBUSGetCurrent */
   int32_t currentOCP = 0;
 

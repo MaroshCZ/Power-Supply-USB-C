@@ -51,6 +51,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_gpio.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_dma.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_exti.h \
+ ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
+ ../Drivers/CMSIS/Include/cmsis_compiler.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
@@ -65,11 +67,10 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../USBPD/App/usbpd.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
- ../Drivers/CMSIS/Include/cmsis_compiler.h ../USBPD/App/usbpd_dpm_core.h \
- ../USBPD/Target/usbpd_dpm_conf.h ../USBPD/App/usbpd_pdo_defs.h \
- ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
- ../USBPD/Target/usbpd_dpm_user.h ../USBPD/Target/usbpd_vdm_user.h \
- ../Utilities/GUI_INTERFACE/gui_api.h ../Core/Inc/usbpd_gui_memmap.h \
+ ../USBPD/App/usbpd_dpm_core.h ../USBPD/Target/usbpd_dpm_conf.h \
+ ../USBPD/App/usbpd_pdo_defs.h ../USBPD/Target/usbpd_dpm_user.h \
+ ../USBPD/Target/usbpd_vdm_user.h ../Utilities/GUI_INTERFACE/gui_api.h \
+ ../Core/Inc/usbpd_gui_memmap.h \
  ../Middlewares/ST/STM32_USBPD_Library/Devices/STM32G0XX/inc/usbpd_hw_if.h \
  ../USBPD/Target/usbpd_devices_conf.h ../USBPD/Target/usbpd_pwr_user.h \
  ../USBPD/App/usbpd_pwr_if.h \
@@ -129,6 +130,8 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_gpio.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_dma.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_exti.h:
+../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
+../Drivers/CMSIS/Include/cmsis_compiler.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
@@ -143,11 +146,9 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../USBPD/App/usbpd.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
-../Drivers/CMSIS/Include/cmsis_compiler.h:
 ../USBPD/App/usbpd_dpm_core.h:
 ../USBPD/Target/usbpd_dpm_conf.h:
 ../USBPD/App/usbpd_pdo_defs.h:
-../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
 ../USBPD/Target/usbpd_dpm_user.h:
 ../USBPD/Target/usbpd_vdm_user.h:
 ../Utilities/GUI_INTERFACE/gui_api.h:

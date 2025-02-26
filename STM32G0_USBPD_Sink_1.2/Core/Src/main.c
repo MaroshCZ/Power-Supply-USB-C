@@ -710,13 +710,13 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, CS_MAX7219_Pin|OCP_RESET_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pin : FLT_IN_TCPP_Pin */
-  GPIO_InitStruct.Pin = FLT_IN_TCPP_Pin;
+  /*Configure GPIO pins : HighZ_Pin FLT_IN_TCPP_Pin */
+  GPIO_InitStruct.Pin = HighZ_Pin|FLT_IN_TCPP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(FLT_IN_TCPP_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SW2_DEBUG_BTN_Pin */
   GPIO_InitStruct.Pin = SW2_DEBUG_BTN_Pin;
@@ -724,8 +724,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(SW2_DEBUG_BTN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CC1_G4_Pin CC2_G4_Pin OCP_ALERT_Pin */
-  GPIO_InitStruct.Pin = CC1_G4_Pin|CC2_G4_Pin|OCP_ALERT_Pin;
+  /*Configure GPIO pins : CC1_G4_Pin CC2_G4_Pin */
+  GPIO_InitStruct.Pin = CC1_G4_Pin|CC2_G4_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -748,6 +748,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(ENC_TOGGLE_UNITS_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : OCP_ALERT_Pin */
+  GPIO_InitStruct.Pin = OCP_ALERT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(OCP_ALERT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : RELAY_ON_OFF_Pin */
   GPIO_InitStruct.Pin = RELAY_ON_OFF_Pin;
@@ -792,7 +798,27 @@ is pressed */
 		int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltage, current, currentOCP);
 
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+		HAL_GPIO_TogglePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin);
 
+			/* Only applies if an error was specified (= if the case couldn't success)*/
+			/**
+			if (USBPD_OK != status)
+			{
+				switch (status)
+				{
+				  case USBPD_BUSY:
+					error = GUI_REJ_DPM_NOT_READY;
+					break;
+				  case USBPD_TIMEOUT:
+					error = GUI_REJ_DPM_TIMEOUT;
+					break;
+				  case USBPD_NOTSUPPORTED:
+				  case USBPD_ERROR:
+				  default:
+					error = GUI_REJ_DPM_REJECT;
+					break;
+				}
+			}**/
 
 	}
 
