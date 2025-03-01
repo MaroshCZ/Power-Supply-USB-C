@@ -795,7 +795,7 @@ void USER_SERV_SNK_BuildRequestedRDO(uint8_t PortNum,
       {
         DPM_Ports[PortNum].DPM_RequestedCurrent           = ma;
         rdo.FixedVariableRDO.OperatingCurrentIn10mAunits  = ma / 10U;
-        rdo.FixedVariableRDO.MaxOperatingCurrent10mAunits = ma / 10U;
+        rdo.FixedVariableRDO.MaxOperatingCurrent10mAunits = pdo.SRCFixedPDO.MaxCurrentIn10mAunits; //ma / 10U;
       }
       break;
 
@@ -847,79 +847,143 @@ uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
 	uint32_t allowablepower;
 	uint32_t selpower;
 	uint32_t allowablecurrent;
-	uint32_t selcurrent;
+	uint32_t selcurrent = 0;
 	uint32_t curr_index = DPM_NO_SRC_PDO_FOUND;
 	uint32_t temp_index;
 	USBPD_USER_SettingsTypeDef *puser = (USBPD_USER_SettingsTypeDef *)&DPM_USER_Settings[PortNum];
 
-	selcurrent     = 0;
+	uint32_t RDOposition;
+	uint32_t nbsrcAPDO = 0;
+	uint32_t nbsrcFixedPDO = 0;
+
+
+	//Get current PDO position
+	USBPD_HandleTypeDef *pdhandle = &DPM_Ports[PortNum];
+	RDOposition = pdhandle->DPM_RDOPosition;
 
 	//Get number of source PDOs
 	nbsrcpdo = DPM_Ports[PortNum].DPM_NumberOfRcvSRCPDO;
 	//Get array list of SRC PDOs
 	ptpdoarray = DPM_Ports[PortNum].DPM_ListOfRcvSRCPDO;
 
-	/* Check SRC PDO value according to its type */
+	/* Get number of APDOs and FixedPDOs */
 	for (temp_index = 0; temp_index < nbsrcpdo; temp_index++)
 	{
 		srcpdo.d32 = ptpdoarray[temp_index];
 
 		switch (srcpdo.GenericPDO.PowerObject)
 		{
-		/* SRC Fixed Supply PDO */
-		case USBPD_CORE_PDO_TYPE_FIXED:
-		{
-		}
-		/* Augmented Power Data Object (APDO) */
-		case USBPD_CORE_PDO_TYPE_APDO:
-		{
-			uint16_t srcmaxvoltage100mv;
-			uint16_t srcminvoltage100mv;
-			uint16_t srcmaxcurrent50ma;
-			//Extract voltage and current limits of given SRC APDO
-			srcmaxvoltage100mv = srcpdo.SRCSNKAPDO.MaxVoltageIn100mV;
-			srcminvoltage100mv = srcpdo.SRCSNKAPDO.MinVoltageIn100mV;
-			srcmaxcurrent50ma = srcpdo.SRCSNKAPDO.MaxCurrentIn50mAunits;
-
-			/*Check if reqvoltage falls within SRC_APDO voltage range*/
-			if ( (PWR_DECODE_100MV(srcminvoltage100mv) <= reqvoltage) && (reqvoltage <= PWR_DECODE_100MV(srcmaxvoltage100mv)) )
+			/* SRC Fixed Supply PDO */
+			case USBPD_CORE_PDO_TYPE_FIXED:
 			{
-				/*Check that reqcurrent is smaller or equal to srcmaxcurrent*/
-				if ( (reqcurrent <= PWR_DECODE_50MA(srcmaxcurrent50ma)) && (reqcurrent != 0) )
+				nbsrcFixedPDO++;
+			}
+			/* Augmented Power Data Object (APDO) */
+			case USBPD_CORE_PDO_TYPE_APDO:
+			{
+				//nbsrcAPDO++;
+				nbsrcAPDO=0;
+			}
+		}
+	}
+
+
+	// Search for matching APDO or find next FixedPDO
+	if (nbsrcAPDO > 0)
+	{
+
+		/* Check SRC PDO value according to its type */
+		for (temp_index = 0; temp_index < nbsrcpdo; temp_index++)
+		{
+			srcpdo.d32 = ptpdoarray[temp_index];
+
+			switch (srcpdo.GenericPDO.PowerObject)
+			{
+			/* SRC Fixed Supply PDO */
+			case USBPD_CORE_PDO_TYPE_FIXED:
+			{
+			}
+			/* Augmented Power Data Object (APDO) */
+			case USBPD_CORE_PDO_TYPE_APDO:
+			{
+				uint16_t srcmaxvoltage100mv;
+				uint16_t srcminvoltage100mv;
+				uint16_t srcmaxcurrent50ma;
+				//Extract voltage and current limits of given SRC APDO
+				srcmaxvoltage100mv = srcpdo.SRCSNKAPDO.MaxVoltageIn100mV;
+				srcminvoltage100mv = srcpdo.SRCSNKAPDO.MinVoltageIn100mV;
+				srcmaxcurrent50ma = srcpdo.SRCSNKAPDO.MaxCurrentIn50mAunits;
+
+				/*Check if reqvoltage falls within SRC_APDO voltage range*/
+				if ( (PWR_DECODE_100MV(srcminvoltage100mv) <= reqvoltage) && (reqvoltage <= PWR_DECODE_100MV(srcmaxvoltage100mv)) )
 				{
-					/*Convert srcmaxcurrent into mV*/
-					allowablecurrent = PWR_DECODE_50MA(srcmaxcurrent50ma);
-
-					/*Find the best APDO index based on the method */
-					switch(Method)
+					/*Check that reqcurrent is smaller or equal to srcmaxcurrent*/
+					if ( (reqcurrent <= PWR_DECODE_50MA(srcmaxcurrent50ma)) && (reqcurrent != 0) )
 					{
-					case PDO_SEL_METHOD_MAX_CUR:
-						if (allowablecurrent > selcurrent)
+						/*Convert srcmaxcurrent into mV*/
+						allowablecurrent = PWR_DECODE_50MA(srcmaxcurrent50ma);
+
+						/*Find the best APDO index based on the method */
+						switch(Method)
 						{
-							/* Consider the current PDO the best one until now */
+						case PDO_SEL_METHOD_MAX_CUR:
+							if (allowablecurrent > selcurrent)
+							{
+								/* Consider the current PDO the best one until now */
+								curr_index = temp_index;
+								selcurrent = allowablecurrent;
+							}
+							break;
+
+						case PDO_SEL_METHOD_MIN_CUR:
+							if ((allowablecurrent < selcurrent) || (selcurrent == 0))
+							{
+								/* Consider the current PDO the best one until now */
+								curr_index = temp_index;
+								selcurrent = allowablecurrent;
+							}
+							break;
+
+						default:
+							/* Default behavior: last PDO is selected */
 							curr_index = temp_index;
 							selcurrent = allowablecurrent;
 						}
-						break;
-
-					case PDO_SEL_METHOD_MIN_CUR:
-						if ((allowablecurrent < selcurrent) || (selcurrent == 0))
-						{
-							/* Consider the current PDO the best one until now */
-							curr_index = temp_index;
-							selcurrent = allowablecurrent;
-						}
-						break;
-
-					default:
-						/* Default behavior: last PDO is selected */
-						curr_index = temp_index;
-						selcurrent = allowablecurrent;
 					}
 				}
 			}
+
+			}
+		}
+	}
+
+	else
+	{
+		uint32_t start_index = RDOposition;
+		uint32_t found_fixed_pdo = 0;
+
+		// Start searching for the next Fixed PDO
+		for (uint32_t i = 0; i < nbsrcpdo; i++)
+		{
+			// Increment and wrap around if necessary
+			uint32_t check_index = (start_index + i) % nbsrcpdo;
+
+			// Load the PDO
+			srcpdo.d32 = ptpdoarray[check_index];
+
+			// Check if it's a Fixed PDO
+			if (srcpdo.GenericPDO.PowerObject == USBPD_CORE_PDO_TYPE_FIXED)
+			{
+				curr_index = check_index;
+				found_fixed_pdo = 1;
+				break;
+			}
 		}
 
+		// Default to the first Fixed PDO if none found (failsafe)
+		if (!found_fixed_pdo)
+		{
+			curr_index = 0;
 		}
 	}
 

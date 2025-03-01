@@ -4,4 +4,4 @@
 ../USBPD/usbpd_user_services.c:512:10:USER_SERV_FindVoltageIndex	72	static
 ../USBPD/usbpd_user_services.c:652:6:USER_SERV_SNK_BuildRDOfromSelectedPDO	176	static
 ../USBPD/usbpd_user_services.c:767:6:USER_SERV_SNK_BuildRequestedRDO	48	static
-../USBPD/usbpd_user_services.c:835:10:USER_SERV_FindSRCIndex	80	static
+../USBPD/usbpd_user_services.c:835:10:USER_SERV_FindSRCIndex	112	static
