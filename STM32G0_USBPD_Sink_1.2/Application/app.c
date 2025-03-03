@@ -94,6 +94,10 @@ void app_init(void){
 	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
 	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
 
+	//Wait for hardware initialization and then turn DB to HIGH (according to TCPP01-M12 datasheet 6.5)
+	HAL_Delay(10000);
+	HAL_GPIO_WritePin(DB_OUT_GPIO_Port, DB_OUT_Pin, GPIO_PIN_SET);
+
 	//Init 7 segment display
 	max7219_Init( 7 );
 	max7219_Decode_On();

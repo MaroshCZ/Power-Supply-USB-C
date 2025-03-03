@@ -190,10 +190,10 @@ void HAL_DAC_MspInit(DAC_HandleTypeDef* hdac)
     /**DAC1 GPIO Configuration
     PA4     ------> DAC1_OUT1
     */
-    GPIO_InitStruct.Pin = OCP_DAC_LIMI_Pin;
+    GPIO_InitStruct.Pin = OCP_DAC_LIMIT_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
     GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(OCP_DAC_LIMI_GPIO_Port, &GPIO_InitStruct);
+    HAL_GPIO_Init(OCP_DAC_LIMIT_GPIO_Port, &GPIO_InitStruct);
 
     /* DAC1 interrupt Init */
     HAL_NVIC_SetPriority(TIM6_DAC_LPTIM1_IRQn, 3, 0);
@@ -224,7 +224,7 @@ void HAL_DAC_MspDeInit(DAC_HandleTypeDef* hdac)
     /**DAC1 GPIO Configuration
     PA4     ------> DAC1_OUT1
     */
-    HAL_GPIO_DeInit(OCP_DAC_LIMI_GPIO_Port, OCP_DAC_LIMI_Pin);
+    HAL_GPIO_DeInit(OCP_DAC_LIMIT_GPIO_Port, OCP_DAC_LIMIT_Pin);
 
     /* DAC1 interrupt DeInit */
     HAL_NVIC_DisableIRQ(TIM6_DAC_LPTIM1_IRQn);

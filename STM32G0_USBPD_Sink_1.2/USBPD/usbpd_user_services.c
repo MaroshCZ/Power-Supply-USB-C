@@ -882,7 +882,7 @@ uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
 			case USBPD_CORE_PDO_TYPE_APDO:
 			{
 				//nbsrcAPDO++;
-				nbsrcAPDO=0;
+				nbsrcAPDO++;
 			}
 		}
 	}

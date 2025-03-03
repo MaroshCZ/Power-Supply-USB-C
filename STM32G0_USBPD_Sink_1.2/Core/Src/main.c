@@ -707,10 +707,10 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, CS_MAX7219_Pin|OCP_RESET_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, LED_LOCK_Pin|RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, DB_OUT_Pin|CS_MAX7219_Pin|LED_USER_Pin|OCP_RESET_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : HighZ_Pin FLT_IN_TCPP_Pin */
   GPIO_InitStruct.Pin = HighZ_Pin|FLT_IN_TCPP_Pin;
@@ -724,10 +724,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(SW2_DEBUG_BTN_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : CC1_G4_Pin CC2_G4_Pin */
-  GPIO_InitStruct.Pin = CC1_G4_Pin|CC2_G4_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  /*Configure GPIO pin : LED_LOCK_Pin */
+  GPIO_InitStruct.Pin = LED_LOCK_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LED_LOCK_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : DB_OUT_Pin LED_USER_Pin */
+  GPIO_InitStruct.Pin = DB_OUT_Pin|LED_USER_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : SW3_OFF_ON_Pin SW1_TOGGLE_I_V_Pin */
@@ -748,6 +756,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(ENC_TOGGLE_UNITS_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : CC2_G4_Pin */
+  GPIO_InitStruct.Pin = CC2_G4_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(CC2_G4_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : OCP_ALERT_Pin */
   GPIO_InitStruct.Pin = OCP_ALERT_Pin;
