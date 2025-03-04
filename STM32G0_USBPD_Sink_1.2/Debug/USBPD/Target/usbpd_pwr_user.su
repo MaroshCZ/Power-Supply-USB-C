@@ -42,4 +42,4 @@
 ../USBPD/Target/usbpd_pwr_user.c:1270:16:BSP_USBPD_PWR_VCCSetState	32	static
 ../USBPD/Target/usbpd_pwr_user.c:1299:13:BSP_USBPD_PWR_EventCallback	24	static
 ../USBPD/Target/usbpd_pwr_user.c:1325:16:BSP_USBPD_PWR_VBUSGetCurrentOCP	32	static
-../USBPD/Target/usbpd_pwr_user.c:1364:16:BSP_PWR_VBUSGetCurrentOCP	32	static
+../USBPD/Target/usbpd_pwr_user.c:1364:16:BSP_PWR_VBUSGetCurrentOCP	24	static

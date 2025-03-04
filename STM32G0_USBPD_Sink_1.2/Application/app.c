@@ -94,10 +94,6 @@ void app_init(void){
 	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
 	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
 
-	//Wait for hardware initialization and then turn DB to HIGH (according to TCPP01-M12 datasheet 6.5)
-	HAL_Delay(10000);
-	HAL_GPIO_WritePin(DB_OUT_GPIO_Port, DB_OUT_Pin, GPIO_PIN_SET);
-
 	//Init 7 segment display
 	max7219_Init( 7 );
 	max7219_Decode_On();
@@ -106,6 +102,9 @@ void app_init(void){
 	max7219_PrintItos(SEGMENT_2, 4, current, 4);
 	max7219_PrintItos(SEGMENT_1, 4, voltage, 3);
 
+	//Wait for hardware initialization and then turn DB to HIGH (according to TCPP01-M12 datasheet 6.5)
+	HAL_Delay(2000);
+	HAL_GPIO_WritePin(DB_OUT_GPIO_Port, DB_OUT_Pin, GPIO_PIN_SET);
 
 
 }
@@ -440,6 +439,17 @@ void cur_vol_button_isr(void){
 		currentState = ADJUSTMENT_CURRENT_OCP;
 	}
 	encoderPress = 3;
+
+	//Get Voltage level into TRACE
+	char _str[60];
+	uint32_t voltage = BSP_PWR_VBUSGetVoltage(0);
+	uint32_t current= BSP_PWR_VBUSGetCurrent(0);
+	uint32_t currentOCP= BSP_PWR_VBUSGetCurrentOCP(0);
+
+	// Use snprintf to limit the number of characters written
+	int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltage, current, currentOCP);
+
+	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 }
 
 #define MAX_LINE_PDO      7u

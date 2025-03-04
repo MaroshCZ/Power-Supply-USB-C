@@ -802,8 +802,8 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
 is pressed */
 	{
 		//Get Voltage level into TRACE
+		/*
 		char _str[60];
-		//BSP_PWR_VBUSGetVoltage(0);
 		uint32_t voltage = BSP_PWR_VBUSGetVoltage(0);
 		uint32_t current= BSP_PWR_VBUSGetCurrent(0);
 		uint32_t currentOCP= BSP_PWR_VBUSGetCurrentOCP(0);
@@ -812,6 +812,8 @@ is pressed */
 		int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltage, current, currentOCP);
 
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+		*/
+
 		HAL_GPIO_TogglePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin);
 
 			/* Only applies if an error was specified (= if the case couldn't success)*/
