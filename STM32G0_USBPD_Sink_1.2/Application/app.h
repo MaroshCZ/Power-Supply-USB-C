@@ -36,6 +36,7 @@ static void sourcecapa_limits(void);
 #define ADC_NUM_OF_SAMPLES 3
 extern ADC_HandleTypeDef hadc1;
 extern DAC_HandleTypeDef hdac1;
+extern TIM_HandleTypeDef htim3;
 
 
 /* Variable containing ADC conversions results

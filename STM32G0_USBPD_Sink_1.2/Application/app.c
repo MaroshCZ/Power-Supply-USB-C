@@ -15,6 +15,7 @@
 #include "usbpd_def.h"
 #include "string.h"
 #include "stdio.h"
+#include "stdbool.h"
 #include <stm32g0xx_ll_adc.h>
 
 #include "usb_device.h"
@@ -27,15 +28,15 @@ int encoderVal; //TIM2 CNT register reading
 int encoderValPrev;
 int encoderPress = 2; //currently selected digit
 int val = 10; //variable holding current voltage addition
-volatile int voltage = 600; //final voltage value
-int voltageTemp = 0; //temporary voltage value
-int voltageMin = 0; //voltage down limit
+int voltage = 330; //final voltage value
+int voltageTemp = 330; //temporary voltage value
+int voltageMin = 330; //voltage down limit
 int voltageMax = 2200; //voltage upper limit
 int current = 1000;
 int currentOCP = 1000;
 int V_TRIP;
 int dac_value = 500;
-int currentTemp = 0;
+int currentTemp = 1000;
 int currentOCPTemp = 1000;
 int currentMin = 0;
 int currentMax = 3000;
@@ -43,6 +44,7 @@ int integer_part;
 int num_digits;
 int indexAPDO;
 int indexSRCAPDO;
+bool limitReadFlag = false;
 uint8_t isMinVoltageAPDOInitialized = 0; // Flag to indicate if minvoltageAPDO has been initialized
 uint32_t maxvoltageAPDO;
 uint32_t minvoltageAPDO;
@@ -74,6 +76,7 @@ volatile Adjustment_StateTypedef currentState = ADJUSTMENT_VOLTAGE;
 #define RX_BUFFER_SIZE 64
 static uint8_t rxBuffer[RX_BUFFER_SIZE];
 static uint32_t rxIndex = 0;
+uint32_t counter = 0;
 
 
 
@@ -88,6 +91,10 @@ void app_init(void){
 	LL_TIM_EnableIT_UPDATE(TIM7); //Enable interrupt generation when timer goes to max value and UPDATE event flag is set
 	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
 
+	//TIM3 initialization of encoder
+	HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
+	__HAL_TIM_SET_COUNTER(&htim3, 30000);
+
 	//Calibrate and start ADC sensing with DMA
 	HAL_ADCEx_Calibration_Start(&hadc1);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&aADCxConvertedValues, ADC_NUM_OF_SAMPLES);
@@ -100,11 +107,12 @@ void app_init(void){
 
 	//Print decimal points and initial values
 	max7219_PrintItos(SEGMENT_2, 4, current, 4);
-	max7219_PrintItos(SEGMENT_1, 4, voltage, 3);
+	max7219_PrintItos(SEGMENT_1, 3, voltage, 3);
 
 	//Wait for hardware initialization and then turn DB to HIGH (according to TCPP01-M12 datasheet 6.5)
 	HAL_Delay(2000);
 	HAL_GPIO_WritePin(DB_OUT_GPIO_Port, DB_OUT_Pin, GPIO_PIN_SET);
+
 
 
 }
@@ -134,6 +142,14 @@ static uint8_t PWR_StartVBusSensing(void)
  * Loop function
  */
 void app_loop(void){
+	/*
+	if (limitReadFlag == false) {
+		sourcecapa_limits();
+		limitReadFlag = true;
+		voltageMin = maxvoltageAPDO/10;
+		voltageMax = minvoltageAPDO/10;
+		voltage = voltageMin;
+	}*/
 
 	//Blink digit based on specified adjustment
 	switch(currentState)
@@ -160,6 +176,7 @@ void app_loop(void){
 	}
 
 	CDC_Transmit_FS(data, strlen(data));
+
 }
 
 
@@ -177,7 +194,7 @@ void encoder_turn_isr(void) {
 		case ADJUSTMENT_VOLTAGE:
 		{
 			//Get direction of encoder turning
-			if (encoderVal > encoderValPrev) {
+			if (encoderVal < encoderValPrev) {
 				voltageTemp += val;
 			} else {
 				voltageTemp -= val;
@@ -215,7 +232,7 @@ void encoder_turn_isr(void) {
 		case ADJUSTMENT_CURRENT:
 		{
 			//Get direction of encoder turning
-			if (encoderVal > encoderValPrev) {
+			if (encoderVal < encoderValPrev) {
 				currentTemp += val;
 			} else {
 				currentTemp -= val;
@@ -254,7 +271,7 @@ void encoder_turn_isr(void) {
 		case ADJUSTMENT_CURRENT_OCP:
 				{
 					//Get direction of encoder turning
-					if (encoderVal > encoderValPrev) {
+					if (encoderVal < encoderValPrev) {
 						currentOCPTemp += val;
 					} else {
 						currentOCPTemp -= val;
@@ -438,16 +455,15 @@ void cur_vol_button_isr(void){
 	{
 		currentState = ADJUSTMENT_CURRENT_OCP;
 	}
-	encoderPress = 3;
 
 	//Get Voltage level into TRACE
 	char _str[60];
-	uint32_t voltage = BSP_PWR_VBUSGetVoltage(0);
-	uint32_t current= BSP_PWR_VBUSGetCurrent(0);
-	uint32_t currentOCP= BSP_PWR_VBUSGetCurrentOCP(0);
+	uint32_t voltageADC = BSP_PWR_VBUSGetVoltage(0);
+	uint32_t currentADC= BSP_PWR_VBUSGetCurrent(0);
+	uint32_t currentOCP_ADC= BSP_PWR_VBUSGetCurrentOCP(0);
 
 	// Use snprintf to limit the number of characters written
-	int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltage, current, currentOCP);
+	int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltageADC, currentADC, currentOCP_ADC);
 
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 }
