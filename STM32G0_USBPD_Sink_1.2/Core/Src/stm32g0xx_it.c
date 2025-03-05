@@ -150,6 +150,9 @@ void EXTI4_15_IRQHandler(void)
   if (__HAL_GPIO_EXTI_GET_IT(ENC_TOGGLE_UNITS_Pin) != RESET){
 	  button_isr();
   }
+  if (__HAL_GPIO_EXTI_GET_IT(SW2_DEBUG_BTN_Pin) != RESET){
+	  lock_button_isr();
+    }
   /* USER CODE END EXTI4_15_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(SW2_DEBUG_BTN_Pin);
   HAL_GPIO_EXTI_IRQHandler(OCP_ALERT_Pin);

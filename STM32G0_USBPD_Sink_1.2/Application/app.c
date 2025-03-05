@@ -62,15 +62,24 @@ typedef enum {
 	ADJUSTMENT_CURRENT_OCP = 0x2u   /*!< CurrentOCP adjustment state */
 } AdjustmentState;
 
+typedef enum {
+	OUTPUT_OFF_STATE = 0x0u,      /*!< Current adjustment state */
+	OUTPUT_ON_STATE = 0x1u,      /*!< Voltage adjustment state */
+
+} OutputState;
+
+
 //USB communication
 uint8_t *data = "Hello World from USB CDC\n";
 uint8_t usb_buffer[64];
 
 // Define a typedef for the state variable
 typedef AdjustmentState Adjustment_StateTypedef;
+typedef OutputState Output_StateTypedef;
 
 // Declare a variable to hold the current state
 volatile Adjustment_StateTypedef currentState = ADJUSTMENT_VOLTAGE;
+volatile Output_StateTypedef outputState = OUTPUT_OFF_STATE;
 
 /*Add variables for LUPART2*/
 #define RX_BUFFER_SIZE 64
@@ -93,7 +102,9 @@ void app_init(void){
 
 	//TIM3 initialization of encoder
 	HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
-	__HAL_TIM_SET_COUNTER(&htim3, 30000);
+	__HAL_TIM_SET_COUNTER(&htim3, 30000); //write non 0 value to avoid shift from 0 -> max value
+	encoderVal = __HAL_TIM_GET_COUNTER(&htim3)/4;
+	encoderValPrev = encoderVal;
 
 	//Calibrate and start ADC sensing with DMA
 	HAL_ADCEx_Calibration_Start(&hadc1);
@@ -151,7 +162,9 @@ void app_loop(void){
 		voltage = voltageMin;
 	}*/
 
+
 	//Blink digit based on specified adjustment
+	/*
 	switch(currentState)
 	{
 		case(ADJUSTMENT_VOLTAGE):
@@ -173,9 +186,79 @@ void app_loop(void){
 			max7219_BlinkDigit(SEGMENT_2, &currentOCP, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
 		}
 		break;
-	}
+	}*/
 
-	CDC_Transmit_FS(data, strlen(data));
+	switch(outputState)
+		{
+			case(OUTPUT_OFF_STATE):
+			{
+				switch(currentState)
+					{
+					case(ADJUSTMENT_VOLTAGE):
+					{
+						//Blink currently selected digit
+						max7219_BlinkDigit(SEGMENT_1, &voltage, encoderPress, 500, 3); //pass voltage address to BlinkDigit function
+					}
+					 break;
+					case(ADJUSTMENT_CURRENT):
+					{
+						//Blink currently selected digit
+						max7219_BlinkDigit(SEGMENT_2, &current, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
+					}
+					break;
+					case(ADJUSTMENT_CURRENT_OCP):
+							{
+
+								//Blink currently selected digit
+								max7219_BlinkDigit(SEGMENT_2, &currentOCP, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
+							}
+							break;
+					}
+
+			}
+			break;
+
+			case(OUTPUT_ON_STATE):
+			{
+
+				uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 t oget centivolts since only 4 digit display..
+				uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
+
+				//Display output voltage
+				integer_part = (int)vol;
+				num_digits = 0;
+
+				while (integer_part) {
+					integer_part = integer_part/10;
+					num_digits++;
+				}
+
+
+				max7219_PrintItos(SEGMENT_1, num_digits, vol, 3);
+
+				//Display output current
+				integer_part = (int)cur;
+				num_digits = 0;
+
+				while (integer_part) {
+					integer_part = integer_part/10;
+					num_digits++;
+				}
+				max7219_PrintItos(SEGMENT_2, num_digits, cur, 4);
+
+				HAL_Delay(250);
+			}
+			break;
+		}
+
+
+
+
+
+
+
+
+	//CDC_Transmit_FS(data, strlen(data));
 
 }
 
@@ -466,6 +549,45 @@ void cur_vol_button_isr(void){
 	int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltageADC, currentADC, currentOCP_ADC);
 
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+}
+
+void lock_button_isr(void){
+	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PB2)
+	EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
+
+	//Set debouncing time in ms
+	TIM7->ARR = 200;
+
+	//Zero TIM7 counter and start counting
+	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
+	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
+
+
+	if (outputState == OUTPUT_OFF_STATE)
+			{
+				outputState = OUTPUT_ON_STATE;
+			}
+			else {
+				outputState = OUTPUT_OFF_STATE;
+				//Display voltage
+				integer_part = (int)voltage;
+				num_digits = 0;
+
+				while (integer_part) {
+					integer_part = integer_part/10;
+					num_digits++;
+				}
+				max7219_PrintItos(SEGMENT_1, num_digits, voltage, 3);
+				//Display current
+				integer_part = (int)current;
+				num_digits = 0;
+
+				while (integer_part) {
+					integer_part = integer_part/10;
+					num_digits++;
+				}
+				max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
+			}
 }
 
 #define MAX_LINE_PDO      7u
