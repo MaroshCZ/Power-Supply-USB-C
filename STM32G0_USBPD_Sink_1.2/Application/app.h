@@ -31,6 +31,7 @@ void button_timer_isr(void);
 void cur_vol_button_isr(void);
 void request_button_isr(void);
 void lock_button_isr(void);
+void ocp_alert_isr(void);
 
 static void sourcecapa_limits(void);
 

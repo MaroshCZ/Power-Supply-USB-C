@@ -207,12 +207,12 @@ void app_loop(void){
 					}
 					break;
 					case(ADJUSTMENT_CURRENT_OCP):
-							{
+					{
 
-								//Blink currently selected digit
-								max7219_BlinkDigit(SEGMENT_2, &currentOCP, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
-							}
-							break;
+						//Blink currently selected digit
+						max7219_BlinkDigit(SEGMENT_2, &currentOCP, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
+					}
+					break;
 					}
 
 			}
@@ -250,13 +250,6 @@ void app_loop(void){
 			}
 			break;
 		}
-
-
-
-
-
-
-
 
 	//CDC_Transmit_FS(data, strlen(data));
 
@@ -588,6 +581,14 @@ void lock_button_isr(void){
 				}
 				max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
 			}
+}
+
+void ocp_alert_isr(void) {
+	//Disable relay
+	HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
+
+	//Change output state
+	outputState = OUTPUT_OFF_STATE;
 }
 
 #define MAX_LINE_PDO      7u
