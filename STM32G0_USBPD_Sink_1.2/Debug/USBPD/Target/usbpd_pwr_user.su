@@ -6,8 +6,8 @@
 ../USBPD/Target/usbpd_pwr_user.c:226:26:BSP_PWR_VBUSSetVoltage_Variable	40	static
 ../USBPD/Target/usbpd_pwr_user.c:251:26:BSP_PWR_VBUSSetVoltage_Battery	40	static
 ../USBPD/Target/usbpd_pwr_user.c:275:26:BSP_PWR_VBUSSetVoltage_APDO	32	static
-../USBPD/Target/usbpd_pwr_user.c:295:17:BSP_PWR_VBUSGetVoltage	24	static
-../USBPD/Target/usbpd_pwr_user.c:315:16:BSP_PWR_VBUSGetCurrent	24	static
+../USBPD/Target/usbpd_pwr_user.c:295:17:BSP_PWR_VBUSGetVoltage	32	static
+../USBPD/Target/usbpd_pwr_user.c:315:16:BSP_PWR_VBUSGetCurrent	32	static
 ../USBPD/Target/usbpd_pwr_user.c:340:26:BSP_PWR_VCONNInit	24	static
 ../USBPD/Target/usbpd_pwr_user.c:362:26:BSP_PWR_VCONNDeInit	24	static
 ../USBPD/Target/usbpd_pwr_user.c:384:26:BSP_PWR_VCONNOn	24	static

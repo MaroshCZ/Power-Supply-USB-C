@@ -113,6 +113,9 @@ void Error_Handler(void);
 #define OCP_ALERT_Pin GPIO_PIN_6
 #define OCP_ALERT_GPIO_Port GPIOB
 #define OCP_ALERT_EXTI_IRQn EXTI4_15_IRQn
+#define OCP_ALERT2_Pin GPIO_PIN_7
+#define OCP_ALERT2_GPIO_Port GPIOB
+#define OCP_ALERT2_EXTI_IRQn EXTI4_15_IRQn
 #define OCP_RESET_Pin GPIO_PIN_8
 #define OCP_RESET_GPIO_Port GPIOB
 #define RELAY_ON_OFF_Pin GPIO_PIN_10

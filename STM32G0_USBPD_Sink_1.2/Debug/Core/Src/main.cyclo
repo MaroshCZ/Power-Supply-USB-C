@@ -32,7 +32,7 @@
 ../Core/Src/main.c:592:13:MX_UCPD1_Init	1
 ../Core/Src/main.c:672:13:MX_DMA_Init	1
 ../Core/Src/main.c:696:13:MX_GPIO_Init	1
-../Core/Src/main.c:798:6:HAL_GPIO_EXTI_Falling_Callback	2
-../Core/Src/main.c:850:6:StartDefaultTask	1
-../Core/Src/main.c:870:6:HAL_TIM_PeriodElapsedCallback	2
-../Core/Src/main.c:888:6:Error_Handler	1
+../Core/Src/main.c:795:6:HAL_GPIO_EXTI_Falling_Callback	3
+../Core/Src/main.c:873:6:StartDefaultTask	1
+../Core/Src/main.c:893:6:HAL_TIM_PeriodElapsedCallback	2
+../Core/Src/main.c:911:6:Error_Handler	1

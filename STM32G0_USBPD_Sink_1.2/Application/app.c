@@ -31,9 +31,11 @@ int val = 10; //variable holding current voltage addition
 int voltage = 330; //final voltage value
 int voltageTemp = 330; //temporary voltage value
 int voltageMin = 330; //voltage down limit
-int voltageMax = 2200; //voltage upper limit
+int voltageMax = 2100; //voltage upper limit
 int current = 1000;
 int currentOCP = 1000;
+int cur; //output current
+int vol; //output voltage
 int V_TRIP;
 int dac_value = 500;
 int currentTemp = 1000;
@@ -44,6 +46,7 @@ int integer_part;
 int num_digits;
 int indexAPDO;
 int indexSRCAPDO;
+int ocp_reset_needed = 0;
 bool limitReadFlag = false;
 uint8_t isMinVoltageAPDOInitialized = 0; // Flag to indicate if minvoltageAPDO has been initialized
 uint32_t maxvoltageAPDO;
@@ -124,6 +127,7 @@ void app_init(void){
 	HAL_Delay(2000);
 	HAL_GPIO_WritePin(DB_OUT_GPIO_Port, DB_OUT_Pin, GPIO_PIN_SET);
 
+	//HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_SET);
 
 
 }
@@ -188,6 +192,14 @@ void app_loop(void){
 		break;
 	}*/
 
+	if (ocp_reset_needed == 1) {
+		HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_RESET);
+		HAL_Delay(1);
+		HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_SET);
+		ocp_reset_needed = 0;
+	}
+
+
 	switch(outputState)
 		{
 			case(OUTPUT_OFF_STATE):
@@ -220,7 +232,6 @@ void app_loop(void){
 
 			case(OUTPUT_ON_STATE):
 			{
-
 				uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 t oget centivolts since only 4 digit display..
 				uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
 
@@ -246,7 +257,8 @@ void app_loop(void){
 				}
 				max7219_PrintItos(SEGMENT_2, num_digits, cur, 4);
 
-				HAL_Delay(250);
+				HAL_Delay(500);
+
 			}
 			break;
 		}
@@ -279,9 +291,14 @@ void encoder_turn_isr(void) {
 			//If required temp value is within limits, assign it to voltage
 			if (voltageMin <= voltageTemp && voltageTemp <= voltageMax) {
 				voltage = voltageTemp;
+			} else if (voltageTemp > voltageMax) {
+				voltage = voltageMax;
+			} else if (voltageTemp < voltageMin) {
+				voltage = voltageMin;
 			} else {
-				voltageTemp = voltage;
+				//voltageTemp = voltage;
 			}
+			voltageTemp = voltage;
 
 			// Get number of int numbers in voltage var
 			integer_part = (int)voltage;
@@ -443,9 +460,19 @@ void button_isr(void){
 		 break;
 	}
 
+	char _str[60];
+	uint32_t voltageADC = BSP_PWR_VBUSGetVoltage(0);
+	uint32_t currentADC= BSP_PWR_VBUSGetCurrent(0);
+	uint32_t currentOCP_ADC= BSP_PWR_VBUSGetCurrentOCP(0);
+
+	// Use snprintf to limit the number of characters written
+	int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltageADC, currentADC, currentOCP_ADC);
+
+	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 
 	//Erase btn (PC3) interrupt flag
     __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_3);
+
 }
 
 /*
@@ -492,7 +519,7 @@ void request_button_isr(void){
 	} USBPD_DPM_SNKPowerRequestDetailsTypeDef;
 	#endif */
 
-	sourcecapa_limits();
+	//sourcecapa_limits();
 
 	indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, voltage*10, current, PDO_SEL_METHOD_MAX_CUR);
 	//Print to debug
@@ -526,10 +553,28 @@ void cur_vol_button_isr(void){
 	else if (currentState == ADJUSTMENT_VOLTAGE)
 	{
 		currentState = ADJUSTMENT_CURRENT;
+		//Display output current
+		integer_part = (int)current;
+		num_digits = 0;
+
+		while (integer_part) {
+			integer_part = integer_part/10;
+			num_digits++;
+		}
+		max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
 	}
 	else
 	{
 		currentState = ADJUSTMENT_CURRENT_OCP;
+		//Display output current
+		integer_part = (int)currentOCP;
+		num_digits = 0;
+
+		while (integer_part) {
+			integer_part = integer_part/10;
+			num_digits++;
+		}
+		max7219_PrintItos(SEGMENT_2, num_digits, currentOCP, 4);
 	}
 
 	//Get Voltage level into TRACE
@@ -581,14 +626,43 @@ void lock_button_isr(void){
 				}
 				max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
 			}
+
+	ocp_reset_needed = 1;
 }
 
 void ocp_alert_isr(void) {
 	//Disable relay
-	HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
-
 	//Change output state
 	outputState = OUTPUT_OFF_STATE;
+	//Disable output
+	HAL_GPIO_ReadPin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin) == GPIO_PIN_RESET;
+
+
+	// Get number of int numbers in voltage var
+	integer_part = (int)voltage;
+	num_digits = 0;
+
+	while (integer_part) {
+		integer_part = integer_part/10;
+		num_digits++;
+	}
+
+	//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
+	max7219_PrintItos(SEGMENT_1, num_digits, voltage, 3);
+
+	//Display output current
+	integer_part = (int)current;
+	num_digits = 0;
+
+	while (integer_part) {
+		integer_part = integer_part/10;
+		num_digits++;
+	}
+	max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
+
+
+	//Clear IT flag
+	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_6);
 }
 
 #define MAX_LINE_PDO      7u

@@ -709,7 +709,10 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, LED_LOCK_Pin|RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, DB_OUT_Pin|CS_MAX7219_Pin|LED_USER_Pin|OCP_RESET_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, DB_OUT_Pin|CS_MAX7219_Pin|LED_USER_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pins : HighZ_Pin FLT_IN_TCPP_Pin */
   GPIO_InitStruct.Pin = HighZ_Pin|FLT_IN_TCPP_Pin;
@@ -737,8 +740,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SW3_OFF_ON_Pin SW1_TOGGLE_I_V_Pin */
-  GPIO_InitStruct.Pin = SW3_OFF_ON_Pin|SW1_TOGGLE_I_V_Pin;
+  /*Configure GPIO pins : SW3_OFF_ON_Pin SW1_TOGGLE_I_V_Pin OCP_ALERT_Pin OCP_ALERT2_Pin */
+  GPIO_InitStruct.Pin = SW3_OFF_ON_Pin|SW1_TOGGLE_I_V_Pin|OCP_ALERT_Pin|OCP_ALERT2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
@@ -761,12 +764,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(CC2_G4_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : OCP_ALERT_Pin */
-  GPIO_InitStruct.Pin = OCP_ALERT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(OCP_ALERT_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : RELAY_ON_OFF_Pin */
   GPIO_InitStruct.Pin = RELAY_ON_OFF_Pin;
@@ -813,7 +810,33 @@ is pressed */
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 		*/
 
-		HAL_GPIO_TogglePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin);
+		char _str[60];
+		if (HAL_GPIO_ReadPin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin) == GPIO_PIN_SET)
+		{
+			HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
+			// Use snprintf to limit the number of characters written
+			int len = snprintf(_str, sizeof(_str), "--------Output Disabled--------");
+		}
+		else
+		{
+			HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_SET);
+			// Use snprintf to limit the number of characters written
+			int len = snprintf(_str, sizeof(_str), "--------Output Enabled--------");
+		}
+
+		//HAL_GPIO_TogglePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin);
+		//Get Voltage level into TRACE
+		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+
+		char _str2[60];
+		uint32_t voltage = BSP_PWR_VBUSGetVoltage(0);
+		uint32_t current= BSP_PWR_VBUSGetCurrent(0);
+		uint32_t currentOCP= BSP_PWR_VBUSGetCurrentOCP(0);
+
+		// Use snprintf to limit the number of characters written
+		int len = snprintf(_str2, sizeof(_str2), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltage, current, currentOCP);
+
+		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str2, strlen(_str2));
 
 			/* Only applies if an error was specified (= if the case couldn't success)*/
 			/**
