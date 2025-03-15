@@ -133,8 +133,8 @@ void app_init(void){
 	max7219_Decode_On();
 
 	//Print decimal points and initial values
-	max7219_PrintItos(SEGMENT_2, 4, current, 4);
-	max7219_PrintItos(SEGMENT_1, 3, voltage, 3);
+	max7219_PrintIspecial(SEGMENT_2, current, 4);
+	max7219_PrintIspecial(SEGMENT_1, voltage, 3);
 
 	//Wait for hardware initialization and then turn DB to HIGH (according to TCPP01-M12 datasheet 6.5)
 	HAL_Delay(2000);
@@ -249,26 +249,10 @@ void app_loop(void){
 				uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
 
 				//Display output voltage
-				integer_part = (int)vol;
-				num_digits = 0;
-
-				while (integer_part) {
-					integer_part = integer_part/10;
-					num_digits++;
-				}
-
-
-				max7219_PrintItos(SEGMENT_1, num_digits, vol, 3);
+				max7219_PrintIspecial(SEGMENT_1, vol, 3);
 
 				//Display output current
-				integer_part = (int)cur;
-				num_digits = 0;
-
-				while (integer_part) {
-					integer_part = integer_part/10;
-					num_digits++;
-				}
-				max7219_PrintItos(SEGMENT_2, num_digits, cur, 4);
+				max7219_PrintIspecial(SEGMENT_2, cur, 4);
 
 				HAL_Delay(500);
 
@@ -314,16 +298,8 @@ void encoder_turn_isr(void) {
 			voltageTemp = voltage;
 
 			// Get number of int numbers in voltage var
-			integer_part = (int)voltage;
-			num_digits = 0;
-
-			while (integer_part) {
-				integer_part = integer_part/10;
-				num_digits++;
-			}
-
 			//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
-			max7219_PrintItos(SEGMENT_1, num_digits, voltage, 3);
+			max7219_PrintIspecial(SEGMENT_1, voltage, 3);
 
 			//Print to debug
 			char _str[40];
@@ -352,16 +328,8 @@ void encoder_turn_isr(void) {
 			}
 
 			// Get number of int numbers in voltage var
-			integer_part = (int)current;
-			num_digits = 0;
-
-			while (integer_part) {
-				integer_part = integer_part/10;
-				num_digits++;
-			}
-
 			//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
-			max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
+			max7219_PrintIspecial(SEGMENT_2, current, 4);
 
 			//Print to debug
 			char _str[40];
@@ -391,14 +359,6 @@ void encoder_turn_isr(void) {
 					}
 
 					// Get number of int numbers in voltage var
-					integer_part = (int)currentOCP;
-					num_digits = 0;
-
-					while (integer_part) {
-						integer_part = integer_part/10;
-						num_digits++;
-					}
-
 					//Based on user selected currentOCP calculate the required DAC out...
 					V_TRIP = (currentOCP * R_OCP_MOHMS * G_OCP)/1000; // mV (mA * mOhms * Gain)
 					//Convert DAC_OUT voltage to 12B resolution
@@ -408,7 +368,7 @@ void encoder_turn_isr(void) {
 					HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
 
 					//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
-					max7219_PrintItos(SEGMENT_2, num_digits, currentOCP, 4);
+					max7219_PrintIspecial(SEGMENT_2, currentOCP, 4);
 
 					//Print to debug
 					char _str[50];
@@ -582,27 +542,13 @@ void cur_vol_button_isr(void){
 	{
 		currentState = ADJUSTMENT_CURRENT;
 		//Display output current
-		integer_part = (int)current;
-		num_digits = 0;
-
-		while (integer_part) {
-			integer_part = integer_part/10;
-			num_digits++;
-		}
-		max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
+		max7219_PrintIspecial(SEGMENT_2, current, 4);
 	}
 	else
 	{
 		currentState = ADJUSTMENT_CURRENT_OCP;
 		//Display output current
-		integer_part = (int)currentOCP;
-		num_digits = 0;
-
-		while (integer_part) {
-			integer_part = integer_part/10;
-			num_digits++;
-		}
-		max7219_PrintItos(SEGMENT_2, num_digits, currentOCP, 4);
+		max7219_PrintIspecial(SEGMENT_2, currentOCP, 4);
 	}
 
 	//Get Voltage level into TRACE
@@ -659,23 +605,9 @@ void lock_button_isr(void){
 				int len = snprintf(_str, sizeof(_str), "--------Output Enabled--------");
 
 				//Display voltage
-				integer_part = (int)voltage;
-				num_digits = 0;
-
-				while (integer_part) {
-					integer_part = integer_part/10;
-					num_digits++;
-				}
-				max7219_PrintItos(SEGMENT_1, num_digits, voltage, 3);
+				max7219_PrintIspecial(SEGMENT_1,voltage, 3);
 				//Display current
-				integer_part = (int)current;
-				num_digits = 0;
-
-				while (integer_part) {
-					integer_part = integer_part/10;
-					num_digits++;
-				}
-				max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
+				max7219_PrintIspecial(SEGMENT_2, current, 4);
 			}
 
 	//HAL_GPIO_TogglePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin);
@@ -692,26 +624,11 @@ void ocp_alert_isr(void) {
 
 
 	// Get number of int numbers in voltage var
-	integer_part = (int)voltage;
-	num_digits = 0;
-
-	while (integer_part) {
-		integer_part = integer_part/10;
-		num_digits++;
-	}
-
 	//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
-	max7219_PrintItos(SEGMENT_1, num_digits, voltage, 3);
+	max7219_PrintIspecial(SEGMENT_1, voltage, 3);
 
 	//Display output current
-	integer_part = (int)current;
-	num_digits = 0;
-
-	while (integer_part) {
-		integer_part = integer_part/10;
-		num_digits++;
-	}
-	max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
+	max7219_PrintIspecial(SEGMENT_2, current, 4);
 
 
 	ocp_reset_needed = 1;
