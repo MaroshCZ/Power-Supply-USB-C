@@ -389,7 +389,7 @@ void encoder_turn_isr(void) {
 /**
  * Button interrupt service routine
  */
-void button_isr(void){
+void enc_toggle_units_isr(void){
 	/*
 	const char response[] = "POWER is ON\r\n";
 	        LPUART_Transmit(LPUART2, (const uint8_t*)response, sizeof(response) - 1);*/
@@ -449,9 +449,9 @@ void button_isr(void){
 }
 
 /*
- * Timer interrupt routine
+ * Timer7 interrupt routine for button debouncing
  */
-void button_timer_isr(void){
+void tim7_btn_isr(void){
 	//Unmask exti line 1, 2 and 3
 	EXTI->IMR1 |= EXTI_IMR1_IM8; //unmask interrupt mask register on exti line 3 (PD8)
 	EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask interrupt mask register on exti line 2 (PB2)
@@ -464,7 +464,7 @@ void button_timer_isr(void){
 /*
  * Timer interrupt routine
  */
-void timer14_isr(void){
+void tim14_isr(void){
 	//Unmask exti line 6
 	EXTI->IMR1 |= EXTI_IMR1_IM6; //unmask interrupt (PB6)
 
@@ -479,7 +479,7 @@ void timer14_isr(void){
 /*
  * Request button interrupt routine, request APDO with user voltage and current
  */
-void request_button_isr(void){
+void sw3_on_off_isr(void){
 	//HAL_GPIO_TogglePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin);
 	//Read SRC capability
 	//USBPD_StatusTypeDef status = USBPD_ERROR;
@@ -522,7 +522,7 @@ void request_button_isr(void){
 /*
  * Change between current and voltage ADJUSTMENT_STATE
  */
-void cur_vol_button_isr(void){
+void sw1_toggle_i_v_isr(void){
 	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PB2)
 	EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
 
@@ -563,7 +563,7 @@ void cur_vol_button_isr(void){
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 }
 
-void lock_button_isr(void){
+void sw2_lock_isr(void){
 	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PB2)
 	EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
 

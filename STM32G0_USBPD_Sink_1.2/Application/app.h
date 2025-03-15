@@ -26,12 +26,12 @@ void app_loop(void);
 
 //declaration of isr
 void encoder_turn_isr(void);
-void button_isr(void);
+void enc_toggle_units_isr(void);
 void button_timer_isr(void);
 void timer14_isr(void);
-void cur_vol_button_isr(void);
+void sw1_toggle_i_v_isr(void);
 void request_button_isr(void);
-void lock_button_isr(void);
+void sw2_lock_isr(void);
 void ocp_alert_isr(void);
 
 static void sourcecapa_limits(void);

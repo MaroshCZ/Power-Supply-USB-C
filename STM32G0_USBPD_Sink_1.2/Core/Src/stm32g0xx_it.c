@@ -133,7 +133,7 @@ void EXTI2_3_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI2_3_IRQn 0 */
   if (__HAL_GPIO_EXTI_GET_IT(SW1_TOGGLE_I_V_Pin) != RESET){
-	  cur_vol_button_isr();
+	  sw1_toggle_i_v_isr();
   }
 
   /* USER CODE END EXTI2_3_IRQn 0 */
@@ -150,10 +150,10 @@ void EXTI4_15_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI4_15_IRQn 0 */
   if (__HAL_GPIO_EXTI_GET_IT(ENC_TOGGLE_UNITS_Pin) != RESET){
-	  button_isr();
+	  enc_toggle_units_isr();
   }
   if (__HAL_GPIO_EXTI_GET_IT(SW2_DEBUG_BTN_Pin) != RESET){
-	  lock_button_isr();
+	  sw2_lock_isr();
   }
   if (__HAL_GPIO_EXTI_GET_IT(OCP_ALERT_Pin) != RESET){
 	  ocp_alert_isr();
