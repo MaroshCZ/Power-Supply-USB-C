@@ -62,6 +62,15 @@ typedef enum {
 	SEGMENT_1 = 1, SEGMENT_2 = 2
 }MAX7219_Segments;
 
+typedef enum {
+	DEC_P_4 = 4, DEC_P_3 = 3, DEC_P_2 = 2, DEC_P_1 = 1
+}MAX7219_DecimalPoint;
+
+typedef enum {
+	BLINK_DIGIT = 0x00,
+	DISP_DIGITS = 0x01
+}MAX7219_EventType;
+
 void max7219_Init(uint8_t intensivity);
 void max7219_SetIntensivity(uint8_t intensivity);
 void max7219_Clean(void);

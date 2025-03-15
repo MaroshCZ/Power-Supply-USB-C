@@ -117,7 +117,7 @@ void EXTI0_1_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_1_IRQn 0 */
   if (__HAL_GPIO_EXTI_GET_IT(SW3_OFF_ON_Pin) != RESET){
-	  request_button_isr();
+	  sw3_on_off_isr();
   }
   /* USER CODE END EXTI0_1_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(SW3_OFF_ON_Pin);
@@ -279,7 +279,7 @@ void TIM6_DAC_LPTIM1_IRQHandler(void)
 void TIM7_LPTIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM7_LPTIM2_IRQn 0 */
-  button_timer_isr();
+  tim7_btn_isr();
   /* USER CODE END TIM7_LPTIM2_IRQn 0 */
 
   /* USER CODE BEGIN TIM7_LPTIM2_IRQn 1 */
@@ -293,7 +293,7 @@ void TIM7_LPTIM2_IRQHandler(void)
 void TIM14_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM14_IRQn 0 */
-  timer14_isr();
+  tim14_isr();
   /* USER CODE END TIM14_IRQn 0 */
   /* USER CODE BEGIN TIM14_IRQn 1 */
 

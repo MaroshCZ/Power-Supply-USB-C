@@ -61,7 +61,10 @@ Core/Src/app_freertos.o: ../Core/Src/app_freertos.c \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_dma.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_exti.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
- ../Drivers/CMSIS/Include/cmsis_compiler.h
+ ../Drivers/CMSIS/Include/cmsis_compiler.h \
+ C:/ST/STM32_CubeIDE/workspace1.14/UCPD/STM32G0_USBPD_Sink_1.2/Application/max7219.h \
+ C:/ST/STM32_CubeIDE/workspace1.14/UCPD/STM32G0_USBPD_Sink_1.2/Application/app.h \
+ ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/projdefs.h:
@@ -126,3 +129,6 @@ Core/Src/app_freertos.o: ../Core/Src/app_freertos.c \
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_exti.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
 ../Drivers/CMSIS/Include/cmsis_compiler.h:
+C:/ST/STM32_CubeIDE/workspace1.14/UCPD/STM32G0_USBPD_Sink_1.2/Application/max7219.h:
+C:/ST/STM32_CubeIDE/workspace1.14/UCPD/STM32G0_USBPD_Sink_1.2/Application/app.h:
+../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:

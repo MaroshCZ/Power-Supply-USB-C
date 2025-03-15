@@ -65,11 +65,7 @@ const osThreadAttr_t defaultTask_attributes = {
   .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 128 * 4
 };
-/* Definitions for myQueue01 */
-osMessageQueueId_t myQueue01Handle;
-const osMessageQueueAttr_t myQueue01_attributes = {
-  .name = "myQueue01"
-};
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -88,6 +84,7 @@ static void MX_DAC1_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_TIM14_Init(void);
 void StartDefaultTask(void *argument);
+void DISPReceiverTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -159,16 +156,19 @@ int main(void)
   /* USER CODE END RTOS_TIMERS */
 
   /* Create the queue(s) */
-  /* creation of myQueue01 */
-  myQueue01Handle = osMessageQueueNew (16, sizeof(uint16_t), &myQueue01_attributes);
+  /* creation of DISPQueue */
+
 
   /* USER CODE BEGIN RTOS_QUEUES */
-  /* add queues, ... */
+  //app_freertos_create();
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
   /* creation of defaultTask */
   defaultTaskHandle = osThreadNew(StartDefaultTask, NULL, &defaultTask_attributes);
+
+  /* creation of DISPReceiverTas */
+
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -970,6 +970,7 @@ void StartDefaultTask(void *argument)
   }
   /* USER CODE END 5 */
 }
+
 
 /**
   * @brief  Period elapsed callback in non blocking mode
