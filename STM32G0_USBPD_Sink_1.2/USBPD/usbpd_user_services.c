@@ -32,6 +32,7 @@
 #endif /* _TRACE */
 #include "string.h"
 /* USER CODE BEGIN Includes */
+#include "app.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -223,14 +224,7 @@ void USBPD_USER_SERV_StoreSRCPDO(uint8_t PortNum, uint8_t *Ptr, uint32_t Size)
     {
       rdo = (uint8_t *)&DPM_Ports[PortNum].DPM_ListOfRcvSRCPDO[index];
       (void)memcpy(rdo, (Ptr + (index * 4U)), (4U * sizeof(uint8_t)));
-
-      /*
-      // Copy PDO data in SINK pdo definition
-      rdo = (uint8_t *)&PORT0_PDO_ListSNK[index];
-      (void)memcpy(rdo, (Ptr + (index * 4U)), (4U * sizeof(uint8_t)));
-      */
     }
-
   }
 }
 
@@ -989,6 +983,12 @@ uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
 
 	return curr_index+1;
 }
+
+void USER_SERV_ExtractSRCCapa(void) {
+	sourcecapa_limits();
+}
+
+
 
 #endif /* _SNK */
 /* USER CODE END USBPD_USER_PRIVATE_FUNCTIONS */

@@ -39,6 +39,7 @@
 #include "usbpd_user_services.h"
 #include "gui_api.h"
 #include "demo_app.h"
+#include "app.h"
 /* USER CODE END Includes */
 
 /** @addtogroup STM32_USBPD_APPLICATION
@@ -410,6 +411,7 @@ void USBPD_DPM_SetDataInfo(uint8_t PortNum, USBPD_CORE_DataInfoType_TypeDef Data
   /* Case Received Source PDO values Data information :*/
     case USBPD_CORE_DATATYPE_RCV_SRC_PDO:         /*!< Storage of Received Source PDO values        */
        USBPD_USER_SERV_StoreSRCPDO(PortNum, Ptr, Size);
+       USER_SERV_ExtractSRCCapa();
        break;
 
     case USBPD_CORE_PPS_STATUS :

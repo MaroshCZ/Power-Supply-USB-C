@@ -149,6 +149,7 @@ uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
 											uint16_t Voltage_mV,
 											uint16_t Current_mA,
 											uint8_t Method);
+void USER_SERV_ExtractSRCCapa(void);
 #endif /* _SNK */
 /* USER CODE BEGIN Private_Variables */
 extern USBPD_HandleTypeDef DPM_Ports[USBPD_PORT_COUNT];

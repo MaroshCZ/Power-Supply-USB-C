@@ -23,11 +23,32 @@
 #include <usbpd_trace.h>
 
 
+typedef struct {
+  //USBPD_PPSSDB_TypeDef  DPM_RcvPPSStatus;           /*!< PPS Status received by port partner                         */
+  //USBPD_SKEDB_TypeDef   DPM_RcvSNKExtendedCapa;     /*!< SNK Extended Capability received by port partner            */
+  uint32_t              voltageSet;       /*!< User selected voltage in centivolts */
+  uint32_t              currentSet;       /*!< User selected OCP limit in mA */
+
+  uint32_t              voltageMeas;      /*!< Measured output voltage in centivolts */
+  uint32_t              currentMeas;      /*!< Measured output current in centivolts */
+
+  uint32_t              voltageMin;       /*!< Minimal SRC voltage in centivolts */
+  uint32_t              voltageMax;       /*!< Maximal SRC voltage in centivolts */
+  uint32_t              currentMax;       /*!< Maximal SRC current in mA */
+
+  int                   val;
+  int 					encoderPress;     /*!< Currently selected digit */
+
+} SINKData_HandleTypeDef;
+
+
 //Variables declaration
 int encoderVal; //TIM2 CNT register reading
 int encoderValPrev;
 int encoderPress = 2; //currently selected digit
 int val = 10; //variable holding current voltage addition
+
+
 int voltage = 330; //final voltage value
 int voltageTemp = 330; //temporary voltage value
 int voltageMin = 330; //voltage down limit
@@ -42,15 +63,14 @@ int currentTemp = 1000;
 int currentOCPTemp = 1000;
 int currentMin = 0;
 int currentMax = 3000;
-int integer_part;
-int num_digits;
-int indexAPDO;
-int indexSRCAPDO;
+
 int ocp_reset_needed = 0;
 bool limitReadFlag = false;
 uint8_t isMinVoltageAPDOInitialized = 0; // Flag to indicate if minvoltageAPDO has been initialized
 uint32_t maxvoltageAPDO;
 uint32_t minvoltageAPDO;
+
+
 uint32_t srcPdoIndex; //variable that holds Pdo index from FindVoltageIndex
 USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
 USBPD_StatusTypeDef powerProfiles;
@@ -89,6 +109,11 @@ volatile Output_StateTypedef outputState = OUTPUT_OFF_STATE;
 static uint8_t rxBuffer[RX_BUFFER_SIZE];
 static uint32_t rxIndex = 0;
 uint32_t counter = 0;
+
+
+SINKData_HandleTypeDef SNK_data = {
+	.voltageMin = 500,
+};
 
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
@@ -644,33 +669,12 @@ void ocp_alert_isr(void) {
   * @retval None
   * source: demo_disco.c Display_sourcecapa_menu_nav
   */
-static void sourcecapa_limits(void)
+void sourcecapa_limits(void)
 {
   uint8_t _str[30];
   uint8_t _max = DPM_Ports[0].DPM_NumberOfRcvSRCPDO;
-  uint8_t _start, _end = 0;
-
-  /*
-  if (hmode == MODE_STANDALONE)
-  {
-	Menu_manage_selection(_max, MAX_LINE_PDO, &_start, &_end, Nav);
-  }
-  else
-  {
-	if((Nav == 1) && (_max > MAX_LINE_PDO))
-	{
-	  _start = _max - MAX_LINE_PDO;
-	  _end = _max;
-	}
-	else
-	{
-	  _start = 0;
-	  _end = MIN(_max, MAX_LINE_PDO);
-	}
-  }
-  */
-  _start = 0;
-  _end = 6;
+  uint8_t _start = 0;
+  SINKData_HandleTypeDef *dhandle = &SNK_data;
 
   for(int8_t index=_start; index < _max; index++)
   {
@@ -680,22 +684,12 @@ static void sourcecapa_limits(void)
 	  {
 		uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_FIXED_MAX_CURRENT_Pos)*10;
 		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_VOLTAGE_Msk) >> USBPD_PDO_SRC_FIXED_VOLTAGE_Pos)*50;
-		sprintf((char*)_str, "FIXED:%2dV %2d.%dA", (int)(maxvoltage/1000), (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
+		//sprintf((char*)_str, "FIXED:%2dV %2d.%dA", (int)(maxvoltage/1000), (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
 		break;
 	  }
 	case USBPD_PDO_TYPE_BATTERY :
 	  {
-		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_BATTERY_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_BATTERY_MAX_VOLTAGE_Pos) * 50;
-		uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_BATTERY_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_BATTERY_MIN_VOLTAGE_Pos) * 50;
-		uint32_t maxpower = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_BATTERY_MAX_POWER_Msk) >> USBPD_PDO_SRC_BATTERY_MAX_POWER_Pos) * 250;
-		if ((maxpower)==100000) /* 100W */
-		{
-		  sprintf((char*)_str, "B:%2d.%1d-%2d.%1dV %2dW",(int)(minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxpower/1000));
-		}
-		else
-		{
-		  sprintf((char*)_str, "B:%2d.%1d-%2d.%1dV %2d.%dW", (int)(minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxpower/1000), (int)(maxpower/100)%10);
-		}
+
 	  }
 	  break;
 	case USBPD_PDO_TYPE_VARIABLE :
@@ -703,27 +697,24 @@ static void sourcecapa_limits(void)
 		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Pos) * 50;
 		uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Pos) * 50;
 		uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Pos) * 10;
-		sprintf((char*)_str, "V:%2d.%1d-%2d.%1dV %d.%dA", (int)(minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
+		//sprintf((char*)_str, "V:%2d.%1d-%2d.%1dV %d.%dA", (int)(minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
 	  }
 	  break;
 	case USBPD_PDO_TYPE_APDO :
 	  {
-		indexAPDO = index + 1;
-		uint32_t minvoltageAPDOtemp = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Pos) * 100;
-		uint32_t maxvoltageAPDOtemp = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Pos) * 100;
-		uint32_t maxcurrentAPDOtemp = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_APDO_MAX_CURRENT_Pos) * 50;
-		sprintf((char*)_str, "A:%2d.%1d-%2d.%1dV %d.%dA",(int) (minvoltageAPDOtemp/1000),(int)(minvoltageAPDOtemp/100)%10, (int)(maxvoltageAPDOtemp/1000),(int)(maxvoltageAPDOtemp/100)%10, (int)(maxcurrentAPDOtemp/1000), (int)((maxcurrentAPDOtemp % 1000) /100));
+		uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Pos) * 100;
+		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Pos) * 100;
+		uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_APDO_MAX_CURRENT_Pos) * 50;
+		//sprintf((char*)_str, "A:%2d.%1d-%2d.%1dV %d.%dA",(int) (minvoltageAPDOtemp/1000),(int)(minvoltageAPDOtemp/100)%10, (int)(maxvoltageAPDOtemp/1000),(int)(maxvoltageAPDOtemp/100)%10, (int)(maxcurrentAPDOtemp/1000), (int)((maxcurrentAPDOtemp % 1000) /100));
 
-		if (!isMinVoltageAPDOInitialized || minvoltageAPDOtemp < minvoltageAPDO) {
-			minvoltageAPDO = minvoltageAPDOtemp;
-			voltageMin = (int)minvoltageAPDOtemp/10;
-			//voltage = voltageMin/10;
-			isMinVoltageAPDOInitialized = 1; // Set the flag to indicate it has been initialized
+		if (minvoltage < dhandle->voltageMin*10) {
+			dhandle -> voltageMin = (int)minvoltage/10;
 		}
-
-		if (maxvoltageAPDOtemp > maxvoltageAPDO) {
-			maxvoltageAPDO = maxvoltageAPDOtemp;
-			voltageMax = (int)maxvoltageAPDOtemp/10;
+		if (maxvoltage > dhandle->voltageMax*10) {
+			dhandle -> voltageMax = (int)maxvoltage/10;
+		}
+		if (maxcurrent > dhandle->currentMax) {
+			dhandle -> currentMax = (int)maxcurrent;
 		}
 	  }
 	  break;

@@ -60,7 +60,8 @@ USBPD/usbpd_user_services.o: ../USBPD/usbpd_user_services.c \
  ../USBPD/Target/usbpd_vdm_user.h ../Utilities/GUI_INTERFACE/gui_api.h \
  ../Core/Inc/usbpd_gui_memmap.h ../USBPD/App/usbpd_pwr_if.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_trace.h \
- ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h
+ ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h \
+ ../Application/app.h
 ../Core/Inc/main.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:
 ../Core/Inc/stm32g0xx_hal_conf.h:
@@ -128,3 +129,4 @@ USBPD/usbpd_user_services.o: ../USBPD/usbpd_user_services.c \
 ../USBPD/App/usbpd_pwr_if.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_trace.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h:
+../Application/app.h:

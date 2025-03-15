@@ -35,7 +35,7 @@ void sw3_on_off_isr(void);
 void sw2_lock_isr(void);
 void ocp_alert_isr(void);
 
-static void sourcecapa_limits(void);
+void sourcecapa_limits(void);
 
 #define ADC_NUM_OF_SAMPLES 3
 extern ADC_HandleTypeDef hadc1;
