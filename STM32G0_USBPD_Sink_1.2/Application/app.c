@@ -91,6 +91,12 @@ static uint32_t rxIndex = 0;
 uint32_t counter = 0;
 
 
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
+{
+  HAL_GPIO_TogglePin(LED_USER_GPIO_Port, LED_USER_Pin);
+}
+
+
 
 /*
  * Initialization function
@@ -103,11 +109,18 @@ void app_init(void){
 	LL_TIM_EnableIT_UPDATE(TIM7); //Enable interrupt generation when timer goes to max value and UPDATE event flag is set
 	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
 
+	//TIM14 initialization
+	LL_TIM_EnableIT_UPDATE(TIM14); //Enable interrupt generation when timer goes to max value and UPDATE event flag is set
+	LL_TIM_ClearFlag_UPDATE(TIM14); //Clear update flag on TIMER14
+
 	//TIM3 initialization of encoder
 	HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
 	__HAL_TIM_SET_COUNTER(&htim3, 30000); //write non 0 value to avoid shift from 0 -> max value
 	encoderVal = __HAL_TIM_GET_COUNTER(&htim3)/4;
 	encoderValPrev = encoderVal;
+
+	//TIM4 initialization
+	HAL_TIM_Base_Start(&htim4);
 
 	//Calibrate and start ADC sensing with DMA
 	HAL_ADCEx_Calibration_Start(&hadc1);
@@ -194,7 +207,7 @@ void app_loop(void){
 
 	if (ocp_reset_needed == 1) {
 		HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_RESET);
-		HAL_Delay(1);
+		HAL_Delay(4); //datasheet says 100ns minimum pull down time for resettin alert, but for me even 1ms was not enough
 		HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_SET);
 		ocp_reset_needed = 0;
 	}
@@ -489,6 +502,21 @@ void button_timer_isr(void){
 }
 
 /*
+ * Timer interrupt routine
+ */
+void timer14_isr(void){
+	//Unmask exti line 6
+	EXTI->IMR1 |= EXTI_IMR1_IM6; //unmask interrupt (PB6)
+
+	//Alert set during turning off/on output, we need to clean it
+	ocp_reset_needed = 1;
+
+	//Clear update flag on TIM7
+	LL_TIM_ClearFlag_UPDATE(TIM14); //Clear update flag on TIMER7
+}
+
+
+/*
  * Request button interrupt routine, request APDO with user voltage and current
  */
 void request_button_isr(void){
@@ -593,6 +621,9 @@ void lock_button_isr(void){
 	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PB2)
 	EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
 
+	//Mask alert pin during setting the relay on/off
+	//EXTI->IMR1 &= ~(EXTI_IMR1_IM6);
+
 	//Set debouncing time in ms
 	TIM7->ARR = 200;
 
@@ -600,13 +631,33 @@ void lock_button_isr(void){
 	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
 	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
 
+	char _str[60];
 
 	if (outputState == OUTPUT_OFF_STATE)
 			{
 				outputState = OUTPUT_ON_STATE;
+				//Mask unwanted button interrupts caused by debouncing on exti line 6 (PD6)
+				EXTI->IMR1 &= ~(EXTI_IMR1_IM6);
+
+				//Set debouncing time in 6 ms
+				TIM14->ARR = 6;
+				//Zero TIM7 counter and start counting
+				LL_TIM_SetCounter(TIM14, 0); //set counter register value of timer 7 to 0
+				LL_TIM_EnableCounter(TIM14); //start counting of timer 7
+
+				//put OCP to transparent mode so any alert during on/off is cleared
+				//HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_SET);
+				// Use snprintf to limit the number of characters written
+				int len = snprintf(_str, sizeof(_str), "--------Output Disabled--------");
+
 			}
 			else {
 				outputState = OUTPUT_OFF_STATE;
+				HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
+				// Use snprintf to limit the number of characters written
+				int len = snprintf(_str, sizeof(_str), "--------Output Enabled--------");
+
 				//Display voltage
 				integer_part = (int)voltage;
 				num_digits = 0;
@@ -627,7 +678,9 @@ void lock_button_isr(void){
 				max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
 			}
 
-	ocp_reset_needed = 1;
+	//HAL_GPIO_TogglePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin);
+	//Get Voltage level into TRACE
+	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 }
 
 void ocp_alert_isr(void) {
@@ -635,7 +688,7 @@ void ocp_alert_isr(void) {
 	//Change output state
 	outputState = OUTPUT_OFF_STATE;
 	//Disable output
-	HAL_GPIO_ReadPin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin) == GPIO_PIN_RESET;
+	HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
 
 
 	// Get number of int numbers in voltage var
@@ -660,6 +713,8 @@ void ocp_alert_isr(void) {
 	}
 	max7219_PrintItos(SEGMENT_2, num_digits, current, 4);
 
+
+	ocp_reset_needed = 1;
 
 	//Clear IT flag
 	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_6);

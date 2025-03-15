@@ -55,9 +55,11 @@ void USB_UCPD1_2_IRQHandler(void);
 void DMA1_Channel1_IRQHandler(void);
 void DMA1_Channel2_3_IRQHandler(void);
 void DMA1_Ch4_7_DMA2_Ch1_5_DMAMUX1_OVR_IRQHandler(void);
+void ADC1_COMP_IRQHandler(void);
 void TIM3_TIM4_IRQHandler(void);
 void TIM6_DAC_LPTIM1_IRQHandler(void);
 void TIM7_LPTIM2_IRQHandler(void);
+void TIM14_IRQHandler(void);
 void USART3_4_5_6_LPUART1_IRQHandler(void);
 /* USER CODE BEGIN EFP */
 

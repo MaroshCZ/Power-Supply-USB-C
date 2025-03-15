@@ -28,6 +28,7 @@ void app_loop(void);
 void encoder_turn_isr(void);
 void button_isr(void);
 void button_timer_isr(void);
+void timer14_isr(void);
 void cur_vol_button_isr(void);
 void request_button_isr(void);
 void lock_button_isr(void);
@@ -39,6 +40,7 @@ static void sourcecapa_limits(void);
 extern ADC_HandleTypeDef hadc1;
 extern DAC_HandleTypeDef hdac1;
 extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim4;
 
 
 /* Variable containing ADC conversions results
