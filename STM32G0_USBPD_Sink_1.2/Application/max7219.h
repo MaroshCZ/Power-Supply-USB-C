@@ -11,6 +11,7 @@
 #include "main.h"
 #include "stdbool.h"
 #include "app.h"
+#include "stdlib.h"
 
 #define NUMBER_OF_DIGITS	8
 #define SPI_PORT			hspi2

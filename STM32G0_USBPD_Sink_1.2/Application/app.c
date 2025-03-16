@@ -115,12 +115,26 @@ SINKData_HandleTypeDef SNK_data = {
 	.voltageMin = 500,
 };
 
+SINKData_HandleTypeDef *dhandle = &SNK_data;
 
+
+// Callback when ADC conversion is complete
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
   HAL_GPIO_TogglePin(LED_USER_GPIO_Port, LED_USER_Pin);
 }
 
+// Callback when ADW CH3 goes out of range
+HAL_ADCEx_LevelOutOfWindow3Callback(ADC_HandleTypeDef *hadc) {
+	outputState = OUTPUT_OFF_STATE;
+	//Disable output
+	HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
+
+	//Print the voltage and current to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
+	max7219_PrintIspecial(SEGMENT_1, voltage, 3);
+	max7219_PrintIspecial(SEGMENT_2, current, 4);
+
+}
 
 
 /*
@@ -150,6 +164,9 @@ void app_init(void){
 	//Calibrate and start ADC sensing with DMA
 	HAL_ADCEx_Calibration_Start(&hadc1);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&aADCxConvertedValues, ADC_NUM_OF_SAMPLES);
+	Update_AWD_Thresholds(0,4095); //(low, high)
+
+	//Init DAC
 	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
 	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
 
@@ -273,6 +290,8 @@ void app_loop(void){
 				uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 t oget centivolts since only 4 digit display..
 				uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
 
+				dhandle ->currentMeas = cur;
+				dhandle ->voltageMeas = vol;
 				//Display output voltage
 				max7219_PrintIspecial(SEGMENT_1, vol, 3);
 
@@ -287,6 +306,21 @@ void app_loop(void){
 
 	//CDC_Transmit_FS(data, strlen(data));
 
+}
+
+/**
+ * Update ADC CH3 AWD Treshold
+ */
+void Update_AWD_Thresholds(uint32_t low, uint32_t high) {
+    HAL_ADC_Stop(&hadc1);  // Stop ADC before updating thresholds
+    HAL_ADC_AnalogWDGConfig(&hadc1, &(ADC_AnalogWDGConfTypeDef){
+        .WatchdogMode = ADC_ANALOGWATCHDOG_SINGLE_REG,
+        .Channel = ADC_CHANNEL_3, //isense (MCP06C20)
+        .ITMode = ENABLE,
+        .HighThreshold = high,
+        .LowThreshold = low
+    });
+    HAL_ADC_Start(&hadc1);  // Restart ADC
 }
 
 
@@ -351,6 +385,12 @@ void encoder_turn_isr(void) {
 			} else {
 				currentTemp = current;
 			}
+
+			int isense_Vtrip_mV = (current *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
+			int isense_rawADCtrip= (V_TRIP *4095) / VDDA_APPLI; //value for AWD tershold
+
+			Update_AWD_Thresholds(0, isense_rawADCtrip);
+
 
 			// Get number of int numbers in voltage var
 			//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
@@ -534,7 +574,7 @@ void sw3_on_off_isr(void){
 
 	//sourcecapa_limits();
 
-	indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, voltage*10, current, PDO_SEL_METHOD_MAX_CUR);
+	int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, voltage*10, current, PDO_SEL_METHOD_MAX_CUR);
 	//Print to debug
 	char _str[70];
 	sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*voltage, current);
