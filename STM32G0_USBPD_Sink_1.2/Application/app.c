@@ -12,7 +12,6 @@
 #include "usbpd_def.h"
 #include "usbpd_dpm_user.h"
 #include "usbpd_user_services.h"
-#include "usbpd_def.h"
 #include "string.h"
 #include "stdio.h"
 #include "stdbool.h"
@@ -22,12 +21,20 @@
 #include "usbd_cdc_if.h"
 #include <usbpd_trace.h>
 
+typedef struct {
+	int curValue;      // Current encoder value
+	int prevValue;     // Previous encoder value
+	int selDigit;  	   // Currently selected digit
+	int increment;     // Current increment value
+	int direction;	   // Direction: 1 for clockwise, -1 for counter-clockwise
+}Encoder_TypeDef;
 
 typedef struct {
   //USBPD_PPSSDB_TypeDef  DPM_RcvPPSStatus;           /*!< PPS Status received by port partner                         */
   //USBPD_SKEDB_TypeDef   DPM_RcvSNKExtendedCapa;     /*!< SNK Extended Capability received by port partner            */
   uint32_t              voltageSet;       /*!< User selected voltage in centivolts */
   uint32_t              currentSet;       /*!< User selected OCP limit in mA */
+  uint32_t				currentOCPSet;
 
   uint32_t              voltageMeas;      /*!< Measured output voltage in centivolts */
   uint32_t              currentMeas;      /*!< Measured output current in centivolts */
@@ -35,9 +42,8 @@ typedef struct {
   uint32_t              voltageMin;       /*!< Minimal SRC voltage in centivolts */
   uint32_t              voltageMax;       /*!< Maximal SRC voltage in centivolts */
   uint32_t              currentMax;       /*!< Maximal SRC current in mA */
-
-  int                   val;
-  int 					encoderPress;     /*!< Currently selected digit */
+  uint32_t              currentMin;       /*!< Minimal current in mA (0)*/
+  Encoder_TypeDef       encoder;
 
 } SINKData_HandleTypeDef;
 
@@ -46,29 +52,13 @@ typedef struct {
 int encoderVal; //TIM2 CNT register reading
 int encoderValPrev;
 int encoderPress = 2; //currently selected digit
-int val = 10; //variable holding current voltage addition
 
-
-int voltage = 330; //final voltage value
-int voltageTemp = 330; //temporary voltage value
-int voltageMin = 330; //voltage down limit
-int voltageMax = 2100; //voltage upper limit
-int current = 1000;
-int currentOCP = 1000;
-int cur; //output current
-int vol; //output voltage
 int V_TRIP;
 int dac_value = 500;
-int currentTemp = 1000;
-int currentOCPTemp = 1000;
-int currentMin = 0;
-int currentMax = 3000;
+
 
 int ocp_reset_needed = 0;
-bool limitReadFlag = false;
-uint8_t isMinVoltageAPDOInitialized = 0; // Flag to indicate if minvoltageAPDO has been initialized
-uint32_t maxvoltageAPDO;
-uint32_t minvoltageAPDO;
+
 
 
 uint32_t srcPdoIndex; //variable that holds Pdo index from FindVoltageIndex
@@ -113,6 +103,13 @@ uint32_t counter = 0;
 
 SINKData_HandleTypeDef SNK_data = {
 	.voltageMin = 500,
+	.voltageSet = 330, //initial value to display
+	.currentSet = 1000, //initial value to display
+	.currentMin = 0,
+	.encoder = {
+		.selDigit = 2,
+		.increment = 10    // Default increment
+	}
 };
 
 SINKData_HandleTypeDef *dhandle = &SNK_data;
@@ -131,8 +128,8 @@ HAL_ADCEx_LevelOutOfWindow3Callback(ADC_HandleTypeDef *hadc) {
 	HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
 
 	//Print the voltage and current to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
-	max7219_PrintIspecial(SEGMENT_1, voltage, 3);
-	max7219_PrintIspecial(SEGMENT_2, current, 4);
+	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
+	max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
 
 }
 
@@ -156,7 +153,7 @@ void app_init(void){
 	HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
 	__HAL_TIM_SET_COUNTER(&htim3, 30000); //write non 0 value to avoid shift from 0 -> max value
 	encoderVal = __HAL_TIM_GET_COUNTER(&htim3)/4;
-	encoderValPrev = encoderVal;
+	//encoderValPrev = encoderVal;
 
 	//TIM4 initialization
 	HAL_TIM_Base_Start(&htim4);
@@ -175,8 +172,8 @@ void app_init(void){
 	max7219_Decode_On();
 
 	//Print decimal points and initial values
-	max7219_PrintIspecial(SEGMENT_2, current, 4);
-	max7219_PrintIspecial(SEGMENT_1, voltage, 3);
+	max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
+	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
 
 	//Wait for hardware initialization and then turn DB to HIGH (according to TCPP01-M12 datasheet 6.5)
 	HAL_Delay(2000);
@@ -188,25 +185,6 @@ void app_init(void){
 }
 
 
-
-/**
- * @brief  Start I/V sense on both Type-C ports.
- * @retval 0 success else fail
- */
-/*
-static uint8_t PWR_StartVBusSensing(void)
-{
-  uint8_t ret = 0u;
-
-  //Start ADCx conversions
-  if (HAL_ADC_Start_DMA(&hadc1, (uint32_t *)aADCxConvertedValues, 2u) != HAL_OK)
-  {
-    ret++;
-  }
-
-  return ret;
-}
-*/
 
 /*
  * Loop function
@@ -264,20 +242,20 @@ void app_loop(void){
 					case(ADJUSTMENT_VOLTAGE):
 					{
 						//Blink currently selected digit
-						max7219_BlinkDigit(SEGMENT_1, &voltage, encoderPress, 500, 3); //pass voltage address to BlinkDigit function
+						max7219_BlinkDigit(SEGMENT_1, &dhandle->voltageSet, dhandle->encoder.selDigit, 500, 3); //pass voltage address to BlinkDigit function
 					}
 					 break;
 					case(ADJUSTMENT_CURRENT):
 					{
 						//Blink currently selected digit
-						max7219_BlinkDigit(SEGMENT_2, &current, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
+						max7219_BlinkDigit(SEGMENT_2, &dhandle->currentSet, dhandle->encoder.selDigit, 500, 4); //pass voltage address to BlinkDigit function
 					}
 					break;
 					case(ADJUSTMENT_CURRENT_OCP):
 					{
 
 						//Blink currently selected digit
-						max7219_BlinkDigit(SEGMENT_2, &currentOCP, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
+						max7219_BlinkDigit(SEGMENT_2, &dhandle->currentOCPSet, dhandle->encoder.selDigit, 500, 4); //pass voltage address to BlinkDigit function
 					}
 					break;
 					}
@@ -323,130 +301,131 @@ void Update_AWD_Thresholds(uint32_t low, uint32_t high) {
     HAL_ADC_Start(&hadc1);  // Restart ADC
 }
 
+// Helper function to update voltage
+void updateVoltage(SINKData_HandleTypeDef *handle) {
+	//Get direction of encoder turning
+	int voltageTemp = handle->voltageSet;
+	voltageTemp += handle->encoder.direction * handle->encoder.increment;
+
+	//If required temp value is within limits, assign it to voltage else assign limits
+	if (voltageTemp > handle->voltageMax) {
+		handle->voltageSet = handle->voltageMax;
+
+	} else if (voltageTemp < handle->voltageMin) {
+		handle->voltageSet = handle->voltageMin;
+
+	} else {
+		handle->voltageSet = voltageTemp;
+	}
+
+	//Print selected voltage to disp, decimal at digit 3
+	max7219_PrintIspecial(SEGMENT_1, handle->voltageSet, 3);
+
+	//Print to debug
+	char _str[40];
+	sprintf(_str,"VBUS selected: %d mV", handle->voltageSet*10);
+	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+
+}
+
+// Helper function to update voltage
+void updateCurrent(SINKData_HandleTypeDef *handle) {
+	//Get direction of encoder turning
+	int currentTemp = handle->currentSet;
+	currentTemp += handle->encoder.direction * handle->encoder.increment;
+
+	//If required temp value is within limits, assign it to voltage else assign limits
+	if (currentTemp > handle->currentMax) {
+		handle->currentSet = handle->currentMax;
+
+	} else if (currentTemp < handle->currentMin) {
+		handle->currentSet = handle->currentMin;
+
+	} else {
+		handle->currentSet = currentTemp;
+	}
+
+	//Update AWD limits
+	int isense_Vtrip_mV = (handle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
+	int isense_rawADCtrip= (V_TRIP *4095) / VDDA_APPLI; //value for AWD tershold
+	Update_AWD_Thresholds(0, isense_rawADCtrip);
+
+	//Print selected voltage to disp, decimal at digit 3
+	max7219_PrintIspecial(SEGMENT_2, handle->currentSet, 4);
+
+	//Print to debug
+	char _str[40];
+	sprintf(_str,"IBUS selected: %d mA", handle->currentSet);
+	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+}
+
+// Helper function to update voltage
+void updateCurrentOCP(SINKData_HandleTypeDef *handle) {
+	//Get direction of encoder turning
+	int currentTemp = handle->currentOCPSet;
+	currentTemp += handle->encoder.direction * handle->encoder.increment;
+
+	//If required temp value is within limits, assign it to voltage
+	if ( (handle->currentMin <= currentTemp) && (currentTemp <= handle->currentMax) ) {
+		handle->currentOCPSet = currentTemp;
+	} else {
+		//currentOCPTemp = currentOCP;
+	}
+
+	int V_TRIP = (handle->currentOCPSet * R_OCP_MOHMS * G_OCP)/1000; // mV (mA * mOhms * Gain)
+	//Convert DAC_OUT voltage to 12B resolution
+	int dac_value = (V_TRIP *4095) / VDDA_APPLI;//__LL_ADC_DIGITAL_SCALE(LL_ADC_RESOLUTION_12B);
+	//Write output with DAC..
+	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
+
+	//Print selected voltage to disp, decimal at digit 3
+	max7219_PrintIspecial(SEGMENT_2, handle->currentOCPSet, 4);
+
+	//Print to debug
+	char _str[40];
+	sprintf(_str,"IOCP selected: %d mA", handle->currentOCPSet);
+	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+
+}
 
 /**
  * TIM2 encoder turning interrupt service routine
  */
 void encoder_turn_isr(void) {
-	//Get the TIM2 value from CNT register
+	//Get the TIM3 (encoder) value from CNT register
 	encoderVal = (TIM3 -> CNT) >> 2;
 
-	if (encoderVal != encoderValPrev){
+	dhandle->encoder.curValue= encoderVal;
+
+	if (encoderVal != dhandle->encoder.prevValue){
+
+		dhandle->encoder.direction = (encoderVal < dhandle->encoder.prevValue) ? 1 : -1;
 
 		switch(currentState)
 		{
 		case ADJUSTMENT_VOLTAGE:
 		{
-			//Get direction of encoder turning
-			if (encoderVal < encoderValPrev) {
-				voltageTemp += val;
-			} else {
-				voltageTemp -= val;
-			}
-
-			//If required temp value is within limits, assign it to voltage
-			if (voltageMin <= voltageTemp && voltageTemp <= voltageMax) {
-				voltage = voltageTemp;
-			} else if (voltageTemp > voltageMax) {
-				voltage = voltageMax;
-			} else if (voltageTemp < voltageMin) {
-				voltage = voltageMin;
-			} else {
-				//voltageTemp = voltage;
-			}
-			voltageTemp = voltage;
-
-			// Get number of int numbers in voltage var
-			//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
-			max7219_PrintIspecial(SEGMENT_1, voltage, 3);
-
-			//Print to debug
-			char _str[40];
-			sprintf(_str,"VBUS selected: %d mV", voltage*10);
-			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-
-			//Save TIM2 CNT value to ValPrev
-			encoderValPrev = encoderVal;
+			updateVoltage(dhandle);
 		}
 		break;
 
 		case ADJUSTMENT_CURRENT:
 		{
-			//Get direction of encoder turning
-			if (encoderVal < encoderValPrev) {
-				currentTemp += val;
-			} else {
-				currentTemp -= val;
-			}
-
-			//If required temp value is within limits, assign it to voltage
-			if (currentMin <= currentTemp && currentTemp <= currentMax) {
-				current = currentTemp;
-			} else {
-				currentTemp = current;
-			}
-
-			int isense_Vtrip_mV = (current *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
-			int isense_rawADCtrip= (V_TRIP *4095) / VDDA_APPLI; //value for AWD tershold
-
-			Update_AWD_Thresholds(0, isense_rawADCtrip);
-
-
-			// Get number of int numbers in voltage var
-			//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
-			max7219_PrintIspecial(SEGMENT_2, current, 4);
-
-			//Print to debug
-			char _str[40];
-			sprintf(_str,"IBUS selected: %d mA", current);
-			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-
-			//Save TIM2 CNT value to ValPrev
-			encoderValPrev = encoderVal;
+			updateCurrent(dhandle);
 
 		}
 		break;
 
 		case ADJUSTMENT_CURRENT_OCP:
-				{
-					//Get direction of encoder turning
-					if (encoderVal < encoderValPrev) {
-						currentOCPTemp += val;
-					} else {
-						currentOCPTemp -= val;
-					}
-
-					//If required temp value is within limits, assign it to voltage
-					if (currentMin <= currentOCPTemp && currentOCPTemp <= currentMax) {
-						currentOCP = currentOCPTemp;
-					} else {
-						currentOCPTemp = currentOCP;
-					}
-
-					// Get number of int numbers in voltage var
-					//Based on user selected currentOCP calculate the required DAC out...
-					V_TRIP = (currentOCP * R_OCP_MOHMS * G_OCP)/1000; // mV (mA * mOhms * Gain)
-					//Convert DAC_OUT voltage to 12B resolution
-					dac_value = (V_TRIP *4095) / VDDA_APPLI;//__LL_ADC_DIGITAL_SCALE(LL_ADC_RESOLUTION_12B);
-
-					//Write output with DAC..
-					HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
-
-					//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
-					max7219_PrintIspecial(SEGMENT_2, currentOCP, 4);
-
-					//Print to debug
-					char _str[50];
-					sprintf(_str,"OCP_I selected: %d mA", currentOCP);
-					USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-
-					//Save TIM2 CNT value to ValPrev
-					encoderValPrev = encoderVal;
-
-				}
-				break;
+		{
+			updateCurrentOCP(dhandle);
+		}
+		break;
 
 		}
+
+		//Save TIM2 CNT value to ValPrev
+		dhandle->encoder.prevValue = encoderVal;
 	}
 }
 
@@ -470,17 +449,18 @@ void enc_toggle_units_isr(void){
 	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
 
 	//Decrement encoderPress value if higher than 4
-	if (encoderPress > 1){
-		encoderPress--;
+	if (dhandle->encoder.selDigit > 1){
+		dhandle->encoder.selDigit--;
 	}
 	else {
-		encoderPress = 4;
+		dhandle->encoder.selDigit = 4;
 	}
 
 	//Choose addition value based on encoderPress val and current ADJUSTMENT_STATE (voltage/current)
+	int val;
 	switch (currentState){
 		case ADJUSTMENT_VOLTAGE:
-			switch (encoderPress) {
+			switch (dhandle->encoder.selDigit) {
 			case 1: val = 2; break;
 			case 2: val = 10; break;
 			case 3: val = 100; break;
@@ -489,7 +469,7 @@ void enc_toggle_units_isr(void){
 		 break;
 		case ADJUSTMENT_CURRENT_OCP:
 		case ADJUSTMENT_CURRENT:
-			switch (encoderPress) {
+			switch (dhandle->encoder.selDigit) {
 			case 1: val = 5; break;
 			case 2: val = 10; break;
 			case 3: val = 100; break;
@@ -497,6 +477,8 @@ void enc_toggle_units_isr(void){
 			}
 		 break;
 	}
+
+	dhandle->encoder.increment = val;
 
 	char _str[60];
 	uint32_t voltageADC = BSP_PWR_VBUSGetVoltage(0);
@@ -574,12 +556,12 @@ void sw3_on_off_isr(void){
 
 	//sourcecapa_limits();
 
-	int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, voltage*10, current, PDO_SEL_METHOD_MAX_CUR);
+	int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, PDO_SEL_METHOD_MAX_CUR);
 	//Print to debug
 	char _str[70];
-	sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*voltage, current);
+	sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-	USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, voltage*10, current);
+	USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
 	//HAL_Delay(2);
 	//HAL_GPIO_WritePin(OCP_ALERT_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_SET);
 }
@@ -607,13 +589,13 @@ void sw1_toggle_i_v_isr(void){
 	{
 		currentState = ADJUSTMENT_CURRENT;
 		//Display output current
-		max7219_PrintIspecial(SEGMENT_2, current, 4);
+		max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
 	}
 	else
 	{
 		currentState = ADJUSTMENT_CURRENT_OCP;
 		//Display output current
-		max7219_PrintIspecial(SEGMENT_2, currentOCP, 4);
+		max7219_PrintIspecial(SEGMENT_2, dhandle->currentOCPSet, 4);
 	}
 
 	//Get Voltage level into TRACE
@@ -670,9 +652,9 @@ void sw2_lock_isr(void){
 				int len = snprintf(_str, sizeof(_str), "--------Output Enabled--------");
 
 				//Display voltage
-				max7219_PrintIspecial(SEGMENT_1,voltage, 3);
+				max7219_PrintIspecial(SEGMENT_1,dhandle->voltageSet, 3);
 				//Display current
-				max7219_PrintIspecial(SEGMENT_2, current, 4);
+				max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
 			}
 
 	//HAL_GPIO_TogglePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin);
@@ -690,10 +672,10 @@ void ocp_alert_isr(void) {
 
 	// Get number of int numbers in voltage var
 	//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
-	max7219_PrintIspecial(SEGMENT_1, voltage, 3);
+	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
 
 	//Display output current
-	max7219_PrintIspecial(SEGMENT_2, current, 4);
+	max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
 
 
 	ocp_reset_needed = 1;
