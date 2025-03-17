@@ -54,7 +54,7 @@
 /* USER CODE BEGIN POWER_Private_Constants */
 /* Resistor voltage divider */
 #define R_A         200000u // 200 kOhms
-#define R_B          40200u // 40.2 kOhms
+#define R_B          36000u // 36 kOhms
 #define R_SENSE_MOHMS   30u // 30 mOhms
 #define G_SENSE         20u // V/V
 #define G_OCP          100u // V/V

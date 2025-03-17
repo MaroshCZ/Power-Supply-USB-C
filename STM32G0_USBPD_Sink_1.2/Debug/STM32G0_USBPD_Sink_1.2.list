@@ -17429,10 +17429,10 @@ static void MX_ADC1_Init(void)
  80080f8:	4b4f      	ldr	r3, [pc, #316]	; (8008238 <MX_ADC1_Init+0x164>)
  80080fa:	4a50      	ldr	r2, [pc, #320]	; (800823c <MX_ADC1_Init+0x168>)
  80080fc:	601a      	str	r2, [r3, #0]
-  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
  80080fe:	4b4e      	ldr	r3, [pc, #312]	; (8008238 <MX_ADC1_Init+0x164>)
  8008100:	2280      	movs	r2, #128	; 0x80
- 8008102:	0612      	lsls	r2, r2, #24
+ 8008102:	05d2      	lsls	r2, r2, #23
  8008104:	605a      	str	r2, [r3, #4]
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
  8008106:	4b4c      	ldr	r3, [pc, #304]	; (8008238 <MX_ADC1_Init+0x164>)
@@ -75943,8 +75943,8 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetVoltage(uint32_t Instance, uint32_t *pVoltag
  801c864:	2000033c 	.word	0x2000033c
  801c868:	00000ce4 	.word	0x00000ce4
  801c86c:	00000fff 	.word	0x00000fff
- 801c870:	0003aa48 	.word	0x0003aa48
- 801c874:	00009d08 	.word	0x00009d08
+ 801c870:	000399e0 	.word	0x000399e0
+ 801c874:	00008ca0 	.word	0x00008ca0
 
 0801c878 <BSP_USBPD_PWR_VBUSGetCurrent>:
   *         @arg @ref USBPD_PWR_TYPE_C_PORT_2
@@ -75986,7 +75986,7 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetCurrent(uint32_t Instance, int32_t *pCurrent
 	 //Calculate vout_adc(mV) on ADC pin based on ADC resolution and reference voltage VDDA and raw ADC value
 	 vout_adc = __LL_ADC_CALC_DATA_TO_VOLTAGE( VDDA_APPLI, \
  801c89c:	4b12      	ldr	r3, [pc, #72]	; (801c8e8 <BSP_USBPD_PWR_VBUSGetCurrent+0x70>)
- 801c89e:	885b      	ldrh	r3, [r3, #2]
+ 801c89e:	889b      	ldrh	r3, [r3, #4]
  801c8a0:	b29b      	uxth	r3, r3
  801c8a2:	001a      	movs	r2, r3
  801c8a4:	4b11      	ldr	r3, [pc, #68]	; (801c8ec <BSP_USBPD_PWR_VBUSGetCurrent+0x74>)
@@ -76080,7 +76080,7 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetCurrentOCP(uint32_t Instance, int32_t *pCurr
 	 //Calculate vout_adc(mV) on ADC pin based on ADC resolution and reference voltage VDDA and raw ADC value
 	 vout_adc = __LL_ADC_CALC_DATA_TO_VOLTAGE( VDDA_APPLI, \
  801c918:	4b12      	ldr	r3, [pc, #72]	; (801c964 <BSP_USBPD_PWR_VBUSGetCurrentOCP+0x70>)
- 801c91a:	889b      	ldrh	r3, [r3, #4]
+ 801c91a:	885b      	ldrh	r3, [r3, #2]
  801c91c:	b29b      	uxth	r3, r3
  801c91e:	001a      	movs	r2, r3
  801c920:	4b11      	ldr	r3, [pc, #68]	; (801c968 <BSP_USBPD_PWR_VBUSGetCurrentOCP+0x74>)
