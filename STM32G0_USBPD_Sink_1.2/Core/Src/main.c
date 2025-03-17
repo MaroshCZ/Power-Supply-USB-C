@@ -306,11 +306,11 @@ static void MX_ADC1_Init(void)
 
   /** Configure the regular channel to be monitored by WatchDog 2 or 3
   */
-  AnalogWDGConfig.WatchdogNumber = ADC_ANALOGWATCHDOG_3;
+  AnalogWDGConfig.WatchdogNumber = ADC_ANALOGWATCHDOG_2;
   AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_SINGLE_REG;
   AnalogWDGConfig.Channel = ADC_CHANNEL_7;
   AnalogWDGConfig.ITMode = ENABLE;
-  AnalogWDGConfig.HighThreshold = 4095;
+  AnalogWDGConfig.HighThreshold = 1000;
   AnalogWDGConfig.LowThreshold = 0;
   if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
   {
