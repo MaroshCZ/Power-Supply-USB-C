@@ -122,7 +122,7 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 }
 
 // Callback when ADW CH3 goes out of range
-HAL_ADCEx_LevelOutOfWindow3Callback(ADC_HandleTypeDef *hadc) {
+void HAL_ADCEx_LevelOutOfWindow3Callback(ADC_HandleTypeDef *hadc) {
 	outputState = OUTPUT_OFF_STATE;
 	//Disable output
 	HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
@@ -158,14 +158,25 @@ void app_init(void){
 	//TIM4 initialization
 	HAL_TIM_Base_Start(&htim4);
 
-	//Calibrate and start ADC sensing with DMA
-	HAL_ADCEx_Calibration_Start(&hadc1);
-	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&aADCxConvertedValues, ADC_NUM_OF_SAMPLES);
-	Update_AWD_Thresholds(0,4095); //(low, high)
-
 	//Init DAC
 	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
 	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
+
+	//Wait for hardware initialization and then turn DB to HIGH (according to TCPP01-M12 datasheet 6.5)
+	HAL_Delay(200);
+	HAL_GPIO_WritePin(DB_OUT_GPIO_Port, DB_OUT_Pin, GPIO_PIN_SET);
+
+	//Calibrate and start ADC sensing with DMA
+	HAL_ADCEx_Calibration_Start(&hadc1);
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&aADCxConvertedValues, ADC_NUM_OF_SAMPLES);
+	// Configure watchdog but don't enable interrupt yet
+	HAL_ADC_AnalogWDGConfig(&hadc1, &(ADC_AnalogWDGConfTypeDef){
+	    .WatchdogMode = ADC_ANALOGWATCHDOG_SINGLE_REG,
+	    .Channel = ADC_CHANNEL_7,
+	    .ITMode = DISABLE,  // Disable interrupt initially
+	    .HighThreshold = 4095,
+	    .LowThreshold = 0
+	});
 
 	//Init 7 segment display
 	max7219_Init( 7 );
@@ -174,10 +185,7 @@ void app_init(void){
 	//Print decimal points and initial values
 	max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
 	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
-
-	//Wait for hardware initialization and then turn DB to HIGH (according to TCPP01-M12 datasheet 6.5)
-	HAL_Delay(2000);
-	HAL_GPIO_WritePin(DB_OUT_GPIO_Port, DB_OUT_Pin, GPIO_PIN_SET);
+	//Update_AWD_Thresholds(0,4095); //(low, high)
 
 	//HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_SET);
 
@@ -290,15 +298,17 @@ void app_loop(void){
  * Update ADC CH3 AWD Treshold
  */
 void Update_AWD_Thresholds(uint32_t low, uint32_t high) {
-    HAL_ADC_Stop(&hadc1);  // Stop ADC before updating thresholds
+	HAL_ADC_Stop_DMA(&hadc1); // Stop ADC with DMA before updating thresholds
     HAL_ADC_AnalogWDGConfig(&hadc1, &(ADC_AnalogWDGConfTypeDef){
         .WatchdogMode = ADC_ANALOGWATCHDOG_SINGLE_REG,
-        .Channel = ADC_CHANNEL_3, //isense (MCP06C20)
+        .Channel = ADC_CHANNEL_7, //isense channel (MCP06C20)
         .ITMode = ENABLE,
         .HighThreshold = high,
         .LowThreshold = low
     });
-    HAL_ADC_Start(&hadc1);  // Restart ADC
+    // Clear any pending flags
+    SET_BIT(hadc1.Instance->ISR, ADC_ISR_AWD3);
+    HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&aADCxConvertedValues, ADC_NUM_OF_SAMPLES); // Restart ADC with DMA
 }
 
 // Helper function to update voltage
@@ -348,7 +358,7 @@ void updateCurrent(SINKData_HandleTypeDef *handle) {
 	//Update AWD limits
 	int isense_Vtrip_mV = (handle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
 	int isense_rawADCtrip= (V_TRIP *4095) / VDDA_APPLI; //value for AWD tershold
-	Update_AWD_Thresholds(0, isense_rawADCtrip);
+	Update_AWD_Thresholds(0, 300);
 
 	//Print selected voltage to disp, decimal at digit 3
 	max7219_PrintIspecial(SEGMENT_2, handle->currentSet, 4);
