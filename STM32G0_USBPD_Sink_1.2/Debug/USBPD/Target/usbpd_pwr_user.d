@@ -59,7 +59,7 @@ USBPD/Target/usbpd_pwr_user.o: ../USBPD/Target/usbpd_pwr_user.c \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_dma.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_exti.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
- ../Application/app.h
+ ../Application/app.h ../USBPD/usbpd_user_services.h
 ../USBPD/Target/usbpd_pwr_user.h:
 ../Drivers/CMSIS/Device/ST/STM32G0xx/Include/stm32g0xx.h:
 ../Drivers/CMSIS/Device/ST/STM32G0xx/Include/stm32g0b1xx.h:
@@ -121,3 +121,4 @@ USBPD/Target/usbpd_pwr_user.o: ../USBPD/Target/usbpd_pwr_user.c \
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_exti.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
 ../Application/app.h:
+../USBPD/usbpd_user_services.h:

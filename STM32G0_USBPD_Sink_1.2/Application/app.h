@@ -8,7 +8,7 @@
 #ifndef APP_H_
 #define APP_H_
 
-
+#include "usbpd_user_services.h"
 //
 typedef enum
 {
@@ -39,6 +39,7 @@ typedef struct {
   uint32_t              voltageMax;       /*!< Maximal SRC voltage in centivolts */
   uint32_t              currentMax;       /*!< Maximal SRC current in mA */
   uint32_t              currentMin;       /*!< Minimal current in mA (0)*/
+  USBPD_USER_SERV_PDO_SelectionMethodTypeDef selMethod;
   Encoder_TypeDef       encoder;
 
 } SINKData_HandleTypeDef;

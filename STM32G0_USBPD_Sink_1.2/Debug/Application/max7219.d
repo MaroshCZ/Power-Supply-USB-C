@@ -54,7 +54,7 @@ Application/max7219.o: ../Application/max7219.c \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_exti.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
  ../Drivers/CMSIS/Include/cmsis_compiler.h \
- ../Application/../Application/app.h
+ ../Application/../Application/app.h ../USBPD/usbpd_user_services.h
 ../Application/../Application/max7219.h:
 ../Core/Inc/main.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:
@@ -112,3 +112,4 @@ Application/max7219.o: ../Application/max7219.c \
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
 ../Drivers/CMSIS/Include/cmsis_compiler.h:
 ../Application/../Application/app.h:
+../USBPD/usbpd_user_services.h:

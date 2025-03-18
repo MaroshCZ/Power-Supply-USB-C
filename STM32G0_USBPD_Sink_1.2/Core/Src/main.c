@@ -833,11 +833,17 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : SW3_OFF_ON_Pin SW1_TOGGLE_I_V_Pin OCP_ALERT_Pin OCP_ALERT2_Pin */
-  GPIO_InitStruct.Pin = SW3_OFF_ON_Pin|SW1_TOGGLE_I_V_Pin|OCP_ALERT_Pin|OCP_ALERT2_Pin;
+  /*Configure GPIO pins : SW3_OFF_ON_Pin OCP_ALERT_Pin OCP_ALERT2_Pin */
+  GPIO_InitStruct.Pin = SW3_OFF_ON_Pin|OCP_ALERT_Pin|OCP_ALERT2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : SW1_TOGGLE_I_V_Pin */
+  GPIO_InitStruct.Pin = SW1_TOGGLE_I_V_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(SW1_TOGGLE_I_V_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : CS_MAX7219_Pin OCP_RESET_Pin */
   GPIO_InitStruct.Pin = CS_MAX7219_Pin|OCP_RESET_Pin;
@@ -885,13 +891,13 @@ static void MX_GPIO_Init(void)
 * @param GPIO_Pin Specifies the pins connected EXTI line
 * @retval None
 */
+/*
 void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
 {
-	if (GPIO_Pin == SW2_DEBUG_BTN_Pin) /* Will display in trace the VBUS value when user button
-is pressed */
+	if (GPIO_Pin == SW2_DEBUG_BTN_Pin) // Will display in trace the VBUS value when user button is pressed
 	{
 		//Get Voltage level into TRACE
-		/*
+
 		char _str[60];
 		uint32_t voltage = BSP_PWR_VBUSGetVoltage(0);
 		uint32_t current= BSP_PWR_VBUSGetCurrent(0);
@@ -901,39 +907,11 @@ is pressed */
 		int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltage, current, currentOCP);
 
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-		*/
 
-		/*
-		char _str[60];
-		if (HAL_GPIO_ReadPin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin) == GPIO_PIN_SET)
-		{
-			HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
-			// Use snprintf to limit the number of characters written
-			int len = snprintf(_str, sizeof(_str), "--------Output Disabled--------");
-		}
-		else
-		{
-			HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_SET);
-			// Use snprintf to limit the number of characters written
-			int len = snprintf(_str, sizeof(_str), "--------Output Enabled--------");
-		}
 
-		//HAL_GPIO_TogglePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin);
-		//Get Voltage level into TRACE
-		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));*/
 
-		char _str2[60];
-		uint32_t voltage = BSP_PWR_VBUSGetVoltage(0);
-		uint32_t current= BSP_PWR_VBUSGetCurrent(0);
-		uint32_t currentOCP= BSP_PWR_VBUSGetCurrentOCP(0);
+			//Only applies if an error was specified (= if the case couldn't success)
 
-		// Use snprintf to limit the number of characters written
-		int len = snprintf(_str2, sizeof(_str2), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltage, current, currentOCP);
-
-		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str2, strlen(_str2));
-
-			/* Only applies if an error was specified (= if the case couldn't success)*/
-			/**
 			if (USBPD_OK != status)
 			{
 				switch (status)
@@ -950,11 +928,13 @@ is pressed */
 					error = GUI_REJ_DPM_REJECT;
 					break;
 				}
-			}**/
+			}
 
 	}
 
-}
+}*/
+
+
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */

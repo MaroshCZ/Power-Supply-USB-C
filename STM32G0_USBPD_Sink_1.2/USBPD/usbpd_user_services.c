@@ -887,7 +887,7 @@ uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
 
 
 	// Search for matching APDO or find next FixedPDO
-	if (nbsrcAPDO > 0)
+	if (nbsrcAPDO > 0 && Method== PDO_SEL_METHOD_MAX_CUR)
 	{
 
 		/* Check SRC PDO value according to its type */

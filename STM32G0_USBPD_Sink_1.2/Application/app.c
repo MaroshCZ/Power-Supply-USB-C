@@ -82,6 +82,7 @@ SINKData_HandleTypeDef SNK_data = {
 	.voltageSet = 330, //initial value to display
 	.currentSet = 1000, //initial value to display
 	.currentMin = 0,
+	.selMethod = PDO_SEL_METHOD_MAX_CUR,
 	.encoder = {
 		.selDigit = 2,
 		.increment = 10    // Default increment
@@ -108,6 +109,93 @@ void HAL_ADCEx_LevelOutOfWindow2Callback(ADC_HandleTypeDef *hadc) {
 	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
 	max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
 
+}
+
+volatile uint32_t sw1ButtonPressTime = 0;
+volatile bool sw1ButtonPressed = false;
+volatile bool sw1LongPressDetected = false;
+volatile bool sw1ButtonReleased = false;
+
+void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
+	if (GPIO_Pin == SW2_DEBUG_BTN_Pin) /* Will display in trace the VBUS value when user button
+	is pressed */
+		{
+		char _str2[60];
+		uint32_t voltage = BSP_PWR_VBUSGetVoltage(0);
+		uint32_t current= BSP_PWR_VBUSGetCurrent(0);
+		uint32_t currentOCP= BSP_PWR_VBUSGetCurrentOCP(0);
+
+		// Use snprintf to limit the number of characters written
+		int len = snprintf(_str2, sizeof(_str2), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltage, current, currentOCP);
+
+		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str2, strlen(_str2));
+		}
+
+    if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
+    	EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
+
+		//Set debouncing time in ms
+		TIM7->ARR = 200;
+
+		//Zero TIM7 counter and start counting
+		LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
+	    LL_TIM_EnableCounter(TIM7); //start counting of timer 7
+
+        sw1ButtonPressTime = HAL_GetTick();  // Store timestamp
+        sw1ButtonPressed = true;  // Mark button as pressed
+        sw1LongPressDetected = false;  // Reset long press flag
+    }
+}
+
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
+    if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
+        uint32_t pressDuration = HAL_GetTick() - sw1ButtonPressTime;
+
+        if (pressDuration >= 800) {  // Long press (800ms threshold)
+            sw1LongPressDetected = true;
+        }
+
+        sw1ButtonPressed = false;  // Reset button state
+        sw1ButtonReleased = true;  // Mark button release event
+    }
+}
+
+void processSw1ButtonEvents() {
+    static uint32_t lastShortPressTime = 0;
+
+    if (sw1LongPressDetected) {
+        printf("Long Press Detected\n");
+        HAL_GPIO_TogglePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin);
+
+        //Temporary logic to change APDO vs FIXED PDO toggling
+        if (dhandle ->selMethod == PDO_SEL_METHOD_MAX_CUR) {
+        	dhandle ->selMethod = PDO_SEL_METHOD_MIN_CUR;
+        }
+        else {
+        	 dhandle ->selMethod = PDO_SEL_METHOD_MAX_CUR;
+        }
+
+
+        sw1LongPressDetected = false;
+        sw1ButtonReleased = false; // Clear the release flag for long press too
+    } else if (sw1ButtonReleased) {
+        uint32_t now = HAL_GetTick();
+        uint32_t pressDuration = now - sw1ButtonPressTime;
+
+        if (pressDuration < 800) {  // Short press condition
+            if (now - lastShortPressTime < 250) {  // Double press detection
+                printf("Double Press Detected\n");
+                HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
+            } else {
+                printf("Short Press Detected\n");
+                sw1_toggle_i_v_isr();
+
+            }
+            lastShortPressTime = now;
+        }
+
+        sw1ButtonReleased = false;  // Reset release flag
+    }
 }
 
 
@@ -219,7 +307,7 @@ void app_loop(void){
 		HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_SET);
 		ocp_reset_needed = 0;
 	}
-
+	processSw1ButtonEvents();
 
 	switch(outputState)
 		{
@@ -547,7 +635,7 @@ void sw3_on_off_isr(void){
 
 	//sourcecapa_limits();
 
-	int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, PDO_SEL_METHOD_MAX_CUR);
+	int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
 	//Print to debug
 	char _str[70];
 	sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
@@ -562,14 +650,14 @@ void sw3_on_off_isr(void){
  */
 void sw1_toggle_i_v_isr(void){
 	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PB2)
-	EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
+	//EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
 
 	//Set debouncing time in ms
-	TIM7->ARR = 200;
+	//TIM7->ARR = 200;
 
 	//Zero TIM7 counter and start counting
-	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
-	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
+	//LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
+	//LL_TIM_EnableCounter(TIM7); //start counting of timer 7
 
 	// Toggle the state
 	if (currentState == ADJUSTMENT_CURRENT_OCP)
