@@ -292,8 +292,14 @@ void USBPD_DPM_Notification(uint8_t PortNum, USBPD_NotifyEventValue_TypeDef Even
 //      break;
 //    case USBPD_NOTIFY_POWER_SWAP_TO_SNK_DONE:
 //      break;
-//    case USBPD_NOTIFY_STATE_SNK_READY:
-//      break;
+    case USBPD_NOTIFY_STATE_SNK_READY:
+    	uint32_t voltage = BSP_PWR_VBUSGetVoltage(0);
+
+    	char _str2[50];
+		// Use snprintf to limit the number of characters written
+		int len = snprintf(_str2, sizeof(_str2), "VBUSmeas:%lu mV, VBUSset:%lu mV", voltage, dhandle->voltageSet);
+		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str2, strlen(_str2));
+      break;
 //    case USBPD_NOTIFY_HARDRESET_RX:
 //    case USBPD_NOTIFY_HARDRESET_TX:
 //      break;

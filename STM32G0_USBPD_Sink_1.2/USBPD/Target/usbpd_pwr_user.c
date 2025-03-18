@@ -294,7 +294,7 @@ __weak PWR_StatusTypeDef BSP_PWR_VBUSSetVoltage_APDO(uint32_t PortId,
   */
 __weak uint32_t BSP_PWR_VBUSGetVoltage(uint32_t PortId)
 {
-  PWR_DEBUG_TRACE(PortId, "ADVICE: Obsolete BSP_PWR_VBUSGetVoltage");
+  //PWR_DEBUG_TRACE(PortId, "ADVICE: Obsolete BSP_PWR_VBUSGetVoltage");
 /* USER CODE BEGIN BSP_PWR_VBUSGetVoltage */
   uint32_t voltage = 0;
 
@@ -314,7 +314,7 @@ __weak uint32_t BSP_PWR_VBUSGetVoltage(uint32_t PortId)
   */
 __weak int32_t BSP_PWR_VBUSGetCurrent(uint32_t PortId)
 {
-  PWR_DEBUG_TRACE(PortId, "ADVICE: Obsolete BSP_PWR_VBUSGetCurrent");
+  //PWR_DEBUG_TRACE(PortId, "ADVICE: Obsolete BSP_PWR_VBUSGetCurrent");
 /* USER CODE BEGIN BSP_PWR_VBUSGetCurrent */
   int32_t current = 0;
 

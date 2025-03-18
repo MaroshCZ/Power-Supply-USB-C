@@ -21,31 +21,7 @@
 #include "usbd_cdc_if.h"
 #include <usbpd_trace.h>
 
-typedef struct {
-	int curValue;      // Current encoder value
-	int prevValue;     // Previous encoder value
-	int selDigit;  	   // Currently selected digit
-	int increment;     // Current increment value
-	int direction;	   // Direction: 1 for clockwise, -1 for counter-clockwise
-}Encoder_TypeDef;
 
-typedef struct {
-  //USBPD_PPSSDB_TypeDef  DPM_RcvPPSStatus;           /*!< PPS Status received by port partner                         */
-  //USBPD_SKEDB_TypeDef   DPM_RcvSNKExtendedCapa;     /*!< SNK Extended Capability received by port partner            */
-  uint32_t              voltageSet;       /*!< User selected voltage in centivolts */
-  uint32_t              currentSet;       /*!< User selected OCP limit in mA */
-  uint32_t				currentOCPSet;
-
-  uint32_t              voltageMeas;      /*!< Measured output voltage in centivolts */
-  uint32_t              currentMeas;      /*!< Measured output current in centivolts */
-
-  uint32_t              voltageMin;       /*!< Minimal SRC voltage in centivolts */
-  uint32_t              voltageMax;       /*!< Maximal SRC voltage in centivolts */
-  uint32_t              currentMax;       /*!< Maximal SRC current in mA */
-  uint32_t              currentMin;       /*!< Minimal current in mA (0)*/
-  Encoder_TypeDef       encoder;
-
-} SINKData_HandleTypeDef;
 
 
 //Variables declaration
@@ -112,6 +88,7 @@ SINKData_HandleTypeDef SNK_data = {
 	}
 };
 
+// Define the pointer to the struct
 SINKData_HandleTypeDef *dhandle = &SNK_data;
 
 
@@ -155,8 +132,17 @@ void app_init(void){
 	encoderVal = __HAL_TIM_GET_COUNTER(&htim3)/4;
 	//encoderValPrev = encoderVal;
 
-	//TIM4 initialization
-	HAL_TIM_Base_Start(&htim4);
+	/*
+	//Set tim IT freq to 10Khz (TIM4 runs on PCLK 64MHz)
+	TIM4->PSC = 64-1;
+	TIM4->ARR = 100-1;
+
+	// Enable update interrupt
+	LL_TIM_EnableIT_UPDATE(TIM4);
+	LL_TIM_ClearFlag_UPDATE(TIM4);
+	LL_TIM_SetCounter(TIM4, 0);
+	LL_TIM_EnableCounter(TIM4);*/
+
 
 	//Init DAC
 	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
@@ -169,6 +155,9 @@ void app_init(void){
 	//Calibrate and start ADC sensing with DMA
 	HAL_ADCEx_Calibration_Start(&hadc1);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&aADCxConvertedValues, ADC_NUM_OF_SAMPLES);
+
+	//TIM4 initialization
+	HAL_TIM_Base_Start(&htim4);
 
 	//Init 7 segment display
 	max7219_Init( 7 );

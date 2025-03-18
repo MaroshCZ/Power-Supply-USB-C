@@ -746,6 +746,10 @@ void USER_SERV_SNK_BuildRDOfromSelectedPDO(uint8_t PortNum,
   Rdo->d32 = pdhandle->DPM_RequestDOMsg;
   /* Get the requested voltage */
   pdhandle->DPM_RequestedVoltage = mv;
+
+  char _str2[60];
+  int len = snprintf(_str2, sizeof(_str2), "Call of native BuildRDO made");
+  USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str2, strlen(_str2));
 }
 
 /**

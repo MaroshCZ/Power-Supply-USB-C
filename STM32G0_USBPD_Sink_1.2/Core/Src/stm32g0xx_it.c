@@ -254,7 +254,11 @@ void TIM3_TIM4_IRQHandler(void)
   HAL_TIM_IRQHandler(&htim3);
   HAL_TIM_IRQHandler(&htim4);
   /* USER CODE BEGIN TIM3_TIM4_IRQn 1 */
-
+  /* Check if TIM4 update interrupt occurred */
+  if(LL_TIM_IsActiveFlag_UPDATE(TIM4))
+  {
+	  LL_TIM_ClearFlag_UPDATE(TIM4);
+  }
   /* USER CODE END TIM3_TIM4_IRQn 1 */
 }
 
