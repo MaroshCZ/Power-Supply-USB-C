@@ -988,10 +988,13 @@ uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
 	return curr_index+1;
 }
 
+
+
+
 void USER_SERV_ExtractSRCCapa(void) {
+	//
 	sourcecapa_limits();
 }
-
 
 
 #endif /* _SNK */

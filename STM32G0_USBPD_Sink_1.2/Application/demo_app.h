@@ -106,6 +106,9 @@ typedef struct {
 	    // Encoder events
 	    volatile bool encoderTurnEvent;
 
+	    // Periodic check event
+	    volatile bool periodicCheckEvent;
+
 	    // ADC/AWDG events
 	    volatile bool awdgEvent;
 } SystemEvents;
@@ -128,6 +131,7 @@ void processButtonEvents(StateMachine *sm, SystemEvents *events);
 void processSystemEvents(StateMachine *sm, SystemEvents *events);
 void updateVoltage(StateMachine *sm, SINKData_HandleTypeDef *handle);
 void updateCurrent(StateMachine *sm, SINKData_HandleTypeDef *handle);
+void TIM14_ISR(void);
 
 /*Exported variables*/
 extern StateMachine stateMachine;

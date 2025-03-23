@@ -113,10 +113,24 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM3) {
     	systemEvents.encoderTurnEvent = true;
-
     }
 }
 
+void TIM14_ISR(void) {
+	if (LL_TIM_IsActiveFlag_UPDATE(TIM14)) {
+		// Clear the update interrupt flag
+		LL_TIM_ClearFlag_UPDATE(TIM14);
+		if (stateMachine.currentState == STATE_ACTIVE) {
+			// Handle periodic check for ACTIVE state
+			systemEvents.periodicCheckEvent = true;
+			//Reset CNT value
+			LL_TIM_SetCounter(TIM14, 0);
+
+			//Start timer again
+			LL_TIM_EnableCounter(TIM14);
+		}
+	}
+}
 
 // Process button events in the main loop (Convert hardware events into logical events)
 void processButtonEvents(StateMachine *sm, SystemEvents *events) {
@@ -206,7 +220,7 @@ void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 	// Set check interval Make the timer persistent across function calls
 	static uint32_t lastCheckTime = 0; // declared to 0 only once, then retains value
     static bool entryDone = false;
-	const uint32_t CHECK_INTERVAL_MS = 250; // Check every 250ms
+	const uint32_t CHECK_INTERVAL_MS = 500; // Check every 500ms
 
 	//=======================================================
 	// ENTRY ACTIONS - Executed once when entering the state
@@ -216,12 +230,14 @@ void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
         // Ensure output is off
         HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_SET);
 
-        // Check temperature and control fan (not shown in your code)
-        int refreshTime = HAL_GetTick();
-        sm->timeoutCounter = 2000;  // 2 seconds timeout
-
         // Save state for return from temporary states
         strcpy(sm->lastStateStr, "ACTIVE");
+
+        // Initialize the check timer
+        TIM14->ARR = 500;
+		LL_TIM_SetCounter(TIM14, 0); //set counter register value of timer 7 to 0
+		LL_TIM_EnableIT_UPDATE(TIM14); // Enable update interrupt
+		LL_TIM_EnableCounter(TIM14);
 
         entryDone = true;
     }
@@ -231,8 +247,8 @@ void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 	//==========================================================
 
     //Periodic check to display measured values
-    uint32_t currentTime = HAL_GetTick();
-    if (currentTime - lastCheckTime >= CHECK_INTERVAL_MS) {
+    if (systemEvents.periodicCheckEvent) {
+        systemEvents.periodicCheckEvent = false;
 		uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 to get centivolts since only 4 digit display..
 		uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
 
@@ -264,6 +280,9 @@ void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
         sm->timeoutCounter = 4000;  // 4 seconds timeout
         entryDone = false;
     }
+
+    if (sm->outputBtnPressed || sm->ocpBtnPressed)
+    LL_TIM_DisableCounter(TIM14);
 }
 
 
@@ -307,9 +326,21 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
         entryDone = true;
     }
     // User interaction - reset the timeout
-	if (sm->rotaryBtnPressed || sm->encoderTurnedFlag) {
+	if (sm->rotaryBtnPressed || sm->encoderTurnedFlag || sm->voltageCurrentBtnPressed) {
 		// Reset the timeout timer whenever there's user interaction
 		sm->stateEntryTime = HAL_GetTick();
+	}
+
+	//Process voltageCurrentBtn press
+	if (sm->voltageCurrentBtnPressed) {
+		//Reset flag
+		sm->voltageCurrentBtnPressed = false;
+		//Process
+		if (sm->setValueMode == SET_VOLTAGE) {
+			sm->setValueMode = SET_CURRENT;
+		} else if (sm->setValueMode == SET_CURRENT) {
+			sm->setValueMode = SET_VOLTAGE;
+		}
 	}
 
     //Process encoder press
