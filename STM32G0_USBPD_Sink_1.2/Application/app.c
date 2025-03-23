@@ -82,6 +82,7 @@ SINKData_HandleTypeDef SNK_data = {
 	.voltageSet = 330, //initial value to display
 	.currentSet = 1000, //initial value to display
 	.currentMin = 0,
+	.currentOCPSet = 1000,
 	.selMethod = PDO_SEL_METHOD_MAX_CUR,
 	.encoder = {
 		.selDigit = 2,
@@ -265,42 +266,8 @@ void app_init(void){
 /*
  * Loop function
  */
-void app_loop(void){
-	/*
-	if (limitReadFlag == false) {
-		sourcecapa_limits();
-		limitReadFlag = true;
-		voltageMin = maxvoltageAPDO/10;
-		voltageMax = minvoltageAPDO/10;
-		voltage = voltageMin;
-	}*/
-
-
-	//Blink digit based on specified adjustment
-	/*
-	switch(currentState)
-	{
-		case(ADJUSTMENT_VOLTAGE):
-		{
-			//Blink currently selected digit
-			max7219_BlinkDigit(SEGMENT_1, &voltage, encoderPress, 500, 3); //pass voltage address to BlinkDigit function
-		}
-		 break;
-		case(ADJUSTMENT_CURRENT):
-		{
-			//Blink currently selected digit
-			max7219_BlinkDigit(SEGMENT_2, &current, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
-		}
-		 break;
-		case(ADJUSTMENT_CURRENT_OCP):
-		{
-
-			//Blink currently selected digit
-			max7219_BlinkDigit(SEGMENT_2, &currentOCP, encoderPress, 500, 4); //pass voltage address to BlinkDigit function
-		}
-		break;
-	}*/
-
+void app_loop(void) {
+    // ...existing code...
 	if (ocp_reset_needed == 1) {
 		HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_RESET);
 		HAL_Delay(4); //datasheet says 100ns minimum pull down time for resettin alert, but for me even 1ms was not enough
@@ -427,7 +394,7 @@ void updateCurrent(SINKData_HandleTypeDef *handle) {
 	//Update AWD limits
 	int isense_Vtrip_mV = (handle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
 	int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD tershold
-	Update_AWD_Thresholds(0, isense_rawADCtrip);
+	Update_AWD_Thresholds(0, isense_rawADCtrip+100);
 
 	//Print selected voltage to disp, decimal at digit 3
 	max7219_PrintIspecial(SEGMENT_2, handle->currentSet, 4);
@@ -445,7 +412,7 @@ void updateCurrentOCP(SINKData_HandleTypeDef *handle) {
 	currentTemp += handle->encoder.direction * handle->encoder.increment;
 
 	//If required temp value is within limits, assign it to voltage
-	if ( (handle->currentMin <= currentTemp) && (currentTemp <= handle->currentMax) ) {
+	if ( (handle->currentMin <= currentTemp) && (currentTemp <= (handle->currentMax + 300)) ) {
 		handle->currentOCPSet = currentTemp;
 	} else {
 		//currentOCPTemp = currentOCP;
@@ -786,6 +753,9 @@ void sourcecapa_limits(void)
 		uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_FIXED_MAX_CURRENT_Pos)*10;
 		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_VOLTAGE_Msk) >> USBPD_PDO_SRC_FIXED_VOLTAGE_Pos)*50;
 		//sprintf((char*)_str, "FIXED:%2dV %2d.%dA", (int)(maxvoltage/1000), (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
+		if (maxcurrent > dhandle->currentMax) {
+			  			dhandle -> currentMax = (int)maxcurrent+100;
+			  		}
 		break;
 	  }
 	case USBPD_PDO_TYPE_BATTERY :
@@ -814,14 +784,16 @@ void sourcecapa_limits(void)
 		if (maxvoltage > dhandle->voltageMax*10) {
 			dhandle -> voltageMax = (int)maxvoltage/10;
 		}
+
 		if (maxcurrent > dhandle->currentMax) {
-			dhandle -> currentMax = (int)maxcurrent;
+			dhandle -> currentMax = (int)maxcurrent+100;
 		}
 	  }
 	  break;
 	default :
 	  sprintf((char*)_str,"Unknown Source PDO");
 	  break;
+
 	}
   }
 }

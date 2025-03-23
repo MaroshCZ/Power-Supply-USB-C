@@ -77,27 +77,25 @@ const osMessageQueueAttr_t DISPQueue_attributes = {
 void DISPReceiverTask(void * argument);
 
 void app_freertos_create() {
-	/* Create Message Queue */
-	DISPQueue = osMessageQueueNew (DISP_QUEUE_SIZE, DISP_QUEUE_MESSAGE_MAX_SIZE, &DISPQueue_attributes);
+    /* Create Message Queue */
+    DISPQueue = osMessageQueueNew(DISP_QUEUE_SIZE, DISP_QUEUE_MESSAGE_MAX_SIZE, &DISPQueue_attributes);
 
-	/* Create Receiver Task */
-	DISPReceiveMsg = osThreadNew(DISPReceiverTask, DISPQueue, &DISPReceiveMsg_attributes); //second argument is queue handle
-
+    /* Create Receiver Task */
+    DISPReceiveMsg = osThreadNew(DISPReceiverTask, DISPQueue, &DISPReceiveMsg_attributes); // second argument is queue handle
 }
 
 void DISPReceiverTask(void *argument) {
-	osMessageQueueId_t queue = (osMessageQueueId_t) argument; // Cast to correct type
-	uint32_t msg;
+    osMessageQueueId_t queue = (osMessageQueueId_t) argument; // Cast to correct type
+    DISPMessage_t msg;
 
-	for (;;)
-	  {
-		HAL_GPIO_TogglePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin);
-		if (osMessageQueueGet(queue, &msg, NULL, 200) == osOK) {
-			// Process received message
-			//HAL_GPIO_TogglePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin);
-		}
-		osDelay(2000);
-	  }
+    for (;;) {
+        if (osMessageQueueGet(queue, &msg, NULL, osWaitForever) == osOK) {
+            // Process received message
+            // Example: Update display based on received message
+            max7219_PrintIspecial(msg.segment, msg.value, msg.decimal_pos);
+        }
+        osDelay(200); // Adjust delay as needed
+    }
 }
 
 /* USER CODE END FunctionPrototypes */

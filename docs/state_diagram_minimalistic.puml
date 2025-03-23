@@ -1,4 +1,4 @@
-@startuml
+@startuml 
 title USB-C PPS State diagram
 legend
     Format PlantUML code: Alt+Shift+F
