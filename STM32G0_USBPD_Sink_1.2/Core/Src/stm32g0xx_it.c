@@ -117,7 +117,7 @@ void EXTI0_1_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI0_1_IRQn 0 */
   if (__HAL_GPIO_EXTI_GET_IT(SW3_OFF_ON_Pin) != RESET){
-	  sw3_on_off_isr();
+	  //sw3_on_off_isr();
   }
   /* USER CODE END EXTI0_1_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(SW3_OFF_ON_Pin);
@@ -150,13 +150,13 @@ void EXTI4_15_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI4_15_IRQn 0 */
   if (__HAL_GPIO_EXTI_GET_IT(ENC_TOGGLE_UNITS_Pin) != RESET){
-	  enc_toggle_units_isr();
+	  //enc_toggle_units_isr();
   }
   if (__HAL_GPIO_EXTI_GET_IT(SW2_DEBUG_BTN_Pin) != RESET){
-	  sw2_lock_isr();
+	  //sw2_lock_isr();
   }
   if (__HAL_GPIO_EXTI_GET_IT(OCP_ALERT_Pin) != RESET){
-	  ocp_alert_isr();
+	  //ocp_alert_isr();
   }
   if (__HAL_GPIO_EXTI_GET_IT(OCP_ALERT2_Pin) != RESET){
 	  //ocp_alert_isr();
@@ -249,7 +249,7 @@ void ADC1_COMP_IRQHandler(void)
 void TIM3_TIM4_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM3_TIM4_IRQn 0 */
-  encoder_turn_isr();
+  //encoder_turn_isr();
   /* USER CODE END TIM3_TIM4_IRQn 0 */
   HAL_TIM_IRQHandler(&htim3);
   HAL_TIM_IRQHandler(&htim4);

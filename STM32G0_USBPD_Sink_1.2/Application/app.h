@@ -9,6 +9,7 @@
 #define APP_H_
 
 #include "usbpd_user_services.h"
+#include "stdbool.h"
 //
 typedef enum
 {
@@ -17,12 +18,14 @@ typedef enum
   CHANGE_OCP
 } USBPD_USER_SERV_StateTypeDef;
 
+
 typedef struct {
 	int curValue;      // Current encoder value
 	int prevValue;     // Previous encoder value
 	int selDigit;  	   // Currently selected digit
 	int increment;     // Current increment value
 	int direction;	   // Direction: 1 for clockwise, -1 for counter-clockwise
+	bool turnEvent;	   // Turn event
 }Encoder_TypeDef;
 
 typedef struct {

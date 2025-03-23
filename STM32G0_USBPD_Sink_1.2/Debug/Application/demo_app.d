@@ -60,7 +60,8 @@ Application/demo_app.o: ../Application/demo_app.c \
  ../Utilities/GUI_INTERFACE/gui_api.h ../Core/Inc/usbpd_gui_memmap.h \
  ../USBPD/Target/usbpd_dpm_user.h ../USBPD/Target/usbpd_devices_conf.h \
  ../USBPD/Target/usbpd_pwr_user.h ../USBPD/App/usbpd_pwr_if.h \
- ../Application/demo_app.h \
+ ../Application/demo_app.h ../Application/app.h \
+ ../USBPD/usbpd_user_services.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
@@ -72,8 +73,7 @@ Application/demo_app.o: ../Application/demo_app.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/task.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
- ../Application/max7219.h ../Application/app.h \
- ../USBPD/usbpd_user_services.h
+ ../Application/max7219.h
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
 ../Drivers/CMSIS/Include/cmsis_compiler.h:
@@ -143,6 +143,8 @@ Application/demo_app.o: ../Application/demo_app.c \
 ../USBPD/Target/usbpd_pwr_user.h:
 ../USBPD/App/usbpd_pwr_if.h:
 ../Application/demo_app.h:
+../Application/app.h:
+../USBPD/usbpd_user_services.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
@@ -155,5 +157,3 @@ Application/demo_app.o: ../Application/demo_app.c \
 ../Middlewares/Third_Party/FreeRTOS/Source/include/list.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h:
 ../Application/max7219.h:
-../Application/app.h:
-../USBPD/usbpd_user_services.h:

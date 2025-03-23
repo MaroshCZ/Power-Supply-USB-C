@@ -8,6 +8,11 @@
 #ifndef DEMO_APP_H_
 #define DEMO_APP_H_
 
+/*Includes*/
+#include "app.h"
+#include "stdio.h"
+#include "stdbool.h"
+
 /* Exported constants --------------------------------------------------------*/
 typedef enum{
      DEMO_OK,
@@ -28,6 +33,7 @@ typedef enum {
     // Sub-states can be handled within each state function
 } SystemState;
 
+/*
 //Definition of encoder data struct
 typedef struct {
 	int curValue;      // Current encoder value
@@ -35,7 +41,7 @@ typedef struct {
 	int selDigit;  	   // Currently selected digit
 	int increment;     // Current increment value
 	int direction;	   // Direction: 1 for clockwise, -1 for counter-clockwise
-}Encoder_TypeDef;
+}Encoder_TypeDef;*/
 
 // Definition of state machine struct
 typedef struct {
@@ -55,6 +61,9 @@ typedef struct {
     bool voltageCurrentBtnPressed;
     //bool showBtnPressed;
     bool rotaryBtnPressed;
+
+    // Other flags
+    bool encoderTurnedFlag;
 
     // Encoder data
     Encoder_TypeDef encoder;
@@ -86,16 +95,20 @@ typedef struct {
 
 // Button event flags
 typedef struct {
-    volatile bool outputBtnEvent;
-    volatile bool lockBtnEvent;
-    volatile bool lockBtnLongEvent;
-    volatile bool voltageCurrentBtnEvent;
-    volatile bool ocpBtnEvent;
-    //volatile bool showBtnEvent;
-    volatile bool rotaryBtnEvent;
-    volatile int8_t encoderDirection;
-    // etc...
-} ButtonEvents;
+	// Button events
+	    volatile bool outputBtnEvent;
+	    volatile bool lockBtnEvent;
+	    volatile bool lockBtnLongEvent;
+	    volatile bool voltageCurrentBtnEvent;
+	    volatile bool ocpBtnEvent;
+	    volatile bool rotaryBtnEvent;
+
+	    // Encoder events
+	    volatile bool encoderTurnEvent;
+
+	    // ADC/AWDG events
+	    volatile bool awdgEvent;
+} SystemEvents;
 
 
 /*Function definition*/
@@ -111,10 +124,13 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
 
 /*State machine*/
 void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
-void processButtonEvents(StateMachine *sm, ButtonEvents *events);
+void processButtonEvents(StateMachine *sm, SystemEvents *events);
+void processSystemEvents(StateMachine *sm, SystemEvents *events);
+void updateVoltage(StateMachine *sm, SINKData_HandleTypeDef *handle);
+void updateCurrent(StateMachine *sm, SINKData_HandleTypeDef *handle);
 
-/*Exported functions*/
-DEMO_ErrorCode DEMO_Init(void);
-DEMO_ErrorCode DEMO_InitTask(void);
+/*Exported variables*/
+extern StateMachine stateMachine;
+extern SystemEvents systemEvents;
 
 #endif /* DEMO_APP_H_ */

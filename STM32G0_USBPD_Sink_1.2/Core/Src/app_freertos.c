@@ -92,7 +92,7 @@ void DISPReceiverTask(void *argument) {
         if (osMessageQueueGet(queue, &msg, NULL, osWaitForever) == osOK) {
             // Process received message
             // Example: Update display based on received message
-            max7219_PrintIspecial(msg.segment, msg.value, msg.decimal_pos);
+            //max7219_PrintIspecial(msg.segment, msg.value, msg.decimal_pos);
         }
         osDelay(200); // Adjust delay as needed
     }

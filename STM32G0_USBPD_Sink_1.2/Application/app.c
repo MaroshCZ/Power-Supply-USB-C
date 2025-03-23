@@ -20,6 +20,7 @@
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
 #include <usbpd_trace.h>
+#include "demo_app.h"
 
 
 
@@ -117,9 +118,9 @@ volatile bool sw1ButtonPressed = false;
 volatile bool sw1LongPressDetected = false;
 volatile bool sw1ButtonReleased = false;
 
+/*
 void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
-	if (GPIO_Pin == SW2_DEBUG_BTN_Pin) /* Will display in trace the VBUS value when user button
-	is pressed */
+	if (GPIO_Pin == SW2_DEBUG_BTN_Pin) // Will display in trace the VBUS value when user button is pressed
 		{
 		char _str2[60];
 		uint32_t voltage = BSP_PWR_VBUSGetVoltage(0);
@@ -146,8 +147,9 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
         sw1ButtonPressed = true;  // Mark button as pressed
         sw1LongPressDetected = false;  // Reset long press flag
     }
-}
+}*/
 
+/*
 void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
     if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
         uint32_t pressDuration = HAL_GetTick() - sw1ButtonPressTime;
@@ -159,7 +161,7 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
         sw1ButtonPressed = false;  // Reset button state
         sw1ButtonReleased = true;  // Mark button release event
     }
-}
+}*/
 
 void processSw1ButtonEvents() {
     static uint32_t lastShortPressTime = 0;
@@ -268,6 +270,7 @@ void app_init(void){
  */
 void app_loop(void) {
     // ...existing code...
+	/*
 	if (ocp_reset_needed == 1) {
 		HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_RESET);
 		HAL_Delay(4); //datasheet says 100ns minimum pull down time for resettin alert, but for me even 1ms was not enough
@@ -325,7 +328,19 @@ void app_loop(void) {
 			break;
 		}
 
-	//CDC_Transmit_FS(data, strlen(data));
+	//CDC_Transmit_FS(data, strlen(data));*/
+	// Process button events
+	processSystemEvents(&stateMachine, &systemEvents);
+
+	// Run the state machine
+	runStateMachine(&stateMachine, &SNK_data);
+
+	// Reset button states after processing
+	stateMachine.outputBtnPressed = false;
+	stateMachine.lockBtnPressed = false;
+	stateMachine.voltageCurrentBtnPressed = false;
+	stateMachine.rotaryBtnPressed = false;
+	stateMachine.encoderTurnedFlag = false;
 
 }
 
@@ -347,6 +362,7 @@ void Update_AWD_Thresholds(uint32_t low, uint32_t high) {
 	}
 }
 
+/*
 // Helper function to update voltage
 void updateVoltage(SINKData_HandleTypeDef *handle) {
 	//Get direction of encoder turning
@@ -372,8 +388,9 @@ void updateVoltage(SINKData_HandleTypeDef *handle) {
 	sprintf(_str,"VBUS selected: %d mV", handle->voltageSet*10);
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 
-}
+}*/
 
+/*
 // Helper function to update voltage
 void updateCurrent(SINKData_HandleTypeDef *handle) {
 	//Get direction of encoder turning
@@ -403,7 +420,7 @@ void updateCurrent(SINKData_HandleTypeDef *handle) {
 	char _str[40];
 	sprintf(_str,"IBUS selected: %d mA", handle->currentSet);
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-}
+}*/
 
 // Helper function to update voltage
 void updateCurrentOCP(SINKData_HandleTypeDef *handle) {
@@ -437,6 +454,7 @@ void updateCurrentOCP(SINKData_HandleTypeDef *handle) {
 /**
  * TIM2 encoder turning interrupt service routine
  */
+/*
 void encoder_turn_isr(void) {
 	//Get the TIM3 (encoder) value from CNT register
 	encoderVal = (TIM3 -> CNT) >> 2;
@@ -451,20 +469,20 @@ void encoder_turn_isr(void) {
 		{
 		case ADJUSTMENT_VOLTAGE:
 		{
-			updateVoltage(dhandle);
+			//updateVoltage(dhandle);
 		}
 		break;
 
 		case ADJUSTMENT_CURRENT:
 		{
-			updateCurrent(dhandle);
+			//updateCurrent(dhandle);
 
 		}
 		break;
 
 		case ADJUSTMENT_CURRENT_OCP:
 		{
-			updateCurrentOCP(dhandle);
+			//updateCurrentOCP(dhandle);
 		}
 		break;
 
@@ -474,15 +492,16 @@ void encoder_turn_isr(void) {
 		dhandle->encoder.prevValue = encoderVal;
 	}
 }
-
+*/
 
 /**
  * Button interrupt service routine
  */
+/*
 void enc_toggle_units_isr(void){
-	/*
-	const char response[] = "POWER is ON\r\n";
-	        LPUART_Transmit(LPUART2, (const uint8_t*)response, sizeof(response) - 1);*/
+
+	//const char response[] = "POWER is ON\r\n";
+	       // LPUART_Transmit(LPUART2, (const uint8_t*)response, sizeof(response) - 1);
 
 	//Mask unwanted button interrupts caused by debouncing on exti line 3 (PD8)
 	EXTI->IMR1 &= ~(EXTI_IMR1_IM8);
@@ -539,7 +558,7 @@ void enc_toggle_units_isr(void){
 	//Erase btn (PC3) interrupt flag
     __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_3);
 
-}
+}*/
 
 /*
  * Timer7 interrupt routine for button debouncing

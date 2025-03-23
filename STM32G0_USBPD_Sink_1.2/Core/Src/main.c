@@ -138,8 +138,7 @@ int main(void)
   /* USER CODE END 2 */
   /* Init scheduler */
   osKernelInitialize();
-  /* USBPD initialisation ---------------------------------*/
-  MX_USBPD_Init();isation ---------------------------------*/
+  /* USBPD initialisation */
   MX_USBPD_Init();
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -944,66 +943,69 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
   * @param  argument: Not used
   * @retval None
   */
-void StartDefaultTask(void *argument) {ask */
-    /* USER CODE BEGIN 5 */oid StartDefaultTask(void *argument)
-    /* Infinite loop */
-    for (;;) {5 */
-        osDelay(1);nite loop */
-        app_loop(); // Ensure app_loop is called to maintain main application logicor(;;)
-    }
-    /* USER CODE END 5 */
-} app_loop();
+/* USER CODE END Header_StartDefaultTask */
+void StartDefaultTask(void *argument)
+{
+  /* USER CODE BEGIN 5 */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+    app_loop();
+  }
+  /* USER CODE END 5 */
+}
 
-/** /* USER CODE END 5 */
-  * @brief  Period elapsed callback in non blocking mode}
+/**
+  * @brief  Period elapsed callback in non blocking mode
   * @note   This function is called  when TIM6 interrupt took place, inside
   * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
   * a global variable "uwTick" used as application time base.
   * @param  htim : TIM handle
-  * @retval Noneck() to increment
-  */" used as application time base.
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim) : TIM handle
-{@retval None
+  * @retval None
+  */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+{
   /* USER CODE BEGIN Callback 0 */
-oid HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
+
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM6) {  /* USER CODE BEGIN Callback 0 */
+  if (htim->Instance == TIM6) {
     HAL_IncTick();
-  }/
-  /* USER CODE BEGIN Callback 1 */ce == TIM6) {
-  USBPD_DPM_TimerCounter(); //related to PD device manager HAL_IncTick();
+  }
+  /* USER CODE BEGIN Callback 1 */
+  USBPD_DPM_TimerCounter(); //related to PD device manager
   GUI_TimerCounter(); //updating a graphical user interface (GUI) based on timer events.
   /* USER CODE END Callback 1 */
 }
- a graphical user interface (GUI) based on timer events.
-/** /* USER CODE END Callback 1 */
-  * @brief  This function is executed in case of error occurrence.}
+
+/**
+  * @brief  This function is executed in case of error occurrence.
   * @retval None
   */
-void Error_Handler(void) function is executed in case of error occurrence.
-{@retval None
+void Error_Handler(void)
+{
   /* USER CODE BEGIN Error_Handler_Debug */
-  /* User can add his own implementation to report the HAL error return state */oid Error_Handler(void)
+  /* User can add his own implementation to report the HAL error return state */
   __disable_irq();
   while (1)
-  {his own implementation to report the HAL error return state */
-  }_irq();
-  /* USER CODE END Error_Handler_Debug */hile (1)
+  {
+  }
+  /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT /* USER CODE END Error_Handler_Debug */
-/**}
+#ifdef  USE_FULL_ASSERT
+/**
   * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.def  USE_FULL_ASSERT
+  *         where the assert_param error has occurred.
   * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source numbere source line number
-  * @retval Nonerred.
+  * @param  line: assert_param error line source number
+  * @retval None
   */
-void assert_failed(uint8_t *file, uint32_t line): assert_param error line source number
-{@retval None
+void assert_failed(uint8_t *file, uint32_t line)
+{
   /* USER CODE BEGIN 6 */
-  /* User can add his own implementation to report the file name and line number,oid assert_failed(uint8_t *file, uint32_t line)
+  /* User can add his own implementation to report the file name and line number,
      ex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */
   /* USER CODE END 6 */
-},
-#endif /* USE_FULL_ASSERT */parameters value: file %s on line %d\r\n", file, line) */
+}
+#endif /* USE_FULL_ASSERT */
