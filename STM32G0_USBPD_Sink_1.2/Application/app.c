@@ -565,9 +565,10 @@ void enc_toggle_units_isr(void){
  */
 void tim7_btn_isr(void){
 	//Unmask exti line 1, 2 and 3
-	EXTI->IMR1 |= EXTI_IMR1_IM8; //unmask interrupt mask register on exti line 3 (PD8)
-	EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask interrupt mask register on exti line 2 (PB2)
-	EXTI->IMR1 |= EXTI_IMR1_IM1; //unmask interrupt mask register on exti line 1 (PB1)
+	EXTI->IMR1 |= EXTI_IMR1_IM8; //unmask interrupt mask register on exti line 8
+	EXTI->IMR1 |= EXTI_IMR1_IM4; //unmask interrupt mask register on exti line 4
+	EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask interrupt mask register on exti line 2
+	EXTI->IMR1 |= EXTI_IMR1_IM1; //unmask interrupt mask register on exti line 1
 
 	//Clear update flag on TIM7
 	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7

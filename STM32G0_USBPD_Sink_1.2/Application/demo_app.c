@@ -90,17 +90,20 @@ void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
     if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
         systemEvents.voltageCurrentBtnEvent = true;
+        EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
     } else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
         systemEvents.lockBtnEvent = true;
+        EXTI->IMR1 &= ~(EXTI_IMR1_IM4);
         //lockButtonPressTime = HAL_GetTick();
     } else if (GPIO_Pin == SW3_OFF_ON_Pin) {
         systemEvents.outputBtnEvent = true;
+        EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
     } else if (GPIO_Pin == ENC_TOGGLE_UNITS_Pin) {
         systemEvents.rotaryBtnEvent = true;
+        EXTI->IMR1 &= ~(EXTI_IMR1_IM8);
     }
 
     // Start debounce timer
-    EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
     TIM7->ARR = 200;
     LL_TIM_SetCounter(TIM7, 0);
     LL_TIM_EnableCounter(TIM7);
@@ -199,25 +202,51 @@ void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 }
 
 void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
-    // Entry actions (if just entered this state)
+	//Declare static variables
+	// Set check interval Make the timer persistent across function calls
+	static uint32_t lastCheckTime = 0; // declared to 0 only once, then retains value
     static bool entryDone = false;
-    if (!entryDone) {
-        // Display set values
-        max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
-        max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
+	const uint32_t CHECK_INTERVAL_MS = 250; // Check every 250ms
 
+	//=======================================================
+	// ENTRY ACTIONS - Executed once when entering the state
+	//=======================================================
+
+    if (!entryDone) {
         // Ensure output is off
         HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_SET);
 
         // Check temperature and control fan (not shown in your code)
+        int refreshTime = HAL_GetTick();
+        sm->timeoutCounter = 2000;  // 2 seconds timeout
 
         // Save state for return from temporary states
-        strcpy(sm->lastStateStr, "IDLE");
+        strcpy(sm->lastStateStr, "ACTIVE");
 
         entryDone = true;
     }
 
-    // Process events and transitions
+    //==========================================================
+	// DO ACTIONS - Executed every time the state is processed
+	//==========================================================
+
+    //Periodic check to display measured values
+    uint32_t currentTime = HAL_GetTick();
+    if (currentTime - lastCheckTime >= CHECK_INTERVAL_MS) {
+		uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 to get centivolts since only 4 digit display..
+		uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
+
+		dhandle ->currentMeas = cur;
+		dhandle ->voltageMeas = vol;
+		//Display output voltage
+		max7219_PrintIspecial(SEGMENT_1, vol, 3);
+		//Display output current
+		max7219_PrintIspecial(SEGMENT_2, cur, 4);
+    }
+
+    //=================================================
+	// TRANSITION CHECKS - Check for state transitions
+	//=================================================
     if (sm->outputBtnPressed) {
         sm->currentState = STATE_IDLE;
         entryDone = false;
@@ -242,7 +271,9 @@ void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     // Entry actions (if just entered this state)
     static bool entryDone = false;
     if (!entryDone) {
-        // Do initialiyation tasks
+    	// Set the state entry time and timeout duration
+		sm->stateEntryTime = HAL_GetTick();
+		sm->timeoutCounter = 2000;  // 2 seconds timeout
 
     	//Show SRC limits on displays
         //max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
@@ -255,9 +286,12 @@ void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
         entryDone = true;
     }
 
-    //After initialization transition to IDLE state
-	sm->currentState = STATE_IDLE;
-	entryDone = false;
+    // Check if the timeout has elapsed
+    if (HAL_GetTick() - sm->stateEntryTime > sm->timeoutCounter) {
+		//After initialization transition to IDLE state
+		sm->currentState = STATE_IDLE;
+		entryDone = false;
+    }
 
 }
 
@@ -314,7 +348,7 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     }
 
 
-    //Proces encoder turn
+    //Process encoder turn
     if (sm->encoderTurnedFlag) {
 		// Handle encoder pulse event
 		int encoderVal = (TIM3 -> CNT) >> 2;
