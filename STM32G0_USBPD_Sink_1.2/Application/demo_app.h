@@ -108,7 +108,6 @@ typedef struct {
 
 	    // Periodic check event
 	    volatile bool periodicCheckEvent;
-	    volatile bool stateTimeoutEvent;
 
 	    // ADC/AWDG events
 	    volatile bool awdgEvent;
