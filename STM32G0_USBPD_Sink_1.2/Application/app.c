@@ -39,7 +39,7 @@ int ocp_reset_needed = 0;
 
 
 uint32_t srcPdoIndex; //variable that holds Pdo index from FindVoltageIndex
-USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
+//USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
 USBPD_StatusTypeDef powerProfiles;
 
 __IO uint16_t aADCxConvertedValues[ADC_NUM_OF_SAMPLES] = {0};
@@ -622,12 +622,13 @@ void sw3_on_off_isr(void){
 
 	//sourcecapa_limits();
 
+	/*
 	int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
 	//Print to debug
 	char _str[70];
 	sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-	USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
+	USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);*/
 	//HAL_Delay(2);
 	//HAL_GPIO_WritePin(OCP_ALERT_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_SET);
 }

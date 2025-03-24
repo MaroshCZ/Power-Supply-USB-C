@@ -12,6 +12,7 @@
 #include "usbpd_dpm_conf.h"
 #include "usbpd_dpm_user.h"
 #include "usbpd_devices_conf.h"
+#include "usbpd_user_services.h"
 #include "usbpd_pwr_if.h"
 #include "demo_app.h"
 #include "string.h"
@@ -35,6 +36,7 @@ StateMachine stateMachine = {
 				.increment = 10    // Default increment
 			}
 };
+USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
 
 void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     // Process events and transitions
@@ -74,7 +76,18 @@ void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     if (sm->currentState == STATE_OCP_TOGGLE ||
         sm->currentState == STATE_SET_VALUES) {
 
+    	// Return to previous state
         if (HAL_GetTick() - sm->stateEntryTime > sm->timeoutCounter) {
+        	// REQUEST PDO baset on set values (on SET_VALUES timed out event)
+			if (sm->currentState == STATE_SET_VALUES) {
+				int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
+				//Print to debug
+
+				char _str[80];
+				sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
+				USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+				USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
+			}
             // Return to previous state
             if (strcmp(sm->lastStateStr, "IDLE") == 0) {
                 sm->currentState = STATE_IDLE;
@@ -94,6 +107,13 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
     } else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
         systemEvents.lockBtnEvent = true;
         EXTI->IMR1 &= ~(EXTI_IMR1_IM4);
+        int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
+		//Print to debug
+
+		char _str[80];
+		sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
+		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+		USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
         //lockButtonPressTime = HAL_GetTick();
     } else if (GPIO_Pin == SW3_OFF_ON_Pin) {
         systemEvents.outputBtnEvent = true;
@@ -120,7 +140,7 @@ void TIM14_ISR(void) {
 	if (LL_TIM_IsActiveFlag_UPDATE(TIM14)) {
 		// Clear the update interrupt flag
 		LL_TIM_ClearFlag_UPDATE(TIM14);
-		if (stateMachine.currentState == STATE_ACTIVE) {
+		if (stateMachine.currentState == STATE_ACTIVE || stateMachine.currentState == STATE_SET_VALUES) {
 			// Handle periodic check for ACTIVE state
 			systemEvents.periodicCheckEvent = true;
 			//Reset CNT value
@@ -317,11 +337,19 @@ void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     // Entry actions (if just entered this state)
     static bool entryDone = false;
+    static bool showDigit = false;  // Start with digit shown
+
     if (!entryDone) {
 
     	// Display set values
         max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
         max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
+
+        // Initialize the periodic timer
+		TIM14->ARR = 500;
+		LL_TIM_SetCounter(TIM14, 0); //set counter register value of timer 14 to 0
+		LL_TIM_EnableIT_UPDATE(TIM14); // Enable update interrupt
+		LL_TIM_EnableCounter(TIM14);
 
         entryDone = true;
     }
@@ -341,6 +369,17 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 		} else if (sm->setValueMode == SET_CURRENT) {
 			sm->setValueMode = SET_VOLTAGE;
 		}
+
+		//Get values into debug trace
+		char _str[60];
+		uint32_t voltageADC = BSP_PWR_VBUSGetVoltage(0);
+		uint32_t currentADC= BSP_PWR_VBUSGetCurrent(0);
+		uint32_t currentOCP_ADC= BSP_PWR_VBUSGetCurrentOCP(0);
+
+		// Use snprintf to limit the number of characters written
+		int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltageADC, currentADC, currentOCP_ADC);
+
+		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 	}
 
     //Process encoder press
@@ -399,11 +438,20 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     }
 
     // Handle digit blinking based on current set mode
-	if (sm->setValueMode == SET_VOLTAGE) {
-		//max7219_BlinkDigit(SEGMENT_1, &dhandle->voltageSet, sm->encoder.selDigit, 500, 3);
-	} else { // SET_CURRENT
-		//max7219_BlinkDigit(SEGMENT_2, &dhandle->currentSet, sm->encoder.selDigit, 500, 4);
-	}
+    if (systemEvents.periodicCheckEvent) {
+    	if (sm->setValueMode == SET_VOLTAGE) {
+			max7219_BlinkDigit2(SEGMENT_1, dhandle->voltageSet, sm->encoder.selDigit, 3, showDigit);
+			max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet,4);
+		} else { // SET_CURRENT
+			max7219_BlinkDigit2(SEGMENT_2, dhandle->currentSet, sm->encoder.selDigit, 4, showDigit);
+			max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet,3);
+		}
+    	//Toggle showDigit
+    	showDigit = !showDigit;
+    	//Erase periodic check flag
+    	systemEvents.periodicCheckEvent = false;
+    }
+
 
 	if (sm->encoder.turnEvent) {
 		//Reset event flag

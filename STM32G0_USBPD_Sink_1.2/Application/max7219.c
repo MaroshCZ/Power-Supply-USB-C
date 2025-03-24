@@ -434,6 +434,31 @@ void max7219_BlinkDigit(MAX7219_Segments segment, int *valuePtr, uint8_t n, uint
 	while (HAL_GetTick() < blinkTimer);
 }
 
+/**
+  * @brief  Function to blink a digit on specific position
+  * @param  segment: Specify which segment (1/2) should be used
+  * @param  value: value
+  * @param  n: Digit which should be blinked
+  * @param  decimal_position: place of decimal point
+  * @param  show_digit: specifies if digit has to be blanked or printed
+  * @retval None
+  */
+
+void max7219_BlinkDigit2(MAX7219_Segments segment, int value, uint8_t n, uint8_t decimal_position, bool show_digit) {
+	uint16_t blinkDigit = n; // Digit to blink (0-3)
+	uint8_t digit;
+	bool showDecimal = blinkDigit == decimal_position;
+	//Erase digit
+	if (!show_digit) {
+		//Print the BLANK and also decimal point
+		max7219_PrintDigit(segment, blinkDigit, BLANK, showDecimal);
+
+	} else {
+		// Reprint whole number
+		max7219_PrintIspecial(segment, value, decimal_position);
+	}
+}
+
 static uint16_t getSymbol(uint8_t number)
 {
 	return SYMBOLS[number];

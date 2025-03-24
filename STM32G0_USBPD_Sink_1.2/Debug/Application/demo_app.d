@@ -60,8 +60,8 @@ Application/demo_app.o: ../Application/demo_app.c \
  ../Utilities/GUI_INTERFACE/gui_api.h ../Core/Inc/usbpd_gui_memmap.h \
  ../USBPD/Target/usbpd_dpm_user.h ../USBPD/Target/usbpd_devices_conf.h \
  ../USBPD/Target/usbpd_pwr_user.h ../USBPD/App/usbpd_pwr_if.h \
- ../Application/demo_app.h ../Application/app.h \
- ../USBPD/usbpd_user_services.h \
+ ../USBPD/usbpd_user_services.h ../Application/demo_app.h \
+ ../Application/app.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h \
  ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h \
  ../Core/Inc/FreeRTOSConfig.h \
@@ -142,9 +142,9 @@ Application/demo_app.o: ../Application/demo_app.c \
 ../USBPD/Target/usbpd_devices_conf.h:
 ../USBPD/Target/usbpd_pwr_user.h:
 ../USBPD/App/usbpd_pwr_if.h:
+../USBPD/usbpd_user_services.h:
 ../Application/demo_app.h:
 ../Application/app.h:
-../USBPD/usbpd_user_services.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os.h:
 ../Middlewares/Third_Party/FreeRTOS/Source/include/FreeRTOS.h:
 ../Core/Inc/FreeRTOSConfig.h:
