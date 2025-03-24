@@ -73,11 +73,14 @@ void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     }
 
     // Check for timeouts in temporary states
+    /*
     if (sm->currentState == STATE_OCP_TOGGLE ||
         sm->currentState == STATE_SET_VALUES) {
 
     	// Return to previous state
-        if (HAL_GetTick() - sm->stateEntryTime > sm->timeoutCounter) {
+        if (systemEvents.stateTimeoutEvent) {
+        	//Erase flag
+        	systemEvents.stateTimeoutEvent = false;
         	// REQUEST PDO baset on set values (on SET_VALUES timed out event)
 			if (sm->currentState == STATE_SET_VALUES) {
 				int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
@@ -89,13 +92,13 @@ void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 				USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
 			}
             // Return to previous state
-            if (strcmp(sm->lastStateStr, "IDLE") == 0) {
+            if (sm->lastState == STATE_IDLE) {
                 sm->currentState = STATE_IDLE;
-            } else if (strcmp(sm->lastStateStr, "ACTIVE") == 0) {
+            } else if (sm->lastState == STATE_ACTIVE) {
                 sm->currentState = STATE_ACTIVE;
             }
         }
-    }
+    }*/
 }
 
 
@@ -140,6 +143,7 @@ void TIM14_ISR(void) {
 	if (LL_TIM_IsActiveFlag_UPDATE(TIM14)) {
 		// Clear the update interrupt flag
 		LL_TIM_ClearFlag_UPDATE(TIM14);
+
 		if (stateMachine.currentState == STATE_ACTIVE || stateMachine.currentState == STATE_SET_VALUES) {
 			// Handle periodic check for ACTIVE state
 			systemEvents.periodicCheckEvent = true;
@@ -149,6 +153,32 @@ void TIM14_ISR(void) {
 			//Start timer again
 			LL_TIM_EnableCounter(TIM14);
 		}
+	}
+}
+
+
+void TIM15_ISR(void) {
+	if (LL_TIM_IsActiveFlag_UPDATE(TIM15)) {
+		// Clear the update interrupt flag
+		LL_TIM_ClearFlag_UPDATE(TIM15);
+
+		// Handle periodic check for ACTIVE state
+		systemEvents.stateTimeoutEvent = true;
+		//Reset CNT value
+		LL_TIM_DisableCounter(TIM15);  // Stop the timer after timeout
+
+		if (stateMachine.currentState == STATE_SET_VALUES) {
+			/*
+			//Make a USBPD request
+			int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
+			//Print to debug
+
+			char _str[70];
+			sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
+			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+			USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);*/
+		}
+
 	}
 }
 
@@ -211,6 +241,7 @@ void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 
         // Save state for return from temporary states
         strcpy(sm->lastStateStr, "IDLE");
+        sm->lastState = STATE_IDLE;
 
         entryDone = true;
     }
@@ -229,8 +260,8 @@ void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
         entryDone = false;
     } else if (sm->rotaryBtnPressed) {
         sm->currentState = STATE_SET_VALUES;
-        sm->stateEntryTime = HAL_GetTick();
         sm->timeoutCounter = 4000;  // 4 seconds timeout
+        sm->rotaryBtnPressed = false;
         entryDone = false;
     }
 }
@@ -252,6 +283,7 @@ void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 
         // Save state for return from temporary states
         strcpy(sm->lastStateStr, "ACTIVE");
+        sm->lastState = STATE_ACTIVE;
 
         // Initialize the check timer
         TIM14->ARR = 500;
@@ -296,13 +328,14 @@ void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
         entryDone = false;
     } else if (sm->rotaryBtnPressed) {
         sm->currentState = STATE_SET_VALUES;
-        sm->stateEntryTime = HAL_GetTick();
         sm->timeoutCounter = 4000;  // 4 seconds timeout
+        sm->rotaryBtnPressed = false;
         entryDone = false;
     }
 
-    if (sm->outputBtnPressed || sm->ocpBtnPressed)
-    LL_TIM_DisableCounter(TIM14);
+    if (sm->outputBtnPressed || sm->ocpBtnPressed) {
+    	LL_TIM_DisableCounter(TIM14);
+    }
 }
 
 
@@ -321,6 +354,7 @@ void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 
         // Save state for return from temporary states
         strcpy(sm->lastStateStr, "INIT");
+        sm->lastState = STATE_INIT;
 
         entryDone = true;
     }
@@ -351,12 +385,22 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 		LL_TIM_EnableIT_UPDATE(TIM14); // Enable update interrupt
 		LL_TIM_EnableCounter(TIM14);
 
+		// Initialize the periodic timer
+		LL_TIM_DisableCounter(TIM15);
+		TIM15->ARR = sm->timeoutCounter;
+		LL_TIM_SetCounter(TIM15, 0); //set counter register value of timer 14 to 0
+		LL_TIM_EnableIT_UPDATE(TIM15); // Enable update interrupt
+		LL_TIM_EnableCounter(TIM15);
+
         entryDone = true;
     }
     // User interaction - reset the timeout
 	if (sm->rotaryBtnPressed || sm->encoderTurnedFlag || sm->voltageCurrentBtnPressed) {
 		// Reset the timeout timer whenever there's user interaction
-		sm->stateEntryTime = HAL_GetTick();
+		LL_TIM_DisableCounter(TIM15);
+		LL_TIM_SetCounter(TIM15, 0); //set counter register value of timer 14 to 0
+		LL_TIM_EnableIT_UPDATE(TIM15); // Enable update interrupt
+		LL_TIM_EnableCounter(TIM15);
 	}
 
 	//Process voltageCurrentBtn press
@@ -477,6 +521,18 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
         sm->stateEntryTime = HAL_GetTick();
         sm->timeoutCounter = 500;  // 0.5 seconds timeout
         entryDone = false;
+    } else if (systemEvents.stateTimeoutEvent) {
+	    //Reset timeout event flag
+    	systemEvents.stateTimeoutEvent = false;
+
+    	//Return to last state
+	    if (sm->lastState == STATE_IDLE) {
+	        sm->currentState = STATE_IDLE;
+	    } else if (sm->lastState == STATE_ACTIVE) {
+	        sm->currentState = STATE_ACTIVE;
+	    }
+	    entryDone = false;
+
     }
 }
 
