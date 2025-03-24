@@ -24,7 +24,6 @@
 #include "app.h"
 #endif /* _GUI_INTERFACE */
 
-
 //**//
 //Initialize button event struct
 SystemEvents systemEvents = {0};
@@ -77,7 +76,9 @@ void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
         sm->currentState == STATE_SET_VALUES) {
 
     	// Return to previous state
-        if (HAL_GetTick() - sm->stateEntryTime > sm->timeoutCounter) {
+        if (systemEvents.stateTimeoutEvent) {
+        	//Erase flag
+        	systemEvents.stateTimeoutEvent = false;
         	// REQUEST PDO baset on set values (on SET_VALUES timed out event)
 			if (sm->currentState == STATE_SET_VALUES) {
 				int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
@@ -136,6 +137,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
     }
 }
 
+//TIME14 for periodic checks
 void TIM14_ISR(void) {
 	if (LL_TIM_IsActiveFlag_UPDATE(TIM14)) {
 		// Clear the update interrupt flag
@@ -148,6 +150,23 @@ void TIM14_ISR(void) {
 
 			//Start timer again
 			LL_TIM_EnableCounter(TIM14);
+		}
+	}
+}
+
+//TIME16 for TIMEOUT events
+void TIM16_ISR(void) {
+	if (LL_TIM_IsActiveFlag_UPDATE(TIM16)) {
+		// Clear the update interrupt flag
+		LL_TIM_ClearFlag_UPDATE(TIM16);
+		if (stateMachine.currentState == STATE_ACTIVE || stateMachine.currentState == STATE_SET_VALUES) {
+			// Handle periodic check for ACTIVE state
+			systemEvents.stateTimeoutEvent = true;
+			//Reset CNT value
+			LL_TIM_SetCounter(TIM16, 0);
+
+			//Start timer again
+			LL_TIM_EnableCounter(TIM16);
 		}
 	}
 }
@@ -229,7 +248,6 @@ void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
         entryDone = false;
     } else if (sm->rotaryBtnPressed) {
         sm->currentState = STATE_SET_VALUES;
-        sm->stateEntryTime = HAL_GetTick();
         sm->timeoutCounter = 4000;  // 4 seconds timeout
         entryDone = false;
     }
@@ -346,17 +364,25 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
         max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
 
         // Initialize the periodic timer
-		TIM14->ARR = 500;
+		TIM14->ARR = 500; //ms
 		LL_TIM_SetCounter(TIM14, 0); //set counter register value of timer 14 to 0
 		LL_TIM_EnableIT_UPDATE(TIM14); // Enable update interrupt
 		LL_TIM_EnableCounter(TIM14);
+
+		// Initialize the timeout timer
+		TIM16->ARR = sm->timeoutCounter;
+		LL_TIM_SetCounter(TIM16, 0); //set counter register value of timer 16 to 0
+		LL_TIM_EnableIT_UPDATE(TIM16); // Enable update interrupt
+		LL_TIM_EnableCounter(TIM16);
 
         entryDone = true;
     }
     // User interaction - reset the timeout
 	if (sm->rotaryBtnPressed || sm->encoderTurnedFlag || sm->voltageCurrentBtnPressed) {
 		// Reset the timeout timer whenever there's user interaction
-		sm->stateEntryTime = HAL_GetTick();
+		LL_TIM_DisableCounter(TIM16);
+		LL_TIM_SetCounter(TIM16, 0); //set counter register value of timer 16 to 0
+		LL_TIM_EnableCounter(TIM14);
 	}
 
 	//Process voltageCurrentBtn press
@@ -441,9 +467,11 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     if (systemEvents.periodicCheckEvent) {
     	if (sm->setValueMode == SET_VOLTAGE) {
 			max7219_BlinkDigit2(SEGMENT_1, dhandle->voltageSet, sm->encoder.selDigit, 3, showDigit);
+			//Reprint current in case it was left during the current digit was blinked
 			max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet,4);
 		} else { // SET_CURRENT
 			max7219_BlinkDigit2(SEGMENT_2, dhandle->currentSet, sm->encoder.selDigit, 4, showDigit);
+			//Reprint voltage in case it was left during the voltage digit was blinked
 			max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet,3);
 		}
     	//Toggle showDigit

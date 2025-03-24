@@ -82,6 +82,7 @@ static void MX_TIM3_Init(void);
 static void MX_DAC1_Init(void);
 static void MX_TIM4_Init(void);
 static void MX_TIM14_Init(void);
+static void MX_TIM16_Init(void);
 void StartDefaultTask(void *argument);
 
 /* USER CODE BEGIN PFP */
@@ -105,7 +106,8 @@ int main(void)
 
   /* MCU Configuration--------------------------------------------------------*/
 
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */  HAL_Init();
+  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
+  HAL_Init();
 
   /* USER CODE BEGIN Init */
 
@@ -131,13 +133,14 @@ int main(void)
   MX_DAC1_Init();
   MX_TIM4_Init();
   MX_TIM14_Init();
+  MX_TIM16_Init();
   /* USER CODE BEGIN 2 */
   app_init();
-  /* USER CODE END 2 */; // Ensure this function is called to create tasks and queues
   /* USER CODE END 2 */
+
   /* Init scheduler */
   osKernelInitialize();
-  /* USBPD initialisation */
+  /* USBPD initialisation ---------------------------------*/
   MX_USBPD_Init();
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -673,6 +676,44 @@ static void MX_TIM14_Init(void)
   /* USER CODE BEGIN TIM14_Init 2 */
 
   /* USER CODE END TIM14_Init 2 */
+
+}
+
+/**
+  * @brief TIM16 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM16_Init(void)
+{
+
+  /* USER CODE BEGIN TIM16_Init 0 */
+
+  /* USER CODE END TIM16_Init 0 */
+
+  LL_TIM_InitTypeDef TIM_InitStruct = {0};
+
+  /* Peripheral clock enable */
+  LL_APB2_GRP1_EnableClock(LL_APB2_GRP1_PERIPH_TIM16);
+
+  /* TIM16 interrupt Init */
+  NVIC_SetPriority(TIM16_FDCAN_IT0_IRQn, 3);
+  NVIC_EnableIRQ(TIM16_FDCAN_IT0_IRQn);
+
+  /* USER CODE BEGIN TIM16_Init 1 */
+
+  /* USER CODE END TIM16_Init 1 */
+  TIM_InitStruct.Prescaler = 63999;
+  TIM_InitStruct.CounterMode = LL_TIM_COUNTERMODE_UP;
+  TIM_InitStruct.Autoreload = 5;
+  TIM_InitStruct.ClockDivision = LL_TIM_CLOCKDIVISION_DIV1;
+  TIM_InitStruct.RepetitionCounter = 0;
+  LL_TIM_Init(TIM16, &TIM_InitStruct);
+  LL_TIM_DisableARRPreload(TIM16);
+  LL_TIM_SetOnePulseMode(TIM16, LL_TIM_ONEPULSEMODE_SINGLE);
+  /* USER CODE BEGIN TIM16_Init 2 */
+
+  /* USER CODE END TIM16_Init 2 */
 
 }
 

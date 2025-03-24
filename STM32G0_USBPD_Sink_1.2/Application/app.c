@@ -217,6 +217,10 @@ void app_init(void){
 	LL_TIM_EnableIT_UPDATE(TIM14); //Enable interrupt generation when timer goes to max value and UPDATE event flag is set
 	LL_TIM_ClearFlag_UPDATE(TIM14); //Clear update flag on TIMER14
 
+	//TIM16 initialization
+	LL_TIM_EnableIT_UPDATE(TIM16); //Enable interrupt generation when timer goes to max value and UPDATE event flag is set
+	LL_TIM_ClearFlag_UPDATE(TIM16); //Clear update flag on TIMER16
+
 	//TIM3 initialization of encoder
 	HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
 	__HAL_TIM_SET_COUNTER(&htim3, 30000); //write non 0 value to avoid shift from 0 -> max value
