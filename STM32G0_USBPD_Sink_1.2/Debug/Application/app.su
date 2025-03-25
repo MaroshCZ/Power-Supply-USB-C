@@ -17,4 +17,4 @@
 ../Application/app.c:684:6:sw2_lock_isr	88	static
 ../Application/app.c:736:6:ocp_alert_isr	8	static
 ../Application/app.c:765:6:sourcecapa_limits	80	static
-../Application/app.c:868:6:processUSBCommand	32	static
+../Application/app.c:867:6:processUSBCommand	32	static

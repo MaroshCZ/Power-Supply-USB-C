@@ -785,7 +785,6 @@ void sourcecapa_limits(void)
 	  }
 	case USBPD_PDO_TYPE_BATTERY :
 	  {
-
 	  }
 	  break;
 	case USBPD_PDO_TYPE_VARIABLE :

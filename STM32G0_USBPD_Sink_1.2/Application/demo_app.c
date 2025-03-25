@@ -25,7 +25,9 @@
 #endif /* _GUI_INTERFACE */
 
 
-//**//
+/*
+ * Define
+ */
 //Initialize button event struct
 SystemEvents systemEvents = {0};
 //Init stateMachine struct
@@ -38,6 +40,9 @@ StateMachine stateMachine = {
 };
 USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
 
+/*
+ * Define Functions
+ */
 void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     // Process events and transitions
     switch (sm->currentState) {
@@ -72,10 +77,10 @@ void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
             break;
     }
 
+
     // Check for timeouts in temporary states
-    /*
-    if (sm->currentState == STATE_OCP_TOGGLE ||
-        sm->currentState == STATE_SET_VALUES) {
+/*
+    if (sm->currentState == STATE_SET_VALUES) {
 
     	// Return to previous state
         if (systemEvents.stateTimeoutEvent) {
@@ -101,7 +106,9 @@ void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     }*/
 }
 
-
+/*
+ * Define Callbacks and ISR
+ */
 //BTN ISR to set event flags
 void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
     if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
@@ -112,7 +119,6 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
         EXTI->IMR1 &= ~(EXTI_IMR1_IM4);
         int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
 		//Print to debug
-
 		char _str[80];
 		sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
@@ -226,9 +232,17 @@ void processSystemEvents(StateMachine *sm, SystemEvents *events) {
 
 }
 
+/*
+ * Define state Handle functions
+ */
+
 void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     // Entry actions (if just entered this state)
     static bool entryDone = false;
+
+    //=======================================================
+	// ENTRY ACTIONS - Executed once when entering the state
+	//=======================================================
     if (!entryDone) {
         // Display set values
         max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
@@ -245,6 +259,10 @@ void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 
         entryDone = true;
     }
+
+    //=================================================
+	// TRANSITION CHECKS - Check for state transitions
+	//=================================================
 
     // Process events and transitions
     if (sm->outputBtnPressed) {
@@ -342,6 +360,10 @@ void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     // Entry actions (if just entered this state)
     static bool entryDone = false;
+
+    //=======================================================
+	// ENTRY ACTIONS - Executed once when entering the state
+	//=======================================================
     if (!entryDone) {
     	// Set the state entry time and timeout duration
 		sm->stateEntryTime = HAL_GetTick();
@@ -359,6 +381,10 @@ void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
         entryDone = true;
     }
 
+    //==========================================================
+	// DO ACTIONS - Executed every time the state is processed
+	//==========================================================
+
     // Check if the timeout has elapsed
     if (HAL_GetTick() - sm->stateEntryTime > sm->timeoutCounter) {
 		//After initialization transition to IDLE state
@@ -372,6 +398,10 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     // Entry actions (if just entered this state)
     static bool entryDone = false;
     static bool showDigit = false;  // Start with digit shown
+
+    //=======================================================
+   	// ENTRY ACTIONS - Executed once when entering the state
+   	//=======================================================
 
     if (!entryDone) {
 
@@ -394,6 +424,11 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 
         entryDone = true;
     }
+
+    //==========================================================
+	// DO ACTIONS - Executed every time the state is processed
+	//==========================================================
+
     // User interaction - reset the timeout
 	if (sm->rotaryBtnPressed || sm->encoderTurnedFlag || sm->voltageCurrentBtnPressed) {
 		// Reset the timeout timer whenever there's user interaction
@@ -436,7 +471,7 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 			sm->encoder.selDigit = 4;
 		}
 
-		//Choose addition value based on encoderPress val and current ADJUSTMENT_STATE (voltage/current)
+		//Choose addition value based on setValueMode
 		int val;
 		switch (sm->setValueMode){
 			case SET_VOLTAGE:
@@ -469,9 +504,8 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 		sm->encoder.curValue= encoderVal;
 
 		if (encoderVal != sm->encoder.prevValue){
-
+			//Get the turn direction and save it
 			sm->encoder.direction = (encoderVal < sm->encoder.prevValue) ? 1 : -1;
-
 
 			//Save TIM3 CNT value to ValPrev
 			sm->encoder.prevValue = encoderVal;
@@ -496,7 +530,7 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     	systemEvents.periodicCheckEvent = false;
     }
 
-
+    // On turnEvent update voltage/current
 	if (sm->encoder.turnEvent) {
 		//Reset event flag
 		sm->encoder.turnEvent = false;
@@ -512,6 +546,9 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 	}
 
 
+	//=================================================
+	// TRANSITION CHECKS - Check for state transitions
+	//=================================================
     // Process events and transitions
 	if (sm->lockBtnHoldActive) {
         sm->currentState = STATE_LOCK;
@@ -563,7 +600,7 @@ void updateVoltage(StateMachine *sm, SINKData_HandleTypeDef *handle) {
 
 }
 
-// Helper function to update voltage
+// Helper function to update voltage and update AWD limit
 void updateCurrent(StateMachine *sm, SINKData_HandleTypeDef *handle) {
 	//Get direction of encoder turning
 	int currentTemp = handle->currentSet;
