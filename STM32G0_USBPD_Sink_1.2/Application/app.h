@@ -11,22 +11,14 @@
 #include "usbpd_user_services.h"
 #include "stdbool.h"
 //
-typedef enum
-{
-  CHANGE_VOLTAGE,
-  CHANGE_CURRENT,
-  CHANGE_OCP
-} USBPD_USER_SERV_StateTypeDef;
 
-
-
-
+/*
 #define G_OCP          100u // V/V
 #define R_OCP_MOHMS      5u // 5 mOhms
 #define R_A         200000u // 200 kOhms
 #define R_B          36000u // 36 kOhms
 #define R_SENSE_MOHMS   30u // 30 mOhms
-#define G_SENSE         20u // V/V
+#define G_SENSE         20u // V/V*/
 
 //declaration of functions
 void app_init(void);
@@ -43,9 +35,10 @@ void sw3_on_off_isr(void);
 void sw2_lock_isr(void);
 void ocp_alert_isr(void);
 
-void sourcecapa_limits(void);
+//void sourcecapa_limits(void);
 
-#define ADC_NUM_OF_SAMPLES 3
+
+//#define ADC_NUM_OF_SAMPLES 3
 extern ADC_HandleTypeDef hadc1;
 extern DAC_HandleTypeDef hdac1;
 extern TIM_HandleTypeDef htim3;
@@ -56,7 +49,7 @@ extern TIM_HandleTypeDef htim4;
    aADCxConvertedValues[0u]: VSENSE
    aADCxConvertedValues[1u]: ISENSE
 */
-extern __IO uint16_t aADCxConvertedValues[ADC_NUM_OF_SAMPLES];
+//extern __IO uint16_t aADCxConvertedValues[ADC_NUM_OF_SAMPLES];
 
 
 //__IO: Indicates that this variable can change at any time, usually due to hardware activity.

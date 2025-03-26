@@ -29,6 +29,7 @@
 /* USER CODE BEGIN include */
 #include "main.h"
 #include "app.h"
+#include "demo_app.h"
 /* USER CODE END include */
 
 /** @addtogroup BSP

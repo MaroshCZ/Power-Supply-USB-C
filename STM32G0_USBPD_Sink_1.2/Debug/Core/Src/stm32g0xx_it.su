@@ -13,6 +13,6 @@
 ../Core/Src/stm32g0xx_it.c:251:6:TIM3_TIM4_IRQHandler	8	static
 ../Core/Src/stm32g0xx_it.c:270:6:TIM6_DAC_LPTIM1_IRQHandler	8	static
 ../Core/Src/stm32g0xx_it.c:285:6:TIM7_LPTIM2_IRQHandler	8	static
-../Core/Src/stm32g0xx_it.c:299:6:TIM14_IRQHandler	8	static
-../Core/Src/stm32g0xx_it.c:313:6:TIM15_IRQHandler	8	static
-../Core/Src/stm32g0xx_it.c:327:6:USART3_4_5_6_LPUART1_IRQHandler	8	static
+../Core/Src/stm32g0xx_it.c:300:6:TIM14_IRQHandler	8	static
+../Core/Src/stm32g0xx_it.c:314:6:TIM15_IRQHandler	8	static
+../Core/Src/stm32g0xx_it.c:328:6:USART3_4_5_6_LPUART1_IRQHandler	8	static

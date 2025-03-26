@@ -286,7 +286,7 @@ void TIM7_LPTIM2_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM7_LPTIM2_IRQn 0 */
   //tim7_btn_isr();
-  TIM7_ISR;
+  //TIM7_ISR();
   /* USER CODE END TIM7_LPTIM2_IRQn 0 */
 
   /* USER CODE BEGIN TIM7_LPTIM2_IRQn 1 */

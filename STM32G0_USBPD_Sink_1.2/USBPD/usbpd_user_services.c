@@ -33,6 +33,7 @@
 #include "string.h"
 /* USER CODE BEGIN Includes */
 #include "app.h"
+#include "demo_app.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/

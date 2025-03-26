@@ -38,9 +38,9 @@ int ocp_reset_needed = 0;
 
 
 
-uint32_t srcPdoIndex; //variable that holds Pdo index from FindVoltageIndex
+//uint32_t srcPdoIndex; //variable that holds Pdo index from FindVoltageIndex
 //USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
-USBPD_StatusTypeDef powerProfiles;
+//SBPD_StatusTypeDef powerProfiles;
 
 __IO uint16_t aADCxConvertedValues[ADC_NUM_OF_SAMPLES] = {0};
 
@@ -207,7 +207,7 @@ void app_init(void){
 	//TIM3 initialization of encoder
 	HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
 	__HAL_TIM_SET_COUNTER(&htim3, 30000); //write non 0 value to avoid shift from 0 -> max value
-	encoderVal = __HAL_TIM_GET_COUNTER(&htim3)/4;
+	//encoderVal = __HAL_TIM_GET_COUNTER(&htim3)/4;
 	//encoderValPrev = encoderVal;
 
 	/*
@@ -224,7 +224,7 @@ void app_init(void){
 
 	//Init DAC
 	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
-	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
+	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 500);
 
 	//Wait for hardware initialization and then turn DB to HIGH (according to TCPP01-M12 datasheet 6.5)
 	HAL_Delay(200);
@@ -337,7 +337,7 @@ void app_loop(void) {
  * Possibility to update parameters on the fly (read more in HAL_ADC_AnalogWDGConfig declaration)
  * Full config and AWD init in main.c
  */
-void Update_AWD_Thresholds(uint32_t low, uint32_t high) {
+__weak void Update_AWD_Thresholds(uint32_t low, uint32_t high) {
 	// Just update the thresholds for an already configured AWD
 	ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
 	AnalogWDGConfig.WatchdogNumber = ADC_ANALOGWATCHDOG_2; // Specify which AWD you're updating
@@ -746,7 +746,7 @@ void ocp_alert_isr(void) {
   * @retval None
   * source: demo_disco.c Display_sourcecapa_menu_nav
   */
-void sourcecapa_limits(void)
+__weak void sourcecapa_limits(void)
 {
   uint8_t _str[30];
   uint8_t _max = DPM_Ports[0].DPM_NumberOfRcvSRCPDO;

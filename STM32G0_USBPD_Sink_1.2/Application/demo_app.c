@@ -183,7 +183,7 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
 		    char failureMsg[100];
 		    snprintf(failureMsg, sizeof(failureMsg),
 		             "PDO Request Failed. Status: %d", status);
-		    USBPD_TRACE_Add(USBPD_TRACE_ERROR, 0, 0, (uint8_t*)failureMsg, strlen(failureMsg));
+		    USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)failureMsg, strlen(failureMsg));
 		}
 
     } else if (GPIO_Pin == SW3_OFF_ON_Pin) {
@@ -210,7 +210,9 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
 			systemEvents.lockBtnLongEvent = true;
 		} else {
 			systemEvents.lockBtnEvent = true;
+		}
 	}
+}
 
 //TIM capture callback
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
@@ -475,10 +477,11 @@ void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 		//TIM3 initialization of encoder
 		HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
 		__HAL_TIM_SET_COUNTER(&htim3, 30000); //write non 0 value to avoid shift from 0 -> max value
-		encoderVal = __HAL_TIM_GET_COUNTER(&htim3)/4;
+		dhandle->encoder.prevValue = __HAL_TIM_GET_COUNTER(&htim3)/4;
+		dhandle->encoder.curValue = __HAL_TIM_GET_COUNTER(&htim3)/4;
 		//Init DAC
 		HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
-		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
+		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, 500);
 
 		//Calibrate and start ADC sensing with DMA
 		HAL_ADCEx_Calibration_Start(&hadc1);
@@ -736,4 +739,77 @@ void updateCurrent(StateMachine *sm, SINKData_HandleTypeDef *handle) {
 	char _str[40];
 	sprintf(_str,"IBUS selected: %d mA", handle->currentSet);
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+}
+
+void sourcecapa_limits(void)
+{
+  uint8_t _str[30];
+  uint8_t _max = DPM_Ports[0].DPM_NumberOfRcvSRCPDO;
+  uint8_t _start = 0;
+  SINKData_HandleTypeDef *dhandle = &SNK_data;
+
+  for(int8_t index=_start; index < _max; index++)
+  {
+	switch(DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_TYPE_Msk)
+	{
+	case USBPD_PDO_TYPE_FIXED :
+	  {
+		uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_FIXED_MAX_CURRENT_Pos)*10;
+		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_VOLTAGE_Msk) >> USBPD_PDO_SRC_FIXED_VOLTAGE_Pos)*50;
+		//sprintf((char*)_str, "FIXED:%2dV %2d.%dA", (int)(maxvoltage/1000), (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
+		if (maxcurrent > dhandle->currentMax) {
+			  			dhandle -> currentMax = (int)maxcurrent+100;
+			  		}
+		break;
+	  }
+	case USBPD_PDO_TYPE_BATTERY :
+	  {
+	  }
+	  break;
+	case USBPD_PDO_TYPE_VARIABLE :
+	  {
+		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Pos) * 50;
+		uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Pos) * 50;
+		uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Pos) * 10;
+		//sprintf((char*)_str, "V:%2d.%1d-%2d.%1dV %d.%dA", (int)(minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
+	  }
+	  break;
+	case USBPD_PDO_TYPE_APDO :
+	  {
+		uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Pos) * 100;
+		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Pos) * 100;
+		uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_APDO_MAX_CURRENT_Pos) * 50;
+		//sprintf((char*)_str, "A:%2d.%1d-%2d.%1dV %d.%dA",(int) (minvoltageAPDOtemp/1000),(int)(minvoltageAPDOtemp/100)%10, (int)(maxvoltageAPDOtemp/1000),(int)(maxvoltageAPDOtemp/100)%10, (int)(maxcurrentAPDOtemp/1000), (int)((maxcurrentAPDOtemp % 1000) /100));
+
+		if (minvoltage < dhandle->voltageMin*10) {
+			dhandle -> voltageMin = (int)minvoltage/10;
+		}
+		if (maxvoltage > dhandle->voltageMax*10) {
+			dhandle -> voltageMax = (int)maxvoltage/10;
+		}
+
+		if (maxcurrent > dhandle->currentMax) {
+			dhandle -> currentMax = (int)maxcurrent+100;
+		}
+	  }
+	  break;
+	default :
+	  sprintf((char*)_str,"Unknown Source PDO");
+	  break;
+
+	}
+  }
+}
+
+void Update_AWD_Thresholds(uint32_t low, uint32_t high) {
+	// Just update the thresholds for an already configured AWD
+	ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
+	AnalogWDGConfig.WatchdogNumber = ADC_ANALOGWATCHDOG_2; // Specify which AWD you're updating
+	AnalogWDGConfig.HighThreshold = high;
+	AnalogWDGConfig.LowThreshold = low;
+
+	if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
+	{
+	    Error_Handler();
+	}
 }
