@@ -19,33 +19,7 @@ typedef enum
 } USBPD_USER_SERV_StateTypeDef;
 
 
-typedef struct {
-	int curValue;      // Current encoder value
-	int prevValue;     // Previous encoder value
-	int selDigit;  	   // Currently selected digit
-	int increment;     // Current increment value
-	int direction;	   // Direction: 1 for clockwise, -1 for counter-clockwise
-	bool turnEvent;	   // Turn event
-}Encoder_TypeDef;
 
-typedef struct {
-  //USBPD_PPSSDB_TypeDef  DPM_RcvPPSStatus;           /*!< PPS Status received by port partner                         */
-  //USBPD_SKEDB_TypeDef   DPM_RcvSNKExtendedCapa;     /*!< SNK Extended Capability received by port partner            */
-  uint32_t              voltageSet;       /*!< User selected voltage in centivolts */
-  uint32_t              currentSet;       /*!< User selected OCP limit in mA */
-  uint32_t				currentOCPSet;
-
-  uint32_t              voltageMeas;      /*!< Measured output voltage in centivolts */
-  uint32_t              currentMeas;      /*!< Measured output current in centivolts */
-
-  uint32_t              voltageMin;       /*!< Minimal SRC voltage in centivolts */
-  uint32_t              voltageMax;       /*!< Maximal SRC voltage in centivolts */
-  uint32_t              currentMax;       /*!< Maximal SRC current in mA */
-  uint32_t              currentMin;       /*!< Minimal current in mA (0)*/
-  USBPD_USER_SERV_PDO_SelectionMethodTypeDef selMethod;
-  Encoder_TypeDef       encoder;
-
-} SINKData_HandleTypeDef;
 
 #define G_OCP          100u // V/V
 #define R_OCP_MOHMS      5u // 5 mOhms
@@ -84,9 +58,6 @@ extern TIM_HandleTypeDef htim4;
 */
 extern __IO uint16_t aADCxConvertedValues[ADC_NUM_OF_SAMPLES];
 
-// Declare external global variable (but do not define it here)
-extern SINKData_HandleTypeDef SNK_data;
-extern SINKData_HandleTypeDef *dhandle;
 
 //__IO: Indicates that this variable can change at any time, usually due to hardware activity.
 

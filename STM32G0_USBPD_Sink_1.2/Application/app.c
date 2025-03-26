@@ -78,23 +78,6 @@ static uint32_t rxIndex = 0;
 uint32_t counter = 0;
 
 
-SINKData_HandleTypeDef SNK_data = {
-	.voltageMin = 500,
-	.voltageSet = 330, //initial value to display
-	.currentSet = 1000, //initial value to display
-	.currentMin = 0,
-	.currentOCPSet = 1000,
-	.selMethod = PDO_SEL_METHOD_MAX_CUR,
-	.encoder = {
-		.selDigit = 2,
-		.increment = 10    // Default increment
-	}
-};
-
-// Define the pointer to the struct
-SINKData_HandleTypeDef *dhandle = &SNK_data;
-
-
 // Callback when ADC conversion is complete
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
@@ -334,6 +317,7 @@ void app_loop(void) {
 
 	//CDC_Transmit_FS(data, strlen(data));*/
 	// Process button events
+	/*
 	processSystemEvents(&stateMachine, &systemEvents);
 
 	// Run the state machine
@@ -344,7 +328,7 @@ void app_loop(void) {
 	stateMachine.lockBtnPressed = false;
 	stateMachine.voltageCurrentBtnPressed = false;
 	stateMachine.rotaryBtnPressed = false;
-	stateMachine.encoderTurnedFlag = false;
+	stateMachine.encoderTurnedFlag = false;*/
 
 }
 

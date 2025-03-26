@@ -28,6 +28,7 @@
 #include <string.h>
 #include <usbpd_trace.h>
 #include <app.h>
+#include <demo_app.h>
 
 
 /* USER CODE END Includes */
@@ -994,7 +995,7 @@ void StartDefaultTask(void *argument)
   for(;;)
   {
     osDelay(1);
-    app_loop();
+    demo_app_loop();
   }
   /* USER CODE END 5 */
 }

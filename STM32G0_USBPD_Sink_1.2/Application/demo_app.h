@@ -33,7 +33,7 @@ typedef enum {
     // Sub-states can be handled within each state function
 } SystemState;
 
-/*
+
 //Definition of encoder data struct
 typedef struct {
 	int curValue;      // Current encoder value
@@ -41,7 +41,7 @@ typedef struct {
 	int selDigit;  	   // Currently selected digit
 	int increment;     // Current increment value
 	int direction;	   // Direction: 1 for clockwise, -1 for counter-clockwise
-}Encoder_TypeDef;*/
+}Encoder_TypeDef;
 
 // Definition of state machine struct
 typedef struct {
@@ -133,6 +133,12 @@ void processSystemEvents(StateMachine *sm, SystemEvents *events);
 void updateVoltage(StateMachine *sm, SINKData_HandleTypeDef *handle);
 void updateCurrent(StateMachine *sm, SINKData_HandleTypeDef *handle);
 void TIM14_ISR(void);
+void demo_app_loop(void);
+
+extern ADC_HandleTypeDef hadc1;
+extern DAC_HandleTypeDef hdac1;
+extern TIM_HandleTypeDef htim3;
+extern TIM_HandleTypeDef htim4;
 
 /*Exported variables*/
 extern StateMachine stateMachine;

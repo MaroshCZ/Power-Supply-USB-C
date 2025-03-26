@@ -22,6 +22,15 @@
 #if defined(_GUI_INTERFACE)
 #include "gui_api.h"
 #include "app.h"
+
+
+#include "usbpd_def.h"
+#include "stdbool.h"
+#include <stm32g0xx_ll_adc.h>
+#include "usb_device.h"
+#include "usbd_cdc_if.h"
+#include <usbpd_trace.h>
+
 #endif /* _GUI_INTERFACE */
 
 
@@ -39,6 +48,43 @@ StateMachine stateMachine = {
 			}
 };
 USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
+
+SINKData_HandleTypeDef SNK_data = {
+	.voltageMin = 500,
+	.voltageSet = 330, //initial value to display
+	.currentSet = 1000, //initial value to display
+	.currentMin = 0,
+	.currentOCPSet = 1000,
+	.selMethod = PDO_SEL_METHOD_MAX_CUR,
+	.encoder = {
+		.selDigit = 2,
+		.increment = 10    // Default increment
+	}
+};
+
+// Define the pointer to the struct
+SINKData_HandleTypeDef *dhandle = &SNK_data;
+
+uint32_t srcPdoIndex; //variable that holds Pdo index from FindVoltageIndex
+//USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
+USBPD_StatusTypeDef powerProfiles;
+
+void demo_app_loop(void) {
+// Process button events
+	processSystemEvents(&stateMachine, &systemEvents);
+
+	// Run the state machine
+	runStateMachine(&stateMachine, &SNK_data);
+
+	// Reset button states after processing
+	stateMachine.outputBtnPressed = false;
+	stateMachine.lockBtnPressed = false;
+	stateMachine.voltageCurrentBtnPressed = false;
+	stateMachine.rotaryBtnPressed = false;
+	stateMachine.encoderTurnedFlag = false;
+
+}
+
 
 /*
  * Define Functions
@@ -122,8 +168,16 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
 		char _str[80];
 		sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-		USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
-        //lockButtonPressTime = HAL_GetTick();
+
+		USBPD_StatusTypeDef status = USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
+
+		if (status != USBPD_OK) {
+		    char failureMsg[100];
+		    snprintf(failureMsg, sizeof(failureMsg),
+		             "PDO Request Failed. Status: %d", status);
+		    USBPD_TRACE_Add(USBPD_TRACE_ERROR, 0, 0, (uint8_t*)failureMsg, strlen(failureMsg));
+		}
+
     } else if (GPIO_Pin == SW3_OFF_ON_Pin) {
         systemEvents.outputBtnEvent = true;
         EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
@@ -313,7 +367,7 @@ void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     }
 
     //==========================================================
-	// DO ACTIONS - Executed every time the state is processed
+	// DO ACTIONS - Executed every time the state is processed =
 	//==========================================================
 
     //Periodic check to display measured values
@@ -372,8 +426,36 @@ void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     	//Show SRC limits on displays
         //max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
         //max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
+		//TIM7 initialization
+		LL_TIM_EnableIT_UPDATE(TIM7); //Enable interrupt generation when timer goes to max value and UPDATE event flag is set
+		LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
 
+		//TIM14 initialization
+		LL_TIM_DisableIT_UPDATE(TIM14); //Enable interrupt generation when timer goes to max value and UPDATE event flag is set
+		LL_TIM_ClearFlag_UPDATE(TIM14); //Clear update flag on TIMER14
 
+		//TIM14 initialization
+		LL_TIM_DisableIT_UPDATE(TIM15); //Enable interrupt generation when timer goes to max value and UPDATE event flag is set
+		LL_TIM_ClearFlag_UPDATE(TIM15); //Clear update flag on TIMER14
+
+		//TIM3 initialization of encoder
+		HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
+		__HAL_TIM_SET_COUNTER(&htim3, 30000); //write non 0 value to avoid shift from 0 -> max value
+		encoderVal = __HAL_TIM_GET_COUNTER(&htim3)/4;
+		//Init DAC
+		HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
+		HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
+
+		//Calibrate and start ADC sensing with DMA
+		HAL_ADCEx_Calibration_Start(&hadc1);
+		HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&aADCxConvertedValues, ADC_NUM_OF_SAMPLES);
+
+		//TIM4 initialization
+		HAL_TIM_Base_Start(&htim4);
+
+		//Init 7 segment display
+		max7219_Init( 7 );
+		max7219_Decode_On();
         // Save state for return from temporary states
         strcpy(sm->lastStateStr, "INIT");
         sm->lastState = STATE_INIT;
@@ -388,6 +470,8 @@ void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     // Check if the timeout has elapsed
     if (HAL_GetTick() - sm->stateEntryTime > sm->timeoutCounter) {
 		//After initialization transition to IDLE state
+    	//Wait for hardware initialization and then turn DB to HIGH (according to TCPP01-M12 datasheet 6.5)
+    	HAL_GPIO_WritePin(DB_OUT_GPIO_Port, DB_OUT_Pin, GPIO_PIN_SET);
 		sm->currentState = STATE_IDLE;
 		entryDone = false;
     }
