@@ -39,6 +39,8 @@
  */
 //Initialize button event struct
 SystemEvents systemEvents = {0};
+ButtonManager buttonManager = {0};
+
 //Init stateMachine struct
 StateMachine stateMachine = {
 		.currentState = STATE_INIT,
@@ -157,17 +159,23 @@ void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
  */
 //BTN ISR to set event flags
 void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
+	uint32_t currentTime = HAL_GetTick();
+
     if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
         systemEvents.voltageCurrentBtnEvent = true;
         EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
     } else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
-        systemEvents.lockBtnEvent = true;
+        buttonManager.buttonPressTimes[BTN_LOCK] = currentTime;
+        buttonManager.buttonStates[BTN_LOCK] = true;
         EXTI->IMR1 &= ~(EXTI_IMR1_IM4);
+
+
         int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
 		//Print to debug
 		char _str[80];
 		sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+
 
 		USBPD_StatusTypeDef status = USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
 
@@ -187,15 +195,50 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
     }
 
     // Start debounce timer
+    buttonManager.debounceActive = true;
     TIM7->ARR = 200;
     LL_TIM_SetCounter(TIM7, 0);
     LL_TIM_EnableCounter(TIM7);
 }
 
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
+	if (GPIO_Pin == SW2_DEBUG_BTN_Pin && buttonManager.buttonStates[BTN_LOCK]) {
+		buttonManager.pressDuration = buttonManager.currentTime - buttonManager.buttonPressTimes[BTN_LOCK];
+		buttonManager.buttonStates[BTN_LOCK] = false;
+
+		if (buttonManager.pressDuration >= LONG_PRESS_THRESHOLD) {
+			systemEvents.lockBtnLongEvent = true;
+		} else {
+			systemEvents.lockBtnEvent = true;
+	}
+
 //TIM capture callback
 void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
     if (htim->Instance == TIM3) {
     	systemEvents.encoderTurnEvent = true;
+    }
+}
+
+// Timer interrupt handler for button debounce
+void TIM7_ISR(void) {
+    if (LL_TIM_IsActiveFlag_UPDATE(TIM7)) {
+        LL_TIM_ClearFlag_UPDATE(TIM7);
+        LL_TIM_DisableCounter(TIM7);
+        buttonManager.debounceActive = false;
+
+        // Re-enable button interrupts after debounce period
+        if (buttonManager.buttonStates[BTN_VOLTAGE_CURRENT]) {
+            EXTI->IMR1 |= EXTI_IMR1_IM2;
+        }
+        if (buttonManager.buttonStates[BTN_LOCK]) {
+            EXTI->IMR1 |= EXTI_IMR1_IM4;
+        }
+        if (buttonManager.buttonStates[BTN_OUTPUT]) {
+            EXTI->IMR1 |= EXTI_IMR1_IM1;
+        }
+        if (buttonManager.buttonStates[BTN_ROTARY]) {
+            EXTI->IMR1 |= EXTI_IMR1_IM8;
+        }
     }
 }
 
@@ -228,15 +271,6 @@ void TIM15_ISR(void) {
 		LL_TIM_DisableCounter(TIM15);  // Stop the timer after timeout
 
 		if (stateMachine.currentState == STATE_SET_VALUES) {
-			/*
-			//Make a USBPD request
-			int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
-			//Print to debug
-
-			char _str[70];
-			sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
-			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-			USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);*/
 		}
 
 	}
@@ -532,17 +566,6 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 		} else if (sm->setValueMode == SET_CURRENT) {
 			sm->setValueMode = SET_VOLTAGE;
 		}
-
-		//Get values into debug trace
-		char _str[60];
-		uint32_t voltageADC = BSP_PWR_VBUSGetVoltage(0);
-		uint32_t currentADC= BSP_PWR_VBUSGetCurrent(0);
-		uint32_t currentOCP_ADC= BSP_PWR_VBUSGetCurrentOCP(0);
-
-		// Use snprintf to limit the number of characters written
-		int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltageADC, currentADC, currentOCP_ADC);
-
-		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 	}
 
     //Process encoder press

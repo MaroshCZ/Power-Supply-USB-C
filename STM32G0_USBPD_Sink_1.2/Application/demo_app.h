@@ -93,7 +93,19 @@ typedef struct {
 
 } StateMachine;
 
-// Button event flags
+// Button management structure to hold all button-related state
+typedef struct {
+    // Button press tracking
+    uint32_t buttonPressTimes[BTN_COUNT];
+    bool buttonStates[BTN_COUNT];
+    uint32_t currentTime;
+    uint32_t pressDuration;
+
+    // Button debounce state
+    bool debounceActive;
+} ButtonManager;
+
+// System event flags
 typedef struct {
 	// Button events
 	    volatile bool outputBtnEvent;
