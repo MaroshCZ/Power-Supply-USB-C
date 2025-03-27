@@ -1,19 +1,20 @@
 /*
+
  * demo_app.h
  *
  *  Created on: Jun 25, 2024
  *      Author: Jan Mareš
- */
+
 
 #ifndef DEMO_APP_H_
 #define DEMO_APP_H_
 
-/*Includes*/
+Includes
 #include "app.h"
 #include "stdio.h"
 #include "stdbool.h"
 
-/* Exported constants --------------------------------------------------------*/
+ Exported constants --------------------------------------------------------
 typedef enum{
      DEMO_OK,
      DEMO_ERROR
@@ -33,7 +34,7 @@ typedef enum {
     // Sub-states can be handled within each state function
 } SystemState;
 
-/*
+
 //Definition of encoder data struct
 typedef struct {
 	int curValue;      // Current encoder value
@@ -41,7 +42,7 @@ typedef struct {
 	int selDigit;  	   // Currently selected digit
 	int increment;     // Current increment value
 	int direction;	   // Direction: 1 for clockwise, -1 for counter-clockwise
-}Encoder_TypeDef;*/
+}Encoder_TypeDef;
 
 // Definition of state machine struct
 typedef struct {
@@ -115,7 +116,7 @@ typedef struct {
 } SystemEvents;
 
 
-/*Function definition*/
+Function definition
 void handleOffState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
 void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
 void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
@@ -126,7 +127,7 @@ void handleDisplayToggleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle)
 void handleOCPToggleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
 void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
 
-/*State machine*/
+State machine
 void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
 void processButtonEvents(StateMachine *sm, SystemEvents *events);
 void processSystemEvents(StateMachine *sm, SystemEvents *events);
@@ -134,8 +135,9 @@ void updateVoltage(StateMachine *sm, SINKData_HandleTypeDef *handle);
 void updateCurrent(StateMachine *sm, SINKData_HandleTypeDef *handle);
 void TIM14_ISR(void);
 
-/*Exported variables*/
+Exported variables
 extern StateMachine stateMachine;
 extern SystemEvents systemEvents;
 
-#endif /* DEMO_APP_H_ */
+#endif  DEMO_APP_H_
+*/

@@ -1,12 +1,13 @@
 /*
+
  * demo_app.c
  *
  *  Created on: Jun 25, 2024
  *      Author: Jan Mareš
- */
 
 
-/* Includes ------------------------------------------------------------------*/
+
+ Includes ------------------------------------------------------------------
 #include "usbpd_core.h"
 #include "usbpd_dpm_core.h"
 #include "usbpd_dpm_conf.h"
@@ -22,12 +23,12 @@
 #if defined(_GUI_INTERFACE)
 #include "gui_api.h"
 #include "app.h"
-#endif /* _GUI_INTERFACE */
+#endif  _GUI_INTERFACE
 
 
-/*
+
  * Define
- */
+
 //Initialize button event struct
 SystemEvents systemEvents = {0};
 //Init stateMachine struct
@@ -40,9 +41,9 @@ StateMachine stateMachine = {
 };
 USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetailss;
 
-/*
+
  * Define Functions
- */
+
 void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     // Process events and transitions
     switch (sm->currentState) {
@@ -79,15 +80,15 @@ void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 
 }
 
-/*
+
  * Define Callbacks and ISR
- */
+
 //BTN ISR to set event flags
 void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
     if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
         systemEvents.voltageCurrentBtnEvent = true;
         EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
-    } /*else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
+    } else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
         systemEvents.lockBtnEvent = true;
         EXTI->IMR1 &= ~(EXTI_IMR1_IM4);
         int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
@@ -98,7 +99,7 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
 		//USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
 		USBPD_DPM_RequestSRCPDO(0, 6, 6000, 1000);
         //lockButtonPressTime = HAL_GetTick();
-    } */else if (GPIO_Pin == SW3_OFF_ON_Pin) {
+    } else if (GPIO_Pin == SW3_OFF_ON_Pin) {
         systemEvents.outputBtnEvent = true;
         EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
     } else if (GPIO_Pin == ENC_TOGGLE_UNITS_Pin) {
@@ -200,17 +201,17 @@ void processSystemEvents(StateMachine *sm, SystemEvents *events) {
     }
 
     // Process timer events
-    /*
+
     if (events->timer1Event) {
         events->timer1Event = false;
         // Handle timer1 event
-    }*/
+    }
 
 }
 
-/*
+
  * Define state Handle functions
- */
+
 
 void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     // Entry actions (if just entered this state)
@@ -538,6 +539,28 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 				break;
 			case SET_CURRENT:
 				//updateCurrent(sm,dhandle);
+				//Get direction of encoder turning
+				int currentTemp = handle->currentSet;
+				currentTemp += sm->encoder.direction * sm->encoder.increment;
+
+				//If required temp value is within limits, assign it to voltage else assign limits
+				if (currentTemp > handle->currentMax) {
+					handle->currentSet = handle->currentMax;
+
+				} else if (currentTemp < handle->currentMin) {
+					handle->currentSet = handle->currentMin;
+
+				} else {
+					handle->currentSet = currentTemp;
+				}
+
+				//Update AWD limits
+				int isense_Vtrip_mV = (handle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
+				int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD tershold
+				Update_AWD_Thresholds(0, isense_rawADCtrip+100);
+
+				//Print selected voltage to disp, decimal at digit 3
+				max7219_PrintIspecial(SEGMENT_2, handle->currentSet, 4);
 				break;
 		}
 	}
@@ -631,3 +654,4 @@ void updateCurrent(StateMachine *sm, SINKData_HandleTypeDef *handle) {
 	sprintf(_str,"IBUS selected: %d mA", handle->currentSet);
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 }
+*/

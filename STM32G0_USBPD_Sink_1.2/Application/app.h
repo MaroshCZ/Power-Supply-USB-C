@@ -91,7 +91,114 @@ extern SINKData_HandleTypeDef *dhandle;
 
 //__IO: Indicates that this variable can change at any time, usually due to hardware activity.
 
+// Definition of PPS states
+typedef enum {
+    STATE_OFF,
+    STATE_INIT,
+    STATE_IDLE,
+    STATE_ACTIVE,
+    STATE_LOCK,
+    STATE_ERROR,
+    //STATE_DISPLAY_TOGGLE,
+    STATE_OCP_TOGGLE,
+    STATE_SET_VALUES,
+    // Sub-states can be handled within each state function
+} SystemState;
+
+// Definition of state machine struct
+typedef struct {
+    // Current and last system state
+    SystemState currentState;
+    SystemState lastState;
+
+    // State timers and counters
+    uint32_t stateEntryTime;
+    uint32_t timeoutCounter;
+
+    // Button states
+    bool outputBtnPressed;
+    bool lockBtnPressed;
+    bool lockBtnHoldActive;
+    bool ocpBtnPressed;
+    bool voltageCurrentBtnPressed;
+    //bool showBtnPressed;
+    bool rotaryBtnPressed;
+
+    // Other flags
+    bool encoderTurnedFlag;
+
+    // Encoder data
+    Encoder_TypeDef encoder;
+
+    // Display states
+    enum {
+        SHOW_LIMITS,
+        SHOW_SET,
+        SHOW_MEASURED
+    } displayMode;
+
+    // Set value states
+    enum {
+        SET_VOLTAGE,
+        SET_CURRENT
+    } setValueMode;
+
+    // OCP state
+    bool ocpEnabled;
+
+    // Error flags
+    uint8_t errorCode;
+    bool errorActive;
+
+    // Last state for returning from special modes
+    char lastStateStr[10];
+
+} StateMachine;
+
+// Button event flags
+typedef struct {
+	// Button events
+	    volatile bool outputBtnEvent;
+	    volatile bool lockBtnEvent;
+	    volatile bool lockBtnLongEvent;
+	    volatile bool voltageCurrentBtnEvent;
+	    volatile bool ocpBtnEvent;
+	    volatile bool rotaryBtnEvent;
+
+	    // Encoder events
+	    volatile bool encoderTurnEvent;
+
+	    // Periodic check event
+	    volatile bool periodicCheckEvent;
+	    volatile bool stateTimeoutEvent;
+
+	    // ADC/AWDG events
+	    volatile bool awdgEvent;
+} SystemEvents;
+
+
+
 void usart2_lupart2_handler(void);
 
+/*Define State functions*/
+void handleOffState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void handleLockState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void handleErrorState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void handleDisplayToggleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void handleOCPToggleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+
+/*Define procces functions and Statemachine*/
+void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void processButtonEvents(StateMachine *sm, SystemEvents *events);
+void processSystemEvents(StateMachine *sm, SystemEvents *events);
+
+/*Define additional fcns and ISR*/
+void updateVoltage(StateMachine *sm, SINKData_HandleTypeDef *handle);
+void updateCurrent(StateMachine *sm, SINKData_HandleTypeDef *handle);
+void TIM14_ISR(void);
 
 #endif /* APP_H_ */

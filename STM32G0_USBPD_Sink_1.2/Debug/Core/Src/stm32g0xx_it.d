@@ -67,8 +67,7 @@ Core/Src/stm32g0xx_it.o: ../Core/Src/stm32g0xx_it.c ../Core/Inc/main.h \
  ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_ll_usart.h \
  C:/ST/STM32_CubeIDE/workspace1.14/UCPD/STM32G0_USBPD_Sink_1.2/Application/app.h \
  ../USBPD/usbpd_user_services.h \
- C:/ST/STM32_CubeIDE/workspace1.14/UCPD/STM32G0_USBPD_Sink_1.2/Application/demo_app.h \
- C:/ST/STM32_CubeIDE/workspace1.14/UCPD/STM32G0_USBPD_Sink_1.2/Application/app.h
+ C:/ST/STM32_CubeIDE/workspace1.14/UCPD/STM32G0_USBPD_Sink_1.2/Application/demo_app.h
 ../Core/Inc/main.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:
 ../Core/Inc/stm32g0xx_hal_conf.h:
@@ -145,4 +144,3 @@ Core/Src/stm32g0xx_it.o: ../Core/Src/stm32g0xx_it.c ../Core/Inc/main.h \
 C:/ST/STM32_CubeIDE/workspace1.14/UCPD/STM32G0_USBPD_Sink_1.2/Application/app.h:
 ../USBPD/usbpd_user_services.h:
 C:/ST/STM32_CubeIDE/workspace1.14/UCPD/STM32G0_USBPD_Sink_1.2/Application/demo_app.h:
-C:/ST/STM32_CubeIDE/workspace1.14/UCPD/STM32G0_USBPD_Sink_1.2/Application/app.h:
