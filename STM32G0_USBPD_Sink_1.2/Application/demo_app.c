@@ -38,7 +38,7 @@ StateMachine stateMachine = {
 				.increment = 10    // Default increment
 			}
 };
-USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
+USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetailss;
 
 /*
  * Define Functions
@@ -114,7 +114,7 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
     if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
         systemEvents.voltageCurrentBtnEvent = true;
         EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
-    } else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
+    } /*else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
         systemEvents.lockBtnEvent = true;
         EXTI->IMR1 &= ~(EXTI_IMR1_IM4);
         int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
@@ -122,9 +122,10 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
 		char _str[80];
 		sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-		USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
+		//USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
+		USBPD_DPM_RequestSRCPDO(0, 6, 6000, 1000);
         //lockButtonPressTime = HAL_GetTick();
-    } else if (GPIO_Pin == SW3_OFF_ON_Pin) {
+    } */else if (GPIO_Pin == SW3_OFF_ON_Pin) {
         systemEvents.outputBtnEvent = true;
         EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
     } else if (GPIO_Pin == ENC_TOGGLE_UNITS_Pin) {
@@ -144,6 +145,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
     	systemEvents.encoderTurnEvent = true;
     }
 }
+
 
 void TIM14_ISR(void) {
 	if (LL_TIM_IsActiveFlag_UPDATE(TIM14)) {
@@ -171,18 +173,19 @@ void TIM15_ISR(void) {
 		// Handle periodic check for ACTIVE state
 		systemEvents.stateTimeoutEvent = true;
 		//Reset CNT value
-		LL_TIM_DisableCounter(TIM15);  // Stop the timer after timeout
+		//LL_TIM_DisableCounter(TIM15);  // Stop the timer after timeout
+
 
 		if (stateMachine.currentState == STATE_SET_VALUES) {
-			/*
+
 			//Make a USBPD request
-			int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
+			int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetailss, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
 			//Print to debug
 
 			char _str[70];
 			sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
 			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-			USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);*/
+			USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
 		}
 
 	}
@@ -501,7 +504,12 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     if (sm->encoderTurnedFlag) {
 		// Handle encoder pulse event
 		int encoderVal = (TIM3 -> CNT) >> 2;
+
+		//
+		//Erase FLAG!!
+		//
 		sm->encoder.curValue= encoderVal;
+		sm->encoderTurnedFlag = false;
 
 		if (encoderVal != sm->encoder.prevValue){
 			//Get the turn direction and save it
@@ -537,10 +545,26 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 		//Update displays
 		switch (sm->setValueMode) {
 			case SET_VOLTAGE:
-				updateVoltage(sm,dhandle);
+				//updateVoltage(sm,dhandle);
+				int voltageTemp = dhandle->voltageSet;
+				voltageTemp += sm->encoder.direction * sm->encoder.increment;
+
+				//If required temp value is within limits, assign it to voltage else assign limits
+				if (voltageTemp > dhandle->voltageMax) {
+					dhandle->voltageSet = dhandle->voltageMax;
+
+				} else if (voltageTemp < dhandle->voltageMin) {
+					dhandle->voltageSet = dhandle->voltageMin;
+
+				} else {
+					dhandle->voltageSet = voltageTemp;
+				}
+
+				//Print selected voltage to disp, decimal at digit 3
+				max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
 				break;
 			case SET_CURRENT:
-				updateCurrent(sm,dhandle);
+				//updateCurrent(sm,dhandle);
 				break;
 		}
 	}
@@ -572,6 +596,10 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 
     }
 }
+
+//
+//Using the functions with arguments messes up code!!!!!! updateVoltage(StateMachine *sm, SINKData_HandleTypeDef *handle)
+//
 
 // Helper function to update voltage
 void updateVoltage(StateMachine *sm, SINKData_HandleTypeDef *handle) {

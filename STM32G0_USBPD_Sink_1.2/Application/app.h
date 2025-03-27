@@ -87,6 +87,7 @@ extern __IO uint16_t aADCxConvertedValues[ADC_NUM_OF_SAMPLES];
 // Declare external global variable (but do not define it here)
 extern SINKData_HandleTypeDef SNK_data;
 extern SINKData_HandleTypeDef *dhandle;
+//get_dhandle(SINKData_HandleTypeDef *)
 
 //__IO: Indicates that this variable can change at any time, usually due to hardware activity.
 
