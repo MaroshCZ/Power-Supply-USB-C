@@ -36,8 +36,6 @@ int dac_value = 500;
 
 int ocp_reset_needed = 0;
 
-
-
 uint32_t srcPdoIndex; //variable that holds Pdo index from FindVoltageIndex
 USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
 USBPD_StatusTypeDef powerProfiles;
@@ -113,94 +111,6 @@ void HAL_ADCEx_LevelOutOfWindow2Callback(ADC_HandleTypeDef *hadc) {
 
 }
 
-volatile uint32_t sw1ButtonPressTime = 0;
-volatile bool sw1ButtonPressed = false;
-volatile bool sw1LongPressDetected = false;
-volatile bool sw1ButtonReleased = false;
-
-/*
-void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
-	if (GPIO_Pin == SW2_DEBUG_BTN_Pin) // Will display in trace the VBUS value when user button is pressed
-		{
-		char _str2[60];
-		uint32_t voltage = BSP_PWR_VBUSGetVoltage(0);
-		uint32_t current= BSP_PWR_VBUSGetCurrent(0);
-		uint32_t currentOCP= BSP_PWR_VBUSGetCurrentOCP(0);
-
-		// Use snprintf to limit the number of characters written
-		int len = snprintf(_str2, sizeof(_str2), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltage, current, currentOCP);
-
-		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str2, strlen(_str2));
-		}
-
-    if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
-    	EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
-
-		//Set debouncing time in ms
-		TIM7->ARR = 200;
-
-		//Zero TIM7 counter and start counting
-		LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
-	    LL_TIM_EnableCounter(TIM7); //start counting of timer 7
-
-        sw1ButtonPressTime = HAL_GetTick();  // Store timestamp
-        sw1ButtonPressed = true;  // Mark button as pressed
-        sw1LongPressDetected = false;  // Reset long press flag
-    }
-}*/
-
-/*
-void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
-    if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
-        uint32_t pressDuration = HAL_GetTick() - sw1ButtonPressTime;
-
-        if (pressDuration >= 800) {  // Long press (800ms threshold)
-            sw1LongPressDetected = true;
-        }
-
-        sw1ButtonPressed = false;  // Reset button state
-        sw1ButtonReleased = true;  // Mark button release event
-    }
-}*/
-
-void processSw1ButtonEvents() {
-    static uint32_t lastShortPressTime = 0;
-
-    if (sw1LongPressDetected) {
-        printf("Long Press Detected\n");
-        HAL_GPIO_TogglePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin);
-
-        //Temporary logic to change APDO vs FIXED PDO toggling
-        if (dhandle ->selMethod == PDO_SEL_METHOD_MAX_CUR) {
-        	dhandle ->selMethod = PDO_SEL_METHOD_MIN_CUR;
-        }
-        else {
-        	 dhandle ->selMethod = PDO_SEL_METHOD_MAX_CUR;
-        }
-
-
-        sw1LongPressDetected = false;
-        sw1ButtonReleased = false; // Clear the release flag for long press too
-    } else if (sw1ButtonReleased) {
-        uint32_t now = HAL_GetTick();
-        uint32_t pressDuration = now - sw1ButtonPressTime;
-
-        if (pressDuration < 800) {  // Short press condition
-            if (now - lastShortPressTime < 250) {  // Double press detection
-                printf("Double Press Detected\n");
-                HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
-            } else {
-                printf("Short Press Detected\n");
-                sw1_toggle_i_v_isr();
-
-            }
-            lastShortPressTime = now;
-        }
-
-        sw1ButtonReleased = false;  // Reset release flag
-    }
-}
-
 
 /*
  * Initialization function
@@ -263,75 +173,13 @@ void app_init(void){
 	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
 
 	//HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_SET);
-
-
 }
-
 
 
 /*
  * Loop function
  */
 void app_loop(void) {
-    // ...existing code...
-	/*
-	if (ocp_reset_needed == 1) {
-		HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_RESET);
-		HAL_Delay(4); //datasheet says 100ns minimum pull down time for resettin alert, but for me even 1ms was not enough
-		HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_SET);
-		ocp_reset_needed = 0;
-	}
-	processSw1ButtonEvents();
-
-	switch(outputState)
-		{
-			case(OUTPUT_OFF_STATE):
-			{
-				switch(currentState)
-					{
-					case(ADJUSTMENT_VOLTAGE):
-					{
-						//Blink currently selected digit
-						max7219_BlinkDigit(SEGMENT_1, &dhandle->voltageSet, dhandle->encoder.selDigit, 500, 3); //pass voltage address to BlinkDigit function
-					}
-					 break;
-					case(ADJUSTMENT_CURRENT):
-					{
-						//Blink currently selected digit
-						max7219_BlinkDigit(SEGMENT_2, &dhandle->currentSet, dhandle->encoder.selDigit, 500, 4); //pass voltage address to BlinkDigit function
-					}
-					break;
-					case(ADJUSTMENT_CURRENT_OCP):
-					{
-
-						//Blink currently selected digit
-						max7219_BlinkDigit(SEGMENT_2, &dhandle->currentOCPSet, dhandle->encoder.selDigit, 500, 4); //pass voltage address to BlinkDigit function
-					}
-					break;
-					}
-
-			}
-			break;
-
-			case(OUTPUT_ON_STATE):
-			{
-				uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 t oget centivolts since only 4 digit display..
-				uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
-
-				dhandle ->currentMeas = cur;
-				dhandle ->voltageMeas = vol;
-				//Display output voltage
-				max7219_PrintIspecial(SEGMENT_1, vol, 3);
-
-				//Display output current
-				max7219_PrintIspecial(SEGMENT_2, cur, 4);
-
-				HAL_Delay(500);
-
-			}
-			break;
-		}
-
 	//CDC_Transmit_FS(data, strlen(data));*/
 	// Process button events
 	processSystemEvents(&stateMachine, &systemEvents);
@@ -345,7 +193,6 @@ void app_loop(void) {
 	stateMachine.voltageCurrentBtnPressed = false;
 	stateMachine.rotaryBtnPressed = false;
 	stateMachine.encoderTurnedFlag = false;
-
 }
 
 /**
@@ -365,66 +212,6 @@ void Update_AWD_Thresholds(uint32_t low, uint32_t high) {
 	    Error_Handler();
 	}
 }
-
-/*
-// Helper function to update voltage
-void updateVoltage(SINKData_HandleTypeDef *handle) {
-	//Get direction of encoder turning
-	int voltageTemp = handle->voltageSet;
-	voltageTemp += handle->encoder.direction * handle->encoder.increment;
-
-	//If required temp value is within limits, assign it to voltage else assign limits
-	if (voltageTemp > handle->voltageMax) {
-		handle->voltageSet = handle->voltageMax;
-
-	} else if (voltageTemp < handle->voltageMin) {
-		handle->voltageSet = handle->voltageMin;
-
-	} else {
-		handle->voltageSet = voltageTemp;
-	}
-
-	//Print selected voltage to disp, decimal at digit 3
-	max7219_PrintIspecial(SEGMENT_1, handle->voltageSet, 3);
-
-	//Print to debug
-	char _str[40];
-	sprintf(_str,"VBUS selected: %d mV", handle->voltageSet*10);
-	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-
-}*/
-
-/*
-// Helper function to update voltage
-void updateCurrent(SINKData_HandleTypeDef *handle) {
-	//Get direction of encoder turning
-	int currentTemp = handle->currentSet;
-	currentTemp += handle->encoder.direction * handle->encoder.increment;
-
-	//If required temp value is within limits, assign it to voltage else assign limits
-	if (currentTemp > handle->currentMax) {
-		handle->currentSet = handle->currentMax;
-
-	} else if (currentTemp < handle->currentMin) {
-		handle->currentSet = handle->currentMin;
-
-	} else {
-		handle->currentSet = currentTemp;
-	}
-
-	//Update AWD limits
-	int isense_Vtrip_mV = (handle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
-	int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD tershold
-	Update_AWD_Thresholds(0, isense_rawADCtrip+100);
-
-	//Print selected voltage to disp, decimal at digit 3
-	max7219_PrintIspecial(SEGMENT_2, handle->currentSet, 4);
-
-	//Print to debug
-	char _str[40];
-	sprintf(_str,"IBUS selected: %d mA", handle->currentSet);
-	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-}*/
 
 // Helper function to update voltage
 void updateCurrentOCP(SINKData_HandleTypeDef *handle) {
