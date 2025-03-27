@@ -1,657 +1,656 @@
-/*
-
- * demo_app.c
- *
- *  Created on: Jun 25, 2024
- *      Author: Jan Mareš
-
-
-
- Includes ------------------------------------------------------------------
-#include "usbpd_core.h"
-#include "usbpd_dpm_core.h"
-#include "usbpd_dpm_conf.h"
-#include "usbpd_dpm_user.h"
-#include "usbpd_devices_conf.h"
-#include "usbpd_user_services.h"
-#include "usbpd_pwr_if.h"
-#include "demo_app.h"
-#include "string.h"
-#include "stdio.h"
-#include "cmsis_os.h"
-#include "max7219.h"
-#if defined(_GUI_INTERFACE)
-#include "gui_api.h"
-#include "app.h"
-#endif  _GUI_INTERFACE
-
-
-
- * Define
-
-//Initialize button event struct
-SystemEvents systemEvents = {0};
-//Init stateMachine struct
-StateMachine stateMachine = {
-		.currentState = STATE_INIT,
-		.encoder = {
-				.selDigit = 2,
-				.increment = 10    // Default increment
-			}
-};
-USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetailss;
-
-
- * Define Functions
-
-void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
-    // Process events and transitions
-    switch (sm->currentState) {
-        case STATE_OFF:
-            //handleOffState(sm, dhandle);
-            break;
-        case STATE_INIT:
-            handleInitState(sm, dhandle);
-            break;
-        case STATE_IDLE:
-            handleIdleState(sm, dhandle);
-            break;
-        case STATE_ACTIVE:
-            handleActiveState(sm, dhandle);
-            break;
-        case STATE_LOCK:
-            //handleLockState(sm, dhandle);
-            break;
-        case STATE_ERROR:
-            //handleErrorState(sm, dhandle);
-            break;
-        case STATE_OCP_TOGGLE:
-            //handleOCPToggleState(sm, dhandle);
-            break;
-        case STATE_SET_VALUES:
-            handleSetValuesState(sm, dhandle);
-            break;
-        default:
-            // Error handling
-            sm->currentState = STATE_ERROR;
-            //sm->errorCode = ERROR_INVALID_STATE;
-            break;
-    }
-
-}
-
-
- * Define Callbacks and ISR
-
-//BTN ISR to set event flags
-void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
-    if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
-        systemEvents.voltageCurrentBtnEvent = true;
-        EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
-    } else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
-        systemEvents.lockBtnEvent = true;
-        EXTI->IMR1 &= ~(EXTI_IMR1_IM4);
-        int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
-		//Print to debug
-		char _str[80];
-		sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
-		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-		//USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
-		USBPD_DPM_RequestSRCPDO(0, 6, 6000, 1000);
-        //lockButtonPressTime = HAL_GetTick();
-    } else if (GPIO_Pin == SW3_OFF_ON_Pin) {
-        systemEvents.outputBtnEvent = true;
-        EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
-    } else if (GPIO_Pin == ENC_TOGGLE_UNITS_Pin) {
-        systemEvents.rotaryBtnEvent = true;
-        EXTI->IMR1 &= ~(EXTI_IMR1_IM8);
-    }
-
-    // Start debounce timer
-    TIM7->ARR = 200;
-    LL_TIM_SetCounter(TIM7, 0);
-    LL_TIM_EnableCounter(TIM7);
-}
-
-//TIM capture callback
-void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
-    if (htim->Instance == TIM3) {
-    	systemEvents.encoderTurnEvent = true;
-    }
-}
-
-
-void TIM14_ISR(void) {
-	if (LL_TIM_IsActiveFlag_UPDATE(TIM14)) {
-		// Clear the update interrupt flag
-		LL_TIM_ClearFlag_UPDATE(TIM14);
-
-		if (stateMachine.currentState == STATE_ACTIVE || stateMachine.currentState == STATE_SET_VALUES) {
-			// Handle periodic check for ACTIVE state
-			systemEvents.periodicCheckEvent = true;
-			//Reset CNT value
-			LL_TIM_SetCounter(TIM14, 0);
-
-			//Start timer again
-			LL_TIM_EnableCounter(TIM14);
-		}
-	}
-}
-
-
-void TIM15_ISR(void) {
-	if (LL_TIM_IsActiveFlag_UPDATE(TIM15)) {
-		// Clear the update interrupt flag
-		LL_TIM_ClearFlag_UPDATE(TIM15);
-
-		// Handle periodic check for ACTIVE state
-		systemEvents.stateTimeoutEvent = true;
-		//Reset CNT value
-		//LL_TIM_DisableCounter(TIM15);  // Stop the timer after timeout
-
-
-		if (stateMachine.currentState == STATE_SET_VALUES) {
-
-			//Make a USBPD request
-			int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetailss, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
-			//Print to debug
-
-			char _str[70];
-			sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
-			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-			USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
-		}
-
-	}
-}
-
-// Process button events in the main loop (Convert hardware events into logical events)
-void processButtonEvents(StateMachine *sm, SystemEvents *events) {
-    if (events->outputBtnEvent) {
-    	//Reset btn event flag
-        events->outputBtnEvent = false;
-        sm->outputBtnPressed = true;
-    } else if (events->voltageCurrentBtnEvent) {
-    	events->voltageCurrentBtnEvent = false;
-    	sm->voltageCurrentBtnPressed = true;
-    } else if (events->lockBtnEvent) {
-    	events->lockBtnEvent = false;
-		sm->lockBtnPressed = true;
-    } else if (events->rotaryBtnEvent) {
-    	//Reset btn event flag
-    	events->rotaryBtnEvent = false;
-		sm->rotaryBtnPressed = true;
-
-    }
-}
-
-// Main system event processor that calls specialized handlers
-void processSystemEvents(StateMachine *sm, SystemEvents *events) {
-    // Process different event types using specialized functions
-    processButtonEvents(sm, events);
-
-    if (events->encoderTurnEvent) {
-    	sm->encoderTurnedFlag = true;
-    	events->encoderTurnEvent = false;
-    }
-    // Process AWDG events
-    if (events->awdgEvent) {
-        //events->awdgEvent = false;
-        //sm->awdgTriggered = true;
-    }
-
-    // Process timer events
-
-    if (events->timer1Event) {
-        events->timer1Event = false;
-        // Handle timer1 event
-    }
-
-}
-
-
- * Define state Handle functions
-
-
-void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
-    // Entry actions (if just entered this state)
-    static bool entryDone = false;
-
-    //=======================================================
-	// ENTRY ACTIONS - Executed once when entering the state
-	//=======================================================
-    if (!entryDone) {
-        // Display set values
-        max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
-        max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
-
-        // Ensure output is off
-        HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
-
-        // Check temperature and control fan (not shown in your code)
-
-        // Save state for return from temporary states
-        strcpy(sm->lastStateStr, "IDLE");
-        sm->lastState = STATE_IDLE;
-
-        entryDone = true;
-    }
-
-    //=================================================
-	// TRANSITION CHECKS - Check for state transitions
-	//=================================================
-
-    // Process events and transitions
-    if (sm->outputBtnPressed) {
-        sm->currentState = STATE_ACTIVE;
-        entryDone = false;
-    } else if (sm->lockBtnHoldActive) {
-        sm->currentState = STATE_LOCK;
-        entryDone = false;
-    } else if (sm->ocpBtnPressed) {
-        sm->currentState = STATE_OCP_TOGGLE;
-        sm->stateEntryTime = HAL_GetTick();
-        sm->timeoutCounter = 500;  // 0.5 seconds timeout
-        entryDone = false;
-    } else if (sm->rotaryBtnPressed) {
-        sm->currentState = STATE_SET_VALUES;
-        sm->timeoutCounter = 4000;  // 4 seconds timeout
-        sm->rotaryBtnPressed = false;
-        entryDone = false;
-    }
-}
-
-void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
-	//Declare static variables
-	// Set check interval Make the timer persistent across function calls
-	static uint32_t lastCheckTime = 0; // declared to 0 only once, then retains value
-    static bool entryDone = false;
-	const uint32_t CHECK_INTERVAL_MS = 500; // Check every 500ms
-
-	//=======================================================
-	// ENTRY ACTIONS - Executed once when entering the state
-	//=======================================================
-
-    if (!entryDone) {
-        // Ensure output is off
-        HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_SET);
-
-        // Save state for return from temporary states
-        strcpy(sm->lastStateStr, "ACTIVE");
-        sm->lastState = STATE_ACTIVE;
-
-        // Initialize the check timer
-        TIM14->ARR = 500;
-		LL_TIM_SetCounter(TIM14, 0); //set counter register value of timer 7 to 0
-		LL_TIM_EnableIT_UPDATE(TIM14); // Enable update interrupt
-		LL_TIM_EnableCounter(TIM14);
-
-        entryDone = true;
-    }
-
-    //==========================================================
-	// DO ACTIONS - Executed every time the state is processed
-	//==========================================================
-
-    //Periodic check to display measured values
-    if (systemEvents.periodicCheckEvent) {
-        systemEvents.periodicCheckEvent = false;
-		uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 to get centivolts since only 4 digit display..
-		uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
-
-		dhandle ->currentMeas = cur;
-		dhandle ->voltageMeas = vol;
-		//Display output voltage
-		max7219_PrintIspecial(SEGMENT_1, vol, 3);
-		//Display output current
-		max7219_PrintIspecial(SEGMENT_2, cur, 4);
-    }
-
-    //=================================================
-	// TRANSITION CHECKS - Check for state transitions
-	//=================================================
-    if (sm->outputBtnPressed) {
-        sm->currentState = STATE_IDLE;
-        entryDone = false;
-    } else if (sm->lockBtnHoldActive) {
-        sm->currentState = STATE_LOCK;
-        entryDone = false;
-    } else if (sm->ocpBtnPressed) {
-        sm->currentState = STATE_OCP_TOGGLE;
-        sm->stateEntryTime = HAL_GetTick();
-        sm->timeoutCounter = 500;  // 0.5 seconds timeout
-        entryDone = false;
-    } else if (sm->rotaryBtnPressed) {
-        sm->currentState = STATE_SET_VALUES;
-        sm->timeoutCounter = 4000;  // 4 seconds timeout
-        sm->rotaryBtnPressed = false;
-        entryDone = false;
-    }
-
-    if (sm->outputBtnPressed || sm->ocpBtnPressed) {
-    	LL_TIM_DisableCounter(TIM14);
-    }
-}
-
-
-void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
-    // Entry actions (if just entered this state)
-    static bool entryDone = false;
-
-    //=======================================================
-	// ENTRY ACTIONS - Executed once when entering the state
-	//=======================================================
-    if (!entryDone) {
-    	// Set the state entry time and timeout duration
-		sm->stateEntryTime = HAL_GetTick();
-		sm->timeoutCounter = 2000;  // 2 seconds timeout
-
-    	//Show SRC limits on displays
-        //max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
-        //max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
-
-
-        // Save state for return from temporary states
-        strcpy(sm->lastStateStr, "INIT");
-        sm->lastState = STATE_INIT;
-
-        entryDone = true;
-    }
-
-    //==========================================================
-	// DO ACTIONS - Executed every time the state is processed
-	//==========================================================
-
-    // Check if the timeout has elapsed
-    if (HAL_GetTick() - sm->stateEntryTime > sm->timeoutCounter) {
-		//After initialization transition to IDLE state
-		sm->currentState = STATE_IDLE;
-		entryDone = false;
-    }
-
-}
-
-void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
-    // Entry actions (if just entered this state)
-    static bool entryDone = false;
-    static bool showDigit = false;  // Start with digit shown
-
-    //=======================================================
-   	// ENTRY ACTIONS - Executed once when entering the state
-   	//=======================================================
-
-    if (!entryDone) {
-
-    	// Display set values
-        max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
-        max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
-
-        // Initialize the periodic timer
-		TIM14->ARR = 500;
-		LL_TIM_SetCounter(TIM14, 0); //set counter register value of timer 14 to 0
-		LL_TIM_EnableIT_UPDATE(TIM14); // Enable update interrupt
-		LL_TIM_EnableCounter(TIM14);
-
-		// Initialize the periodic timer
-		LL_TIM_DisableCounter(TIM15);
-		TIM15->ARR = sm->timeoutCounter;
-		LL_TIM_SetCounter(TIM15, 0); //set counter register value of timer 14 to 0
-		LL_TIM_EnableIT_UPDATE(TIM15); // Enable update interrupt
-		LL_TIM_EnableCounter(TIM15);
-
-        entryDone = true;
-    }
-
-    //==========================================================
-	// DO ACTIONS - Executed every time the state is processed
-	//==========================================================
-
-    // User interaction - reset the timeout
-	if (sm->rotaryBtnPressed || sm->encoderTurnedFlag || sm->voltageCurrentBtnPressed) {
-		// Reset the timeout timer whenever there's user interaction
-		LL_TIM_DisableCounter(TIM15);
-		LL_TIM_SetCounter(TIM15, 0); //set counter register value of timer 14 to 0
-		LL_TIM_EnableIT_UPDATE(TIM15); // Enable update interrupt
-		LL_TIM_EnableCounter(TIM15);
-	}
-
-	//Process voltageCurrentBtn press
-	if (sm->voltageCurrentBtnPressed) {
-		//Reset flag
-		sm->voltageCurrentBtnPressed = false;
-		//Process
-		if (sm->setValueMode == SET_VOLTAGE) {
-			sm->setValueMode = SET_CURRENT;
-		} else if (sm->setValueMode == SET_CURRENT) {
-			sm->setValueMode = SET_VOLTAGE;
-		}
-
-		//Get values into debug trace
-		char _str[60];
-		uint32_t voltageADC = BSP_PWR_VBUSGetVoltage(0);
-		uint32_t currentADC= BSP_PWR_VBUSGetCurrent(0);
-		uint32_t currentOCP_ADC= BSP_PWR_VBUSGetCurrentOCP(0);
-
-		// Use snprintf to limit the number of characters written
-		int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltageADC, currentADC, currentOCP_ADC);
-
-		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-	}
-
-    //Process encoder press
-    if (sm->rotaryBtnPressed) {
-		//Decrement encoderPress value if higher than 4
-		if (sm->encoder.selDigit > 1){
-			sm->encoder.selDigit--;
-		}
-		else {
-			sm->encoder.selDigit = 4;
-		}
-
-		//Choose addition value based on setValueMode
-		int val;
-		switch (sm->setValueMode){
-			case SET_VOLTAGE:
-				switch (sm->encoder.selDigit) {
-				case 1: val = 2; break;
-				case 2: val = 10; break;
-				case 3: val = 100; break;
-				case 4: val = 1000; break;
-				}
-			 break;
-			//case SET_CURRENT:
-			case SET_CURRENT:
-				switch (sm->encoder.selDigit) {
-				case 1: val = 5; break;
-				case 2: val = 10; break;
-				case 3: val = 100; break;
-				case 4: val = 1000; break;
-				}
-			 break;
-		}
-
-		sm->encoder.increment = val;
-    }
-
-
-    //Process encoder turn
-    if (sm->encoderTurnedFlag) {
-		// Handle encoder pulse event
-		int encoderVal = (TIM3 -> CNT) >> 2;
-
-		//
-		//Erase FLAG!!
-		//
-		sm->encoder.curValue= encoderVal;
-		sm->encoderTurnedFlag = false;
-
-		if (encoderVal != sm->encoder.prevValue){
-			//Get the turn direction and save it
-			sm->encoder.direction = (encoderVal < sm->encoder.prevValue) ? 1 : -1;
-
-			//Save TIM3 CNT value to ValPrev
-			sm->encoder.prevValue = encoderVal;
-
-			//Set encoder Turn event flag
-			sm->encoder.turnEvent = true;
-		}
-    }
-
-    // Handle digit blinking based on current set mode
-    if (systemEvents.periodicCheckEvent) {
-    	if (sm->setValueMode == SET_VOLTAGE) {
-			max7219_BlinkDigit2(SEGMENT_1, dhandle->voltageSet, sm->encoder.selDigit, 3, showDigit);
-			max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet,4);
-		} else { // SET_CURRENT
-			max7219_BlinkDigit2(SEGMENT_2, dhandle->currentSet, sm->encoder.selDigit, 4, showDigit);
-			max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet,3);
-		}
-    	//Toggle showDigit
-    	showDigit = !showDigit;
-    	//Erase periodic check flag
-    	systemEvents.periodicCheckEvent = false;
-    }
-
-    // On turnEvent update voltage/current
-	if (sm->encoder.turnEvent) {
-		//Reset event flag
-		sm->encoder.turnEvent = false;
-		//Update displays
-		switch (sm->setValueMode) {
-			case SET_VOLTAGE:
-				//updateVoltage(sm,dhandle);
-				int voltageTemp = dhandle->voltageSet;
-				voltageTemp += sm->encoder.direction * sm->encoder.increment;
-
-				//If required temp value is within limits, assign it to voltage else assign limits
-				if (voltageTemp > dhandle->voltageMax) {
-					dhandle->voltageSet = dhandle->voltageMax;
-
-				} else if (voltageTemp < dhandle->voltageMin) {
-					dhandle->voltageSet = dhandle->voltageMin;
-
-				} else {
-					dhandle->voltageSet = voltageTemp;
-				}
-
-				//Print selected voltage to disp, decimal at digit 3
-				max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
-				break;
-			case SET_CURRENT:
-				//updateCurrent(sm,dhandle);
-				//Get direction of encoder turning
-				int currentTemp = handle->currentSet;
-				currentTemp += sm->encoder.direction * sm->encoder.increment;
-
-				//If required temp value is within limits, assign it to voltage else assign limits
-				if (currentTemp > handle->currentMax) {
-					handle->currentSet = handle->currentMax;
-
-				} else if (currentTemp < handle->currentMin) {
-					handle->currentSet = handle->currentMin;
-
-				} else {
-					handle->currentSet = currentTemp;
-				}
-
-				//Update AWD limits
-				int isense_Vtrip_mV = (handle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
-				int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD tershold
-				Update_AWD_Thresholds(0, isense_rawADCtrip+100);
-
-				//Print selected voltage to disp, decimal at digit 3
-				max7219_PrintIspecial(SEGMENT_2, handle->currentSet, 4);
-				break;
-		}
-	}
-
-
-	//=================================================
-	// TRANSITION CHECKS - Check for state transitions
-	//=================================================
-    // Process events and transitions
-	if (sm->lockBtnHoldActive) {
-        sm->currentState = STATE_LOCK;
-        entryDone = false;
-    } else if (sm->ocpBtnPressed) {
-        sm->currentState = STATE_OCP_TOGGLE;
-        sm->stateEntryTime = HAL_GetTick();
-        sm->timeoutCounter = 500;  // 0.5 seconds timeout
-        entryDone = false;
-    } else if (systemEvents.stateTimeoutEvent) {
-	    //Reset timeout event flag
-    	systemEvents.stateTimeoutEvent = false;
-
-    	//Return to last state
-	    if (sm->lastState == STATE_IDLE) {
-	        sm->currentState = STATE_IDLE;
-	    } else if (sm->lastState == STATE_ACTIVE) {
-	        sm->currentState = STATE_ACTIVE;
-	    }
-	    entryDone = false;
-
-    }
-}
-
 //
-//Using the functions with arguments messes up code!!!!!! updateVoltage(StateMachine *sm, SINKData_HandleTypeDef *handle)
+// * demo_app.c
+// *
+// *  Created on: Jun 25, 2024
+// *      Author: Jan Mareš
 //
-
-// Helper function to update voltage
-void updateVoltage(StateMachine *sm, SINKData_HandleTypeDef *handle) {
-	//Get direction of encoder turning
-	int voltageTemp = handle->voltageSet;
-	voltageTemp += sm->encoder.direction * sm->encoder.increment;
-
-	//If required temp value is within limits, assign it to voltage else assign limits
-	if (voltageTemp > handle->voltageMax) {
-		handle->voltageSet = handle->voltageMax;
-
-	} else if (voltageTemp < handle->voltageMin) {
-		handle->voltageSet = handle->voltageMin;
-
-	} else {
-		handle->voltageSet = voltageTemp;
-	}
-
-	//Print selected voltage to disp, decimal at digit 3
-	max7219_PrintIspecial(SEGMENT_1, handle->voltageSet, 3);
-
-	//Print to debug
-	char _str[40];
-	sprintf(_str,"VBUS selected: %d mV", handle->voltageSet*10);
-	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-
-}
-
-// Helper function to update voltage and update AWD limit
-void updateCurrent(StateMachine *sm, SINKData_HandleTypeDef *handle) {
-	//Get direction of encoder turning
-	int currentTemp = handle->currentSet;
-	currentTemp += sm->encoder.direction * sm->encoder.increment;
-
-	//If required temp value is within limits, assign it to voltage else assign limits
-	if (currentTemp > handle->currentMax) {
-		handle->currentSet = handle->currentMax;
-
-	} else if (currentTemp < handle->currentMin) {
-		handle->currentSet = handle->currentMin;
-
-	} else {
-		handle->currentSet = currentTemp;
-	}
-
-	//Update AWD limits
-	int isense_Vtrip_mV = (handle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
-	int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD tershold
-	Update_AWD_Thresholds(0, isense_rawADCtrip+100);
-
-	//Print selected voltage to disp, decimal at digit 3
-	max7219_PrintIspecial(SEGMENT_2, handle->currentSet, 4);
-
-	//Print to debug
-	char _str[40];
-	sprintf(_str,"IBUS selected: %d mA", handle->currentSet);
-	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-}
-*/
+//
+//
+// Includes ------------------------------------------------------------------
+//#include "usbpd_core.h"
+//#include "usbpd_dpm_core.h"
+//#include "usbpd_dpm_conf.h"
+//#include "usbpd_dpm_user.h"
+//#include "usbpd_devices_conf.h"
+//#include "usbpd_user_services.h"
+//#include "usbpd_pwr_if.h"
+//#include "demo_app.h"
+//#include "string.h"
+//#include "stdio.h"
+//#include "cmsis_os.h"
+//#include "max7219.h"
+//#if defined(_GUI_INTERFACE)
+//#include "gui_api.h"
+//#include "app.h"
+//#endif  _GUI_INTERFACE
+//
+//
+//
+// * Define
+//
+////Initialize button event struct
+//SystemEvents systemEvents = {0};
+////Init stateMachine struct
+//StateMachine stateMachine = {
+//		.currentState = STATE_INIT,
+//		.encoder = {
+//				.selDigit = 2,
+//				.increment = 10    // Default increment
+//			}
+//};
+//USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetailss;
+//
+//
+// * Define Functions
+//
+//void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
+//    // Process events and transitions
+//    switch (sm->currentState) {
+//        case STATE_OFF:
+//            //handleOffState(sm, dhandle);
+//            break;
+//        case STATE_INIT:
+//            handleInitState(sm, dhandle);
+//            break;
+//        case STATE_IDLE:
+//            handleIdleState(sm, dhandle);
+//            break;
+//        case STATE_ACTIVE:
+//            handleActiveState(sm, dhandle);
+//            break;
+//        case STATE_LOCK:
+//            //handleLockState(sm, dhandle);
+//            break;
+//        case STATE_ERROR:
+//            //handleErrorState(sm, dhandle);
+//            break;
+//        case STATE_OCP_TOGGLE:
+//            //handleOCPToggleState(sm, dhandle);
+//            break;
+//        case STATE_SET_VALUES:
+//            handleSetValuesState(sm, dhandle);
+//            break;
+//        default:
+//            // Error handling
+//            sm->currentState = STATE_ERROR;
+//            //sm->errorCode = ERROR_INVALID_STATE;
+//            break;
+//    }
+//
+//}
+//
+//
+// * Define Callbacks and ISR
+//
+////BTN ISR to set event flags
+//void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
+//    if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
+//        systemEvents.voltageCurrentBtnEvent = true;
+//        EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
+//    } else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
+//        systemEvents.lockBtnEvent = true;
+//        EXTI->IMR1 &= ~(EXTI_IMR1_IM4);
+//        int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
+//		//Print to debug
+//		char _str[80];
+//		sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
+//		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+//		//USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
+//		USBPD_DPM_RequestSRCPDO(0, 6, 6000, 1000);
+//        //lockButtonPressTime = HAL_GetTick();
+//    } else if (GPIO_Pin == SW3_OFF_ON_Pin) {
+//        systemEvents.outputBtnEvent = true;
+//        EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
+//    } else if (GPIO_Pin == ENC_TOGGLE_UNITS_Pin) {
+//        systemEvents.rotaryBtnEvent = true;
+//        EXTI->IMR1 &= ~(EXTI_IMR1_IM8);
+//    }
+//
+//    // Start debounce timer
+//    TIM7->ARR = 200;
+//    LL_TIM_SetCounter(TIM7, 0);
+//    LL_TIM_EnableCounter(TIM7);
+//}
+//
+////TIM capture callback
+//void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
+//    if (htim->Instance == TIM3) {
+//    	systemEvents.encoderTurnEvent = true;
+//    }
+//}
+//
+//
+//void TIM14_ISR(void) {
+//	if (LL_TIM_IsActiveFlag_UPDATE(TIM14)) {
+//		// Clear the update interrupt flag
+//		LL_TIM_ClearFlag_UPDATE(TIM14);
+//
+//		if (stateMachine.currentState == STATE_ACTIVE || stateMachine.currentState == STATE_SET_VALUES) {
+//			// Handle periodic check for ACTIVE state
+//			systemEvents.periodicCheckEvent = true;
+//			//Reset CNT value
+//			LL_TIM_SetCounter(TIM14, 0);
+//
+//			//Start timer again
+//			LL_TIM_EnableCounter(TIM14);
+//		}
+//	}
+//}
+//
+//
+//void TIM15_ISR(void) {
+//	if (LL_TIM_IsActiveFlag_UPDATE(TIM15)) {
+//		// Clear the update interrupt flag
+//		LL_TIM_ClearFlag_UPDATE(TIM15);
+//
+//		// Handle periodic check for ACTIVE state
+//		systemEvents.stateTimeoutEvent = true;
+//		//Reset CNT value
+//		//LL_TIM_DisableCounter(TIM15);  // Stop the timer after timeout
+//
+//
+//		if (stateMachine.currentState == STATE_SET_VALUES) {
+//
+//			//Make a USBPD request
+//			int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetailss, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
+//			//Print to debug
+//
+//			char _str[70];
+//			sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
+//			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+//			USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
+//		}
+//
+//	}
+//}
+//
+//// Process button events in the main loop (Convert hardware events into logical events)
+//void processButtonEvents(StateMachine *sm, SystemEvents *events) {
+//    if (events->outputBtnEvent) {
+//    	//Reset btn event flag
+//        events->outputBtnEvent = false;
+//        sm->outputBtnPressed = true;
+//    } else if (events->voltageCurrentBtnEvent) {
+//    	events->voltageCurrentBtnEvent = false;
+//    	sm->voltageCurrentBtnPressed = true;
+//    } else if (events->lockBtnEvent) {
+//    	events->lockBtnEvent = false;
+//		sm->lockBtnPressed = true;
+//    } else if (events->rotaryBtnEvent) {
+//    	//Reset btn event flag
+//    	events->rotaryBtnEvent = false;
+//		sm->rotaryBtnPressed = true;
+//
+//    }
+//}
+//
+//// Main system event processor that calls specialized handlers
+//void processSystemEvents(StateMachine *sm, SystemEvents *events) {
+//    // Process different event types using specialized functions
+//    processButtonEvents(sm, events);
+//
+//    if (events->encoderTurnEvent) {
+//    	sm->encoderTurnedFlag = true;
+//    	events->encoderTurnEvent = false;
+//    }
+//    // Process AWDG events
+//    if (events->awdgEvent) {
+//        //events->awdgEvent = false;
+//        //sm->awdgTriggered = true;
+//    }
+//
+//    // Process timer events
+//
+//    if (events->timer1Event) {
+//        events->timer1Event = false;
+//        // Handle timer1 event
+//    }
+//
+//}
+//
+//
+// * Define state Handle functions
+//
+//
+//void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
+//    // Entry actions (if just entered this state)
+//    static bool entryDone = false;
+//
+//    //=======================================================
+//	// ENTRY ACTIONS - Executed once when entering the state
+//	//=======================================================
+//    if (!entryDone) {
+//        // Display set values
+//        max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
+//        max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
+//
+//        // Ensure output is off
+//        HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
+//
+//        // Check temperature and control fan (not shown in your code)
+//
+//        // Save state for return from temporary states
+//        strcpy(sm->lastStateStr, "IDLE");
+//        sm->lastState = STATE_IDLE;
+//
+//        entryDone = true;
+//    }
+//
+//    //=================================================
+//	// TRANSITION CHECKS - Check for state transitions
+//	//=================================================
+//
+//    // Process events and transitions
+//    if (sm->outputBtnPressed) {
+//        sm->currentState = STATE_ACTIVE;
+//        entryDone = false;
+//    } else if (sm->lockBtnHoldActive) {
+//        sm->currentState = STATE_LOCK;
+//        entryDone = false;
+//    } else if (sm->ocpBtnPressed) {
+//        sm->currentState = STATE_OCP_TOGGLE;
+//        sm->stateEntryTime = HAL_GetTick();
+//        sm->timeoutCounter = 500;  // 0.5 seconds timeout
+//        entryDone = false;
+//    } else if (sm->rotaryBtnPressed) {
+//        sm->currentState = STATE_SET_VALUES;
+//        sm->timeoutCounter = 4000;  // 4 seconds timeout
+//        sm->rotaryBtnPressed = false;
+//        entryDone = false;
+//    }
+//}
+//
+//void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
+//	//Declare static variables
+//	// Set check interval Make the timer persistent across function calls
+//	static uint32_t lastCheckTime = 0; // declared to 0 only once, then retains value
+//    static bool entryDone = false;
+//	const uint32_t CHECK_INTERVAL_MS = 500; // Check every 500ms
+//
+//	//=======================================================
+//	// ENTRY ACTIONS - Executed once when entering the state
+//	//=======================================================
+//
+//    if (!entryDone) {
+//        // Ensure output is off
+//        HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_SET);
+//
+//        // Save state for return from temporary states
+//        strcpy(sm->lastStateStr, "ACTIVE");
+//        sm->lastState = STATE_ACTIVE;
+//
+//        // Initialize the check timer
+//        TIM14->ARR = 500;
+//		LL_TIM_SetCounter(TIM14, 0); //set counter register value of timer 7 to 0
+//		LL_TIM_EnableIT_UPDATE(TIM14); // Enable update interrupt
+//		LL_TIM_EnableCounter(TIM14);
+//
+//        entryDone = true;
+//    }
+//
+//    //==========================================================
+//	// DO ACTIONS - Executed every time the state is processed
+//	//==========================================================
+//
+//    //Periodic check to display measured values
+//    if (systemEvents.periodicCheckEvent) {
+//        systemEvents.periodicCheckEvent = false;
+//		uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 to get centivolts since only 4 digit display..
+//		uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
+//
+//		dhandle ->currentMeas = cur;
+//		dhandle ->voltageMeas = vol;
+//		//Display output voltage
+//		max7219_PrintIspecial(SEGMENT_1, vol, 3);
+//		//Display output current
+//		max7219_PrintIspecial(SEGMENT_2, cur, 4);
+//    }
+//
+//    //=================================================
+//	// TRANSITION CHECKS - Check for state transitions
+//	//=================================================
+//    if (sm->outputBtnPressed) {
+//        sm->currentState = STATE_IDLE;
+//        entryDone = false;
+//    } else if (sm->lockBtnHoldActive) {
+//        sm->currentState = STATE_LOCK;
+//        entryDone = false;
+//    } else if (sm->ocpBtnPressed) {
+//        sm->currentState = STATE_OCP_TOGGLE;
+//        sm->stateEntryTime = HAL_GetTick();
+//        sm->timeoutCounter = 500;  // 0.5 seconds timeout
+//        entryDone = false;
+//    } else if (sm->rotaryBtnPressed) {
+//        sm->currentState = STATE_SET_VALUES;
+//        sm->timeoutCounter = 4000;  // 4 seconds timeout
+//        sm->rotaryBtnPressed = false;
+//        entryDone = false;
+//    }
+//
+//    if (sm->outputBtnPressed || sm->ocpBtnPressed) {
+//    	LL_TIM_DisableCounter(TIM14);
+//    }
+//}
+//
+//
+//void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
+//    // Entry actions (if just entered this state)
+//    static bool entryDone = false;
+//
+//    //=======================================================
+//	// ENTRY ACTIONS - Executed once when entering the state
+//	//=======================================================
+//    if (!entryDone) {
+//    	// Set the state entry time and timeout duration
+//		sm->stateEntryTime = HAL_GetTick();
+//		sm->timeoutCounter = 2000;  // 2 seconds timeout
+//
+//    	//Show SRC limits on displays
+//        //max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
+//        //max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
+//
+//
+//        // Save state for return from temporary states
+//        strcpy(sm->lastStateStr, "INIT");
+//        sm->lastState = STATE_INIT;
+//
+//        entryDone = true;
+//    }
+//
+//    //==========================================================
+//	// DO ACTIONS - Executed every time the state is processed
+//	//==========================================================
+//
+//    // Check if the timeout has elapsed
+//    if (HAL_GetTick() - sm->stateEntryTime > sm->timeoutCounter) {
+//		//After initialization transition to IDLE state
+//		sm->currentState = STATE_IDLE;
+//		entryDone = false;
+//    }
+//
+//}
+//
+//void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
+//    // Entry actions (if just entered this state)
+//    static bool entryDone = false;
+//    static bool showDigit = false;  // Start with digit shown
+//
+//    //=======================================================
+//   	// ENTRY ACTIONS - Executed once when entering the state
+//   	//=======================================================
+//
+//    if (!entryDone) {
+//
+//    	// Display set values
+//        max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
+//        max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
+//
+//        // Initialize the periodic timer
+//		TIM14->ARR = 500;
+//		LL_TIM_SetCounter(TIM14, 0); //set counter register value of timer 14 to 0
+//		LL_TIM_EnableIT_UPDATE(TIM14); // Enable update interrupt
+//		LL_TIM_EnableCounter(TIM14);
+//
+//		// Initialize the periodic timer
+//		LL_TIM_DisableCounter(TIM15);
+//		TIM15->ARR = sm->timeoutCounter;
+//		LL_TIM_SetCounter(TIM15, 0); //set counter register value of timer 14 to 0
+//		LL_TIM_EnableIT_UPDATE(TIM15); // Enable update interrupt
+//		LL_TIM_EnableCounter(TIM15);
+//
+//        entryDone = true;
+//    }
+//
+//    //==========================================================
+//	// DO ACTIONS - Executed every time the state is processed
+//	//==========================================================
+//
+//    // User interaction - reset the timeout
+//	if (sm->rotaryBtnPressed || sm->encoderTurnedFlag || sm->voltageCurrentBtnPressed) {
+//		// Reset the timeout timer whenever there's user interaction
+//		LL_TIM_DisableCounter(TIM15);
+//		LL_TIM_SetCounter(TIM15, 0); //set counter register value of timer 14 to 0
+//		LL_TIM_EnableIT_UPDATE(TIM15); // Enable update interrupt
+//		LL_TIM_EnableCounter(TIM15);
+//	}
+//
+//	//Process voltageCurrentBtn press
+//	if (sm->voltageCurrentBtnPressed) {
+//		//Reset flag
+//		sm->voltageCurrentBtnPressed = false;
+//		//Process
+//		if (sm->setValueMode == SET_VOLTAGE) {
+//			sm->setValueMode = SET_CURRENT;
+//		} else if (sm->setValueMode == SET_CURRENT) {
+//			sm->setValueMode = SET_VOLTAGE;
+//		}
+//
+//		//Get values into debug trace
+//		char _str[60];
+//		uint32_t voltageADC = BSP_PWR_VBUSGetVoltage(0);
+//		uint32_t currentADC= BSP_PWR_VBUSGetCurrent(0);
+//		uint32_t currentOCP_ADC= BSP_PWR_VBUSGetCurrentOCP(0);
+//
+//		// Use snprintf to limit the number of characters written
+//		int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltageADC, currentADC, currentOCP_ADC);
+//
+//		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+//	}
+//
+//    //Process encoder press
+//    if (sm->rotaryBtnPressed) {
+//		//Decrement encoderPress value if higher than 4
+//		if (sm->encoder.selDigit > 1){
+//			sm->encoder.selDigit--;
+//		}
+//		else {
+//			sm->encoder.selDigit = 4;
+//		}
+//
+//		//Choose addition value based on setValueMode
+//		int val;
+//		switch (sm->setValueMode){
+//			case SET_VOLTAGE:
+//				switch (sm->encoder.selDigit) {
+//				case 1: val = 2; break;
+//				case 2: val = 10; break;
+//				case 3: val = 100; break;
+//				case 4: val = 1000; break;
+//				}
+//			 break;
+//			//case SET_CURRENT:
+//			case SET_CURRENT:
+//				switch (sm->encoder.selDigit) {
+//				case 1: val = 5; break;
+//				case 2: val = 10; break;
+//				case 3: val = 100; break;
+//				case 4: val = 1000; break;
+//				}
+//			 break;
+//		}
+//
+//		sm->encoder.increment = val;
+//    }
+//
+//
+//    //Process encoder turn
+//    if (sm->encoderTurnedFlag) {
+//		// Handle encoder pulse event
+//		int encoderVal = (TIM3 -> CNT) >> 2;
+//
+//		//
+//		//Erase FLAG!!
+//		//
+//		sm->encoder.curValue= encoderVal;
+//		sm->encoderTurnedFlag = false;
+//
+//		if (encoderVal != sm->encoder.prevValue){
+//			//Get the turn direction and save it
+//			sm->encoder.direction = (encoderVal < sm->encoder.prevValue) ? 1 : -1;
+//
+//			//Save TIM3 CNT value to ValPrev
+//			sm->encoder.prevValue = encoderVal;
+//
+//			//Set encoder Turn event flag
+//			sm->encoder.turnEvent = true;
+//		}
+//    }
+//
+//    // Handle digit blinking based on current set mode
+//    if (systemEvents.periodicCheckEvent) {
+//    	if (sm->setValueMode == SET_VOLTAGE) {
+//			max7219_BlinkDigit2(SEGMENT_1, dhandle->voltageSet, sm->encoder.selDigit, 3, showDigit);
+//			max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet,4);
+//		} else { // SET_CURRENT
+//			max7219_BlinkDigit2(SEGMENT_2, dhandle->currentSet, sm->encoder.selDigit, 4, showDigit);
+//			max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet,3);
+//		}
+//    	//Toggle showDigit
+//    	showDigit = !showDigit;
+//    	//Erase periodic check flag
+//    	systemEvents.periodicCheckEvent = false;
+//    }
+//
+//    // On turnEvent update voltage/current
+//	if (sm->encoder.turnEvent) {
+//		//Reset event flag
+//		sm->encoder.turnEvent = false;
+//		//Update displays
+//		switch (sm->setValueMode) {
+//			case SET_VOLTAGE:
+//				//updateVoltage(sm,dhandle);
+//				int voltageTemp = dhandle->voltageSet;
+//				voltageTemp += sm->encoder.direction * sm->encoder.increment;
+//
+//				//If required temp value is within limits, assign it to voltage else assign limits
+//				if (voltageTemp > dhandle->voltageMax) {
+//					dhandle->voltageSet = dhandle->voltageMax;
+//
+//				} else if (voltageTemp < dhandle->voltageMin) {
+//					dhandle->voltageSet = dhandle->voltageMin;
+//
+//				} else {
+//					dhandle->voltageSet = voltageTemp;
+//				}
+//
+//				//Print selected voltage to disp, decimal at digit 3
+//				max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
+//				break;
+//			case SET_CURRENT:
+//				//updateCurrent(sm,dhandle);
+//				//Get direction of encoder turning
+//				int currentTemp = handle->currentSet;
+//				currentTemp += sm->encoder.direction * sm->encoder.increment;
+//
+//				//If required temp value is within limits, assign it to voltage else assign limits
+//				if (currentTemp > handle->currentMax) {
+//					handle->currentSet = handle->currentMax;
+//
+//				} else if (currentTemp < handle->currentMin) {
+//					handle->currentSet = handle->currentMin;
+//
+//				} else {
+//					handle->currentSet = currentTemp;
+//				}
+//
+//				//Update AWD limits
+//				int isense_Vtrip_mV = (handle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
+//				int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD tershold
+//				Update_AWD_Thresholds(0, isense_rawADCtrip+100);
+//
+//				//Print selected voltage to disp, decimal at digit 3
+//				max7219_PrintIspecial(SEGMENT_2, handle->currentSet, 4);
+//				break;
+//		}
+//	}
+//
+//
+//	//=================================================
+//	// TRANSITION CHECKS - Check for state transitions
+//	//=================================================
+//    // Process events and transitions
+//	if (sm->lockBtnHoldActive) {
+//        sm->currentState = STATE_LOCK;
+//        entryDone = false;
+//    } else if (sm->ocpBtnPressed) {
+//        sm->currentState = STATE_OCP_TOGGLE;
+//        sm->stateEntryTime = HAL_GetTick();
+//        sm->timeoutCounter = 500;  // 0.5 seconds timeout
+//        entryDone = false;
+//    } else if (systemEvents.stateTimeoutEvent) {
+//	    //Reset timeout event flag
+//    	systemEvents.stateTimeoutEvent = false;
+//
+//    	//Return to last state
+//	    if (sm->lastState == STATE_IDLE) {
+//	        sm->currentState = STATE_IDLE;
+//	    } else if (sm->lastState == STATE_ACTIVE) {
+//	        sm->currentState = STATE_ACTIVE;
+//	    }
+//	    entryDone = false;
+//
+//    }
+//}
+//
+//
+////
+////Using the functions with arguments messes up code!!!!!! updateVoltage(StateMachine *sm, SINKData_HandleTypeDef *handle)
+////
+//
+//// Helper function to update voltage
+//void updateVoltage(StateMachine *sm, SINKData_HandleTypeDef *handle) {
+//	//Get direction of encoder turning
+//	int voltageTemp = handle->voltageSet;
+//	voltageTemp += sm->encoder.direction * sm->encoder.increment;
+//
+//	//If required temp value is within limits, assign it to voltage else assign limits
+//	if (voltageTemp > handle->voltageMax) {
+//		handle->voltageSet = handle->voltageMax;
+//
+//	} else if (voltageTemp < handle->voltageMin) {
+//		handle->voltageSet = handle->voltageMin;
+//
+//	} else {
+//		handle->voltageSet = voltageTemp;
+//	}
+//
+//	//Print selected voltage to disp, decimal at digit 3
+//	max7219_PrintIspecial(SEGMENT_1, handle->voltageSet, 3);
+//
+//	//Print to debug
+//	char _str[40];
+//	sprintf(_str,"VBUS selected: %d mV", handle->voltageSet*10);
+//	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+//
+//}
+//
+//// Helper function to update voltage and update AWD limit
+//void updateCurrent(StateMachine *sm, SINKData_HandleTypeDef *handle) {
+//	//Get direction of encoder turning
+//	int currentTemp = handle->currentSet;
+//	currentTemp += sm->encoder.direction * sm->encoder.increment;
+//
+//	//If required temp value is within limits, assign it to voltage else assign limits
+//	if (currentTemp > handle->currentMax) {
+//		handle->currentSet = handle->currentMax;
+//
+//	} else if (currentTemp < handle->currentMin) {
+//		handle->currentSet = handle->currentMin;
+//
+//	} else {
+//		handle->currentSet = currentTemp;
+//	}
+//
+//	//Update AWD limits
+//	int isense_Vtrip_mV = (handle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
+//	int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD tershold
+//	Update_AWD_Thresholds(0, isense_rawADCtrip+100);
+//
+//	//Print selected voltage to disp, decimal at digit 3
+//	max7219_PrintIspecial(SEGMENT_2, handle->currentSet, 4);
+//
+//	//Print to debug
+//	char _str[40];
+//	sprintf(_str,"IBUS selected: %d mA", handle->currentSet);
+//	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+//}

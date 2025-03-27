@@ -192,7 +192,7 @@ void handleOCPToggleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
 void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
 
 /*Define procces functions and Statemachine*/
-void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void runStateMachine(void); //StateMachine *sm, SINKData_HandleTypeDef *dhandle
 void processButtonEvents(StateMachine *sm, SystemEvents *events);
 void processSystemEvents(StateMachine *sm, SystemEvents *events);
 

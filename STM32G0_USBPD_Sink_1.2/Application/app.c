@@ -11,6 +11,7 @@
 #include "max7219.h"
 #include "usbpd_def.h"
 #include "usbpd_dpm_user.h"
+#include "usbpd_pwr_user.h"
 #include "usbpd_user_services.h"
 #include "string.h"
 #include "stdio.h"
@@ -23,7 +24,8 @@
 #include "demo_app.h"
 
 
-
+int32_t BSP_USBPD_PWR_VBUSGetCurrentOCP(uint32_t Instance, int32_t *pCurrentOCP);
+int32_t BSP_PWR_VBUSGetCurrentOCP(uint32_t PortId);
 
 //Variables declaration
 int encoderVal; //TIM2 CNT register reading
@@ -98,6 +100,27 @@ SINKData_HandleTypeDef SNK_data = {
 SINKData_HandleTypeDef *dhandle = &SNK_data;
 StateMachine *sm = &stateMachine;
 
+
+void runStateMachine(void) {
+    // Process events and transitions
+    switch (sm->currentState) {
+        case STATE_OFF:
+            //handleOffState(sm, dhandle);
+            break;
+        case STATE_INIT:
+            handleInitState(sm, dhandle);
+            break;
+        case STATE_IDLE:
+            handleIdleState(sm, dhandle);
+            break;
+        default:
+            // Error handling
+            sm->currentState = STATE_ERROR;
+            //sm->errorCode = ERROR_INVALID_STATE;
+            break;
+    }
+
+}
 
 // Callback when ADC conversion is complete
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
@@ -189,7 +212,8 @@ void app_loop(void) {
 	processSystemEvents(&stateMachine, &systemEvents);
 
 	// Run the state machine
-	runStateMachine(&stateMachine, &SNK_data);
+	//runStateMachine(&stateMachine, &SNK_data);
+	runStateMachine();
 
 	// Reset button states after processing
 	stateMachine.outputBtnPressed = false;
@@ -275,7 +299,7 @@ void TIM15_ISR(void) {
 			//Print to debug
 
 			char _str[70];
-			sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
+			sprintf(_str,"APDO request: indexSRCPDO= %int, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
 			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 			USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
 		}
@@ -333,7 +357,7 @@ void processSystemEvents(StateMachine *sm, SystemEvents *events) {
 /*
  * Define runStateMachine
  */
-void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
+/*void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     // Process events and transitions
     switch (sm->currentState) {
         case STATE_OFF:
@@ -367,7 +391,7 @@ void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
             break;
     }
 
-}
+}*/
 
 /*
  * Define state Handle functions
@@ -460,9 +484,9 @@ void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 	//Declare static variables
 	// Set check interval Make the timer persistent across function calls
-	static uint32_t lastCheckTime = 0; // declared to 0 only once, then retains value
+	//static uint32_t lastCheckTime = 0; // declared to 0 only once, then retains value
     static bool entryDone = false;
-	const uint32_t CHECK_INTERVAL_MS = 500; // Check every 500ms
+	//const uint32_t CHECK_INTERVAL_MS = 500; // Check every 500ms
 
 	//=======================================================
 	// ENTRY ACTIONS - Executed once when entering the state
@@ -771,7 +795,7 @@ void updateCurrentOCP(SINKData_HandleTypeDef *handle) {
 
 	//Print to debug
 	char _str[40];
-	sprintf(_str,"IOCP selected: %d mA", handle->currentOCPSet);
+	sprintf(_str,"IOCP selected: %lu mA", handle->currentOCPSet);
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 
 }
@@ -949,7 +973,7 @@ void sw3_on_off_isr(void){
 	int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
 	//Print to debug
 	char _str[70];
-	sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
+	sprintf(_str,"APDO request: indexSRCPDO= %int, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 	USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
 	//HAL_Delay(2);
