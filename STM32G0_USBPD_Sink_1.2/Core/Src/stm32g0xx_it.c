@@ -156,6 +156,7 @@ void EXTI4_15_IRQHandler(void)
   }
   if (__HAL_GPIO_EXTI_GET_IT(SW2_DEBUG_BTN_Pin) != RESET){
 	  //sw2_lock_isr();
+	  sw3_on_off_isr();
   }
   if (__HAL_GPIO_EXTI_GET_IT(OCP_ALERT_Pin) != RESET){
 	  //ocp_alert_isr();

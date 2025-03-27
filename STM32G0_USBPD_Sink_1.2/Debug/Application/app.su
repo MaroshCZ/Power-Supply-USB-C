@@ -12,7 +12,7 @@
 ../Application/app.c:430:6:updateCurrentOCP	88	static
 ../Application/app.c:570:6:tim7_btn_isr	8	static
 ../Application/app.c:584:6:tim14_isr	8	static
-../Application/app.c:599:6:sw3_on_off_isr	8	static
+../Application/app.c:599:6:sw3_on_off_isr	104	static
 ../Application/app.c:643:6:sw1_toggle_i_v_isr	96	static
 ../Application/app.c:684:6:sw2_lock_isr	88	static
 ../Application/app.c:736:6:ocp_alert_isr	8	static
