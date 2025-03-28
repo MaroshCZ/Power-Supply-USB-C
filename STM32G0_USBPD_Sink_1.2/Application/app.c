@@ -144,17 +144,28 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 
 // Callback when ADWG2 (CH7 ISENSE) goes out of range
 void HAL_ADCEx_LevelOutOfWindow2Callback(ADC_HandleTypeDef *hadc) {
-	outputState = OUTPUT_OFF_STATE;
+	systemEvents.awdgEvent = true;
 	//Disable output
 	HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
-
-	//Print the voltage and current to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
-	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
-	max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
-
 }
 
+/**
+ * Update ADC CH3 AWD Treshold
+ * Possibility to update parameters on the fly (read more in HAL_ADC_AnalogWDGConfig declaration)
+ * Full config and AWD init in main.c
+ */
+void Update_AWD_Thresholds(uint32_t low, uint32_t high) {
+	// Just update the thresholds for an already configured AWD
+	ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
+	AnalogWDGConfig.WatchdogNumber = ADC_ANALOGWATCHDOG_2; // Specify which AWD you're updating
+	AnalogWDGConfig.HighThreshold = high;
+	AnalogWDGConfig.LowThreshold = low;
 
+	if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
+	{
+	    Error_Handler();
+	}
+}
 /*
  * Initialization function
  */
@@ -317,6 +328,20 @@ void processButtonEvents(void) {
     } else if (events->lockBtnEvent) {
     	events->lockBtnEvent = false;
 		sm->lockBtnPressed = true;
+
+		//Toggle OCP mode
+		switch(sm->OCPMode) {
+			case OCP_DISABLED:
+				// Enable the specific AWDG interrupt
+				__HAL_ADC_ENABLE_IT(&hadc1, ADC_IT_AWD2);
+				sm->OCPMode = OCP_ENABLED;
+				break;
+			case OCP_ENABLED:
+				// Enable the specific AWDG interrupt
+				__HAL_ADC_DISABLE_IT(&hadc1, ADC_IT_AWD2);
+				sm->OCPMode = OCP_DISABLED;
+				break;
+		}
     } else if (events->rotaryBtnEvent) {
     	//Reset btn event flag
     	events->rotaryBtnEvent = false;
@@ -338,23 +363,15 @@ void processSystemEvents(void) {
 		sm->stateTimeoutFlag= true;
 		events->stateTimeoutEvent = false;
 	}
-	 if (events->periodicCheckEvent) {
+	if (events->periodicCheckEvent) {
 		sm->periodicCheckFlag= true;
 		events->periodicCheckEvent = false;
 	}
     // Process AWDG events
     if (events->awdgEvent) {
-        //events->awdgEvent = false;
-        //sm->awdgTriggered = true;
+        events->awdgEvent = false;
+        sm->awdgTriggeredFlag = true;
     }
-
-    // Process timer events
-    /*
-    if (events->timer1Event) {
-        events->timer1Event = false;
-        // Handle timer1 event
-    }*/
-
 }
 
 
@@ -500,10 +517,8 @@ void handleActiveState(void) {
     } else if (sm->lockBtnHoldActive) {
         sm->currentState = STATE_LOCK;
         entryDone = false;
-    } else if (sm->ocpBtnPressed) {
-        sm->currentState = STATE_OCP_TOGGLE;
-        sm->stateEntryTime = HAL_GetTick();
-        sm->timeoutCounter = 500;  // 0.5 seconds timeout
+    } else if (sm->awdgTriggeredFlag) {
+        sm->currentState = STATE_IDLE;
         entryDone = false;
     } else if (sm->rotaryBtnPressed) {
         sm->currentState = STATE_SET_VALUES;
@@ -664,13 +679,13 @@ void handleSetValuesState(void) {
 		switch (sm->setValueMode) {
 			case SET_VOLTAGE:
 				updateVoltage();
-				//Print to debug
+				//Print to debug !!calling it from inside updateVoltage() results in hardFault error!!
 				sprintf(_str,"VBUS selected: %lu mV", dhandle->voltageSet * 10);
 				USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 				break;
 			case SET_CURRENT:
 				updateCurrent();
-				//Print to debug
+				//Print to debug !!calling it from inside updateVoltage() results in hardFault error!!
 				sprintf(_str,"IBUS selected: %lu mA", dhandle->currentSet);
 				USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 				break;
@@ -711,23 +726,7 @@ void handleSetValuesState(void) {
     }
 }
 
-/**
- * Update ADC CH3 AWD Treshold
- * Possibility to update parameters on the fly (read more in HAL_ADC_AnalogWDGConfig declaration)
- * Full config and AWD init in main.c
- */
-void Update_AWD_Thresholds(uint32_t low, uint32_t high) {
-	// Just update the thresholds for an already configured AWD
-	ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
-	AnalogWDGConfig.WatchdogNumber = ADC_ANALOGWATCHDOG_2; // Specify which AWD you're updating
-	AnalogWDGConfig.HighThreshold = high;
-	AnalogWDGConfig.LowThreshold = low;
 
-	if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
-	{
-	    Error_Handler();
-	}
-}
 
 
 /*
@@ -987,8 +986,6 @@ void updateVoltage(void) {
 void updateCurrent(void) {
 	//Get direction of encoder turning
 	int currentTemp = dhandle->currentSet;
-	int dir = sm->encoder.direction;
-	int increment = sm->encoder.increment;
 	currentTemp += sm->encoder.direction * sm->encoder.increment;
 
 	//If required temp value is within limits, assign it to voltage else assign limits
@@ -1004,8 +1001,8 @@ void updateCurrent(void) {
 
 	//Update AWD limits
 	int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
-	int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD tershold
-	Update_AWD_Thresholds(0, isense_rawADCtrip+100);
+	int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD treshold
+	Update_AWD_Thresholds(0, isense_rawADCtrip);
 
 	//Print selected voltage to disp, decimal at digit 3
 	max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);

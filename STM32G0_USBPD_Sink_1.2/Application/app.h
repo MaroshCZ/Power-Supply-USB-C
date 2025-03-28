@@ -117,16 +117,22 @@ typedef struct {
     bool lockBtnHoldActive;
     bool ocpBtnPressed;
     bool voltageCurrentBtnPressed;
-    //bool showBtnPressed;
     bool rotaryBtnPressed;
 
     // Other flags
     bool encoderTurnedFlag;
     bool stateTimeoutFlag;
     bool periodicCheckFlag;
+    bool awdgTriggeredFlag;
 
     // Encoder data
     Encoder_TypeDef encoder;
+
+    // Display states
+	enum {
+		OCP_DISABLED,
+		OCP_ENABLED
+	} OCPMode;
 
     // Display states
     enum {
@@ -195,8 +201,6 @@ void processButtonEvents(void);
 void processSystemEvents(void);
 
 /*Define additional fcns and ISR*/
-void updateVoltage(void);
-void updateCurrent(void);
 void updateCurrentOCP(void);
 void Update_AWD_Thresholds(uint32_t low, uint32_t high);
 void TIM14_ISR(void);
