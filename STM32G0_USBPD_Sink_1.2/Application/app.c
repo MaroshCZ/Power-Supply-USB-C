@@ -32,7 +32,6 @@ int encoderVal; //TIM2 CNT register reading
 int encoderValPrev;
 int dac_value = 500;
 
-
 int ocp_reset_needed = 0;
 
 uint32_t srcPdoIndex; //variable that holds Pdo index from FindVoltageIndex
@@ -102,23 +101,38 @@ StateMachine *sm = &stateMachine;
 
 
 void runStateMachine(void) {
-    // Process events and transitions
-    switch (sm->currentState) {
-        case STATE_OFF:
-            //handleOffState(sm, dhandle);
-            break;
-        case STATE_INIT:
-            handleInitState(sm, dhandle);
-            break;
-        case STATE_IDLE:
-            handleIdleState(sm, dhandle);
-            break;
-        default:
-            // Error handling
-            sm->currentState = STATE_ERROR;
-            //sm->errorCode = ERROR_INVALID_STATE;
-            break;
-    }
+	// Process events and transitions
+	switch (sm->currentState) {
+		case STATE_OFF:
+			//handleOffState(sm, dhandle);
+			break;
+		case STATE_INIT:
+			handleInitState(sm, dhandle);
+			break;
+		case STATE_IDLE:
+			handleIdleState(sm, dhandle);
+			break;
+		case STATE_ACTIVE:
+			handleActiveState(sm, dhandle);
+			break;
+		case STATE_LOCK:
+			//handleLockState(sm, dhandle);
+			break;
+		case STATE_ERROR:
+			//handleErrorState(sm, dhandle);
+			break;
+		case STATE_OCP_TOGGLE:
+			//handleOCPToggleState(sm, dhandle);
+			break;
+		case STATE_SET_VALUES:
+			handleSetValuesState(sm, dhandle);
+			break;
+		default:
+			// Error handling
+			sm->currentState = STATE_ERROR;
+			//sm->errorCode = ERROR_INVALID_STATE;
+			break;
+	}
 
 }
 
@@ -231,18 +245,11 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
     if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
         systemEvents.voltageCurrentBtnEvent = true;
         EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
-    } /*else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
+    } else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
         systemEvents.lockBtnEvent = true;
         EXTI->IMR1 &= ~(EXTI_IMR1_IM4);
-        int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
-		//Print to debug
-		char _str[80];
-		sprintf(_str,"APDO request: indexSRCPDO= %lu, VBUS= %lu mV, Ibus= %d mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
-		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-		//USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
-		USBPD_DPM_RequestSRCPDO(0, 6, 6000, 1000);
         //lockButtonPressTime = HAL_GetTick();
-    } */else if (GPIO_Pin == SW3_OFF_ON_Pin) {
+    } else if (GPIO_Pin == SW3_OFF_ON_Pin) {
         systemEvents.outputBtnEvent = true;
         EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
     } else if (GPIO_Pin == ENC_TOGGLE_UNITS_Pin) {
@@ -354,44 +361,6 @@ void processSystemEvents(StateMachine *sm, SystemEvents *events) {
 
 }
 
-/*
- * Define runStateMachine
- */
-/*void runStateMachine(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
-    // Process events and transitions
-    switch (sm->currentState) {
-        case STATE_OFF:
-            //handleOffState(sm, dhandle);
-            break;
-        case STATE_INIT:
-            handleInitState(sm, dhandle);
-            break;
-        case STATE_IDLE:
-            handleIdleState(sm, dhandle);
-            break;
-        case STATE_ACTIVE:
-            handleActiveState(sm, dhandle);
-            break;
-        case STATE_LOCK:
-            //handleLockState(sm, dhandle);
-            break;
-        case STATE_ERROR:
-            //handleErrorState(sm, dhandle);
-            break;
-        case STATE_OCP_TOGGLE:
-            //handleOCPToggleState(sm, dhandle);
-            break;
-        case STATE_SET_VALUES:
-            handleSetValuesState(sm, dhandle);
-            break;
-        default:
-            // Error handling
-            sm->currentState = STATE_ERROR;
-            //sm->errorCode = ERROR_INVALID_STATE;
-            break;
-    }
-
-}*/
 
 /*
  * Define state Handle functions
@@ -701,26 +670,10 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 		//Update displays
 		switch (sm->setValueMode) {
 			case SET_VOLTAGE:
-				//updateVoltage(sm,dhandle);
-				int voltageTemp = dhandle->voltageSet;
-				voltageTemp += sm->encoder.direction * sm->encoder.increment;
-
-				//If required temp value is within limits, assign it to voltage else assign limits
-				if (voltageTemp > dhandle->voltageMax) {
-					dhandle->voltageSet = dhandle->voltageMax;
-
-				} else if (voltageTemp < dhandle->voltageMin) {
-					dhandle->voltageSet = dhandle->voltageMin;
-
-				} else {
-					dhandle->voltageSet = voltageTemp;
-				}
-
-				//Print selected voltage to disp, decimal at digit 3
-				max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
+				updateVoltage();
 				break;
 			case SET_CURRENT:
-				//updateCurrent(sm,dhandle);
+				updateCurrent();
 				break;
 		}
 	}
@@ -771,143 +724,6 @@ void Update_AWD_Thresholds(uint32_t low, uint32_t high) {
 	}
 }
 
-// Helper function to update voltage
-void updateCurrentOCP(SINKData_HandleTypeDef *handle) {
-	//Get direction of encoder turning
-	int currentTemp = handle->currentOCPSet;
-	currentTemp += handle->encoder.direction * handle->encoder.increment;
-
-	//If required temp value is within limits, assign it to voltage
-	if ( (handle->currentMin <= currentTemp) && (currentTemp <= (handle->currentMax + 300)) ) {
-		handle->currentOCPSet = currentTemp;
-	} else {
-		//currentOCPTemp = currentOCP;
-	}
-
-	int V_TRIP = (handle->currentOCPSet * R_OCP_MOHMS * G_OCP)/1000; // mV (mA * mOhms * Gain)
-	//Convert DAC_OUT voltage to 12B resolution
-	int dac_value = (V_TRIP *4095) / VDDA_APPLI;//__LL_ADC_DIGITAL_SCALE(LL_ADC_RESOLUTION_12B);
-	//Write output with DAC..
-	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
-
-	//Print selected voltage to disp, decimal at digit 3
-	max7219_PrintIspecial(SEGMENT_2, handle->currentOCPSet, 4);
-
-	//Print to debug
-	char _str[40];
-	sprintf(_str,"IOCP selected: %lu mA", handle->currentOCPSet);
-	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-
-}
-
-/**
- * TIM2 encoder turning interrupt service routine
- */
-/*
-void encoder_turn_isr(void) {
-	//Get the TIM3 (encoder) value from CNT register
-	encoderVal = (TIM3 -> CNT) >> 2;
-
-	dhandle->encoder.curValue= encoderVal;
-
-	if (encoderVal != dhandle->encoder.prevValue){
-
-		dhandle->encoder.direction = (encoderVal < dhandle->encoder.prevValue) ? 1 : -1;
-
-		switch(currentState)
-		{
-		case ADJUSTMENT_VOLTAGE:
-		{
-			//updateVoltage(dhandle);
-		}
-		break;
-
-		case ADJUSTMENT_CURRENT:
-		{
-			//updateCurrent(dhandle);
-
-		}
-		break;
-
-		case ADJUSTMENT_CURRENT_OCP:
-		{
-			//updateCurrentOCP(dhandle);
-		}
-		break;
-
-		}
-
-		//Save TIM2 CNT value to ValPrev
-		dhandle->encoder.prevValue = encoderVal;
-	}
-}
-*/
-
-/**
- * Button interrupt service routine
- */
-/*
-void enc_toggle_units_isr(void){
-
-	//const char response[] = "POWER is ON\r\n";
-	       // LPUART_Transmit(LPUART2, (const uint8_t*)response, sizeof(response) - 1);
-
-	//Mask unwanted button interrupts caused by debouncing on exti line 3 (PD8)
-	EXTI->IMR1 &= ~(EXTI_IMR1_IM8);
-
-	//Set debouncing time in ms
-	TIM7->ARR = 200;
-
-	//Zero TIM7 counter and start counting
-	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
-	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
-
-	//Decrement encoderPress value if higher than 4
-	if (dhandle->encoder.selDigit > 1){
-		dhandle->encoder.selDigit--;
-	}
-	else {
-		dhandle->encoder.selDigit = 4;
-	}
-
-	//Choose addition value based on encoderPress val and current ADJUSTMENT_STATE (voltage/current)
-	int val;
-	switch (currentState){
-		case ADJUSTMENT_VOLTAGE:
-			switch (dhandle->encoder.selDigit) {
-			case 1: val = 2; break;
-			case 2: val = 10; break;
-			case 3: val = 100; break;
-			case 4: val = 1000; break;
-			}
-		 break;
-		case ADJUSTMENT_CURRENT_OCP:
-		case ADJUSTMENT_CURRENT:
-			switch (dhandle->encoder.selDigit) {
-			case 1: val = 5; break;
-			case 2: val = 10; break;
-			case 3: val = 100; break;
-			case 4: val = 1000; break;
-			}
-		 break;
-	}
-
-	dhandle->encoder.increment = val;
-
-	char _str[60];
-	uint32_t voltageADC = BSP_PWR_VBUSGetVoltage(0);
-	uint32_t currentADC= BSP_PWR_VBUSGetCurrent(0);
-	uint32_t currentOCP_ADC= BSP_PWR_VBUSGetCurrentOCP(0);
-
-	// Use snprintf to limit the number of characters written
-	int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltageADC, currentADC, currentOCP_ADC);
-
-	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-
-	//Erase btn (PC3) interrupt flag
-    __HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_3);
-
-}*/
 
 /*
  * Timer7 interrupt routine for button debouncing
@@ -937,92 +753,6 @@ void tim14_isr(void){
 	LL_TIM_ClearFlag_UPDATE(TIM14); //Clear update flag on TIMER7
 }
 
-
-/*
- * Request button interrupt routine, request APDO with user voltage and current
- */
-void sw3_on_off_isr(void){
-	//HAL_GPIO_TogglePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin);
-	//Read SRC capability
-	//USBPD_StatusTypeDef status = USBPD_ERROR;
-	//status = USBPD_DPM_RequestGetSourceCapability(0);
-
-	//Mask unwanted button interrupts caused by debouncing on exti line 1 (PB1)
-	EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
-
-	//HAL_GPIO_WritePin(OCP_ALERT_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_RESET);
-
-	//Zero TIM7 counter and start counting
-	LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
-	LL_TIM_EnableCounter(TIM7); //start counting of timer 7
-
-	/*
-	typedef struct
-	{
-	  uint32_t RequestedVoltageInmVunits;               //< Sink request operating voltage in mV units
-	  uint32_t MaxOperatingCurrentInmAunits;            //< Sink request Max operating current in mA units
-	  uint32_t OperatingCurrentInmAunits;               //< Sink request operating current in mA units
-	  uint32_t MaxOperatingPowerInmWunits;              //< Sink request Max operating power in mW units
-	  uint32_t OperatingPowerInmWunits;                 //< Sink request operating power in mW units
-	} USBPD_DPM_SNKPowerRequestDetailsTypeDef;
-	#endif */
-
-	//sourcecapa_limits();
-
-
-	int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
-	//Print to debug
-	char _str[70];
-	sprintf(_str,"APDO request: indexSRCPDO= %int, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
-	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-	USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
-	//HAL_Delay(2);
-	//HAL_GPIO_WritePin(OCP_ALERT_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_SET);
-}
-
-/*
- * Change between current and voltage ADJUSTMENT_STATE
- */
-void sw1_toggle_i_v_isr(void){
-	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PB2)
-	//EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
-
-	//Set debouncing time in ms
-	//TIM7->ARR = 200;
-
-	//Zero TIM7 counter and start counting
-	//LL_TIM_SetCounter(TIM7, 0); //set counter register value of timer 7 to 0
-	//LL_TIM_EnableCounter(TIM7); //start counting of timer 7
-
-	// Toggle the state
-	if (currentState == ADJUSTMENT_CURRENT_OCP)
-	{
-		currentState = ADJUSTMENT_VOLTAGE;
-	}
-	else if (currentState == ADJUSTMENT_VOLTAGE)
-	{
-		currentState = ADJUSTMENT_CURRENT;
-		//Display output current
-		max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
-	}
-	else
-	{
-		currentState = ADJUSTMENT_CURRENT_OCP;
-		//Display output current
-		max7219_PrintIspecial(SEGMENT_2, dhandle->currentOCPSet, 4);
-	}
-
-	//Get Voltage level into TRACE
-	char _str[60];
-	uint32_t voltageADC = BSP_PWR_VBUSGetVoltage(0);
-	uint32_t currentADC= BSP_PWR_VBUSGetCurrent(0);
-	uint32_t currentOCP_ADC= BSP_PWR_VBUSGetCurrentOCP(0);
-
-	// Use snprintf to limit the number of characters written
-	int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltageADC, currentADC, currentOCP_ADC);
-
-	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-}
 
 void sw2_lock_isr(void){
 	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PB2)
@@ -1227,4 +957,89 @@ void processUSBCommand(uint8_t* command, uint32_t length)
 }
 
 
+// Helper function to update voltage
+void updateVoltage(void) {
+	//Get direction of encoder turning
+	int voltageTemp = dhandle->voltageSet;
+	voltageTemp += sm->encoder.direction * sm->encoder.increment;
 
+	//If required temp value is within limits, assign it to voltage else assign limits
+	if (voltageTemp > dhandle->voltageMax) {
+		dhandle->voltageSet = dhandle->voltageMax;
+
+	} else if (voltageTemp < dhandle->voltageMin) {
+		dhandle->voltageSet = dhandle->voltageMin;
+
+	} else {
+		dhandle->voltageSet = voltageTemp;
+	}
+
+	//Print selected voltage to disp, decimal at digit 3
+	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
+
+	//Print to debug
+	char _str[40];
+	sprintf(_str,"VBUS selected: %d mV", dhandle->voltageSet*10);
+	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+
+}
+
+// Helper function to update voltage and update AWD limit
+void updateCurrent(void) {
+	//Get direction of encoder turning
+	int currentTemp = dhandle->currentSet;
+	currentTemp += sm->encoder.direction * sm->encoder.increment;
+
+	//If required temp value is within limits, assign it to voltage else assign limits
+	if (currentTemp > dhandle->currentMax) {
+		dhandle->currentSet = dhandle->currentMax;
+
+	} else if (currentTemp < dhandle->currentMin) {
+		dhandle->currentSet = dhandle->currentMin;
+
+	} else {
+		dhandle->currentSet = currentTemp;
+	}
+
+	//Update AWD limits
+	int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
+	int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD tershold
+	Update_AWD_Thresholds(0, isense_rawADCtrip+100);
+
+	//Print selected voltage to disp, decimal at digit 3
+	max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
+
+	//Print to debug
+	char _str[40];
+	sprintf(_str,"IBUS selected: %d mA", dhandle->currentSet);
+	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+}
+
+// Helper function to update voltage
+void updateCurrentOCP(void) {
+	//Get direction of encoder turning
+	int currentTemp = dhandle->currentOCPSet;
+	currentTemp += sm->encoder.direction * sm->encoder.increment;
+
+	//If required temp value is within limits, assign it to voltage
+	if ( (dhandle->currentMin <= currentTemp) && (currentTemp <= (dhandle->currentMax + 300)) ) {
+		dhandle->currentOCPSet = currentTemp;
+	} else {
+		//currentOCPTemp = currentOCP;
+	}
+
+	int V_TRIP = (dhandle->currentOCPSet * R_OCP_MOHMS * G_OCP)/1000; // mV (mA * mOhms * Gain)
+	//Convert DAC_OUT voltage to 12B resolution
+	int dac_value = (V_TRIP *4095) / VDDA_APPLI;//__LL_ADC_DIGITAL_SCALE(LL_ADC_RESOLUTION_12B);
+	//Write output with DAC..
+	HAL_DAC_SetValue(&hdac1, DAC_CHANNEL_1, DAC_ALIGN_12B_R, dac_value);
+
+	//Print selected voltage to disp, decimal at digit 3
+	max7219_PrintIspecial(SEGMENT_2, dhandle->currentOCPSet, 4);
+
+	//Print to debug
+	char _str[40];
+	sprintf(_str,"IOCP selected: %lu mA", dhandle->currentOCPSet);
+	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+
+}

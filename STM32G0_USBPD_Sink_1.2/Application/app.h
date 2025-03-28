@@ -197,8 +197,9 @@ void processButtonEvents(StateMachine *sm, SystemEvents *events);
 void processSystemEvents(StateMachine *sm, SystemEvents *events);
 
 /*Define additional fcns and ISR*/
-void updateVoltage(StateMachine *sm, SINKData_HandleTypeDef *handle);
-void updateCurrent(StateMachine *sm, SINKData_HandleTypeDef *handle);
+void updateVoltage(void);
+void updateCurrent(void);
+void updateCurrentOCP(void);
 void TIM14_ISR(void);
 
 #endif /* APP_H_ */
