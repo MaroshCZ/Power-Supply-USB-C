@@ -73,8 +73,7 @@ USBPD/Target/usbpd_dpm_user.o: ../USBPD/Target/usbpd_dpm_user.c \
  ../Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2/cmsis_os2.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_trace.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h \
- ../USBPD/usbpd_user_services.h ../Application/demo_app.h \
- ../Application/app.h
+ ../USBPD/usbpd_user_services.h ../Application/app.h
 ../Core/Inc/main.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:
 ../Core/Inc/stm32g0xx_hal_conf.h:
@@ -155,5 +154,4 @@ USBPD/Target/usbpd_dpm_user.o: ../USBPD/Target/usbpd_dpm_user.c \
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_trace.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h:
 ../USBPD/usbpd_user_services.h:
-../Application/demo_app.h:
 ../Application/app.h:

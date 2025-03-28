@@ -83,10 +83,6 @@ extern TIM_HandleTypeDef htim4;
    aADCxConvertedValues[1u]: ISENSE
 */
 extern __IO uint16_t aADCxConvertedValues[ADC_NUM_OF_SAMPLES];
-
-// Declare external global variable (but do not define it here)
-extern SINKData_HandleTypeDef SNK_data;
-extern SINKData_HandleTypeDef *dhandle;
 //get_dhandle(SINKData_HandleTypeDef *)
 
 //__IO: Indicates that this variable can change at any time, usually due to hardware activity.
@@ -126,6 +122,8 @@ typedef struct {
 
     // Other flags
     bool encoderTurnedFlag;
+    bool stateTimeoutFlag;
+    bool periodicCheckFlag;
 
     // Encoder data
     Encoder_TypeDef encoder;
@@ -158,22 +156,22 @@ typedef struct {
 // Button event flags
 typedef struct {
 	// Button events
-	    volatile bool outputBtnEvent;
-	    volatile bool lockBtnEvent;
-	    volatile bool lockBtnLongEvent;
-	    volatile bool voltageCurrentBtnEvent;
-	    volatile bool ocpBtnEvent;
-	    volatile bool rotaryBtnEvent;
+	volatile bool outputBtnEvent;
+	volatile bool lockBtnEvent;
+	volatile bool lockBtnLongEvent;
+	volatile bool voltageCurrentBtnEvent;
+	volatile bool ocpBtnEvent;
+	volatile bool rotaryBtnEvent;
 
-	    // Encoder events
-	    volatile bool encoderTurnEvent;
+	// Encoder events
+	volatile bool encoderTurnEvent;
 
-	    // Periodic check event
-	    volatile bool periodicCheckEvent;
-	    volatile bool stateTimeoutEvent;
+	// Periodic check event
+	volatile bool periodicCheckEvent;
+	volatile bool stateTimeoutEvent;
 
-	    // ADC/AWDG events
-	    volatile bool awdgEvent;
+	// ADC/AWDG events
+	volatile bool awdgEvent;
 } SystemEvents;
 
 
@@ -182,24 +180,25 @@ void usart2_lupart2_handler(void);
 
 /*Define State functions*/
 void handleOffState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
-void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
-void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
-void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void handleInitState(void);
+void handleIdleState(void);
+void handleActiveState(void);
 void handleLockState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
 void handleErrorState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
 void handleDisplayToggleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
 void handleOCPToggleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
-void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void handleSetValuesState(void);
 
 /*Define procces functions and Statemachine*/
 void runStateMachine(void); //StateMachine *sm, SINKData_HandleTypeDef *dhandle
-void processButtonEvents(StateMachine *sm, SystemEvents *events);
-void processSystemEvents(StateMachine *sm, SystemEvents *events);
+void processButtonEvents(void);
+void processSystemEvents(void);
 
 /*Define additional fcns and ISR*/
 void updateVoltage(void);
 void updateCurrent(void);
 void updateCurrentOCP(void);
+void Update_AWD_Thresholds(uint32_t low, uint32_t high);
 void TIM14_ISR(void);
 
 #endif /* APP_H_ */

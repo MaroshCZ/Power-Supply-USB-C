@@ -67,8 +67,7 @@ Application/app.o: ../Application/app.c ../Core/Inc/main.h \
  ../Middlewares/ST/STM32_USB_Device_Library/Core/Inc/usbd_ctlreq.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_trace.h \
  ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h \
- ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h \
- ../Application/demo_app.h
+ ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h
 ../Core/Inc/main.h:
 ../Drivers/STM32G0xx_HAL_Driver/Inc/stm32g0xx_hal.h:
 ../Core/Inc/stm32g0xx_hal_conf.h:
@@ -143,4 +142,3 @@ Application/app.o: ../Application/app.c ../Core/Inc/main.h \
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_trace.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_core.h:
 ../Middlewares/ST/STM32_USBPD_Library/Core/inc/usbpd_def.h:
-../Application/demo_app.h:

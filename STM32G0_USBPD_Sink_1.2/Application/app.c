@@ -21,7 +21,6 @@
 #include "usb_device.h"
 #include "usbd_cdc_if.h"
 #include <usbpd_trace.h>
-#include "demo_app.h"
 
 
 int32_t BSP_USBPD_PWR_VBUSGetCurrentOCP(uint32_t Instance, int32_t *pCurrentOCP);
@@ -98,6 +97,7 @@ SINKData_HandleTypeDef SNK_data = {
 // Define the pointer to the struct
 SINKData_HandleTypeDef *dhandle = &SNK_data;
 StateMachine *sm = &stateMachine;
+SystemEvents *events = &systemEvents;
 
 
 void runStateMachine(void) {
@@ -107,13 +107,13 @@ void runStateMachine(void) {
 			//handleOffState(sm, dhandle);
 			break;
 		case STATE_INIT:
-			handleInitState(sm, dhandle);
+			handleInitState();
 			break;
 		case STATE_IDLE:
-			handleIdleState(sm, dhandle);
+			handleIdleState();
 			break;
 		case STATE_ACTIVE:
-			handleActiveState(sm, dhandle);
+			handleActiveState();
 			break;
 		case STATE_LOCK:
 			//handleLockState(sm, dhandle);
@@ -125,7 +125,7 @@ void runStateMachine(void) {
 			//handleOCPToggleState(sm, dhandle);
 			break;
 		case STATE_SET_VALUES:
-			handleSetValuesState(sm, dhandle);
+			handleSetValuesState();
 			break;
 		default:
 			// Error handling
@@ -223,7 +223,7 @@ void app_init(void){
 void app_loop(void) {
 	//CDC_Transmit_FS(data, strlen(data));*/
 	// Process button events
-	processSystemEvents(&stateMachine, &systemEvents);
+	processSystemEvents();
 
 	// Run the state machine
 	//runStateMachine(&stateMachine, &SNK_data);
@@ -234,6 +234,9 @@ void app_loop(void) {
 	stateMachine.lockBtnPressed = false;
 	stateMachine.voltageCurrentBtnPressed = false;
 	stateMachine.rotaryBtnPressed = false;
+	stateMachine.encoderTurnedFlag = false;
+	stateMachine.stateTimeoutFlag = false;
+	stateMachine.periodicCheckFlag = false;
 	stateMachine.encoderTurnedFlag = false;
 }
 
@@ -275,15 +278,13 @@ void TIM14_ISR(void) {
 		// Clear the update interrupt flag
 		LL_TIM_ClearFlag_UPDATE(TIM14);
 
-		if (stateMachine.currentState == STATE_ACTIVE || stateMachine.currentState == STATE_SET_VALUES) {
-			// Handle periodic check for ACTIVE state
-			systemEvents.periodicCheckEvent = true;
-			//Reset CNT value
-			LL_TIM_SetCounter(TIM14, 0);
+		// Handle periodic check for ACTIVE state
+		systemEvents.periodicCheckEvent = true;
+		//Reset CNT value
+		LL_TIM_SetCounter(TIM14, 0);
 
-			//Start timer again
-			LL_TIM_EnableCounter(TIM14);
-		}
+		//Start timer again
+		LL_TIM_EnableCounter(TIM14);
 	}
 }
 
@@ -298,19 +299,6 @@ void TIM15_ISR(void) {
 		//Reset CNT value
 		//LL_TIM_DisableCounter(TIM15);  // Stop the timer after timeout
 
-
-		if (stateMachine.currentState == STATE_SET_VALUES) {
-
-			//Make a USBPD request
-			int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
-			//Print to debug
-
-			char _str[70];
-			sprintf(_str,"APDO request: indexSRCPDO= %int, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
-			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-			USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
-		}
-
 	}
 }
 
@@ -318,7 +306,7 @@ void TIM15_ISR(void) {
  * Define Process functions
  */
 // Process button events in the main loop (Convert hardware events into logical events)
-void processButtonEvents(StateMachine *sm, SystemEvents *events) {
+void processButtonEvents(void) {
     if (events->outputBtnEvent) {
     	//Reset btn event flag
         events->outputBtnEvent = false;
@@ -338,14 +326,22 @@ void processButtonEvents(StateMachine *sm, SystemEvents *events) {
 }
 
 // Main system event processor that calls specialized handlers
-void processSystemEvents(StateMachine *sm, SystemEvents *events) {
+void processSystemEvents(void) {
     // Process different event types using specialized functions
-    processButtonEvents(sm, events);
+    processButtonEvents();
 
     if (events->encoderTurnEvent) {
     	sm->encoderTurnedFlag = true;
     	events->encoderTurnEvent = false;
     }
+    if (events->stateTimeoutEvent) {
+		sm->stateTimeoutFlag= true;
+		events->stateTimeoutEvent = false;
+	}
+	 if (events->periodicCheckEvent) {
+		sm->periodicCheckFlag= true;
+		events->periodicCheckEvent = false;
+	}
     // Process AWDG events
     if (events->awdgEvent) {
         //events->awdgEvent = false;
@@ -365,7 +361,7 @@ void processSystemEvents(StateMachine *sm, SystemEvents *events) {
 /*
  * Define state Handle functions
  */
-void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
+void handleInitState(void) {
     // Entry actions (if just entered this state)
     static bool entryDone = false;
 
@@ -402,7 +398,7 @@ void handleInitState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 
 }
 
-void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
+void handleIdleState(void) {
     // Entry actions (if just entered this state)
     static bool entryDone = false;
 
@@ -450,7 +446,7 @@ void handleIdleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     }
 }
 
-void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
+void handleActiveState(void) {
 	//Declare static variables
 	// Set check interval Make the timer persistent across function calls
 	//static uint32_t lastCheckTime = 0; // declared to 0 only once, then retains value
@@ -483,8 +479,7 @@ void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 	//==========================================================
 
     //Periodic check to display measured values
-    if (systemEvents.periodicCheckEvent) {
-        systemEvents.periodicCheckEvent = false;
+    if (sm->periodicCheckFlag) {
 		uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 to get centivolts since only 4 digit display..
 		uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
 
@@ -522,7 +517,7 @@ void handleActiveState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     }
 }
 
-void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
+void handleSetValuesState(void) {
     // Entry actions (if just entered this state)
     static bool entryDone = false;
     static bool showDigit = false;  // Start with digit shown
@@ -634,7 +629,6 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 		//Erase FLAG!!
 		//
 		sm->encoder.curValue= encoderVal;
-		sm->encoderTurnedFlag = false;
 
 		if (encoderVal != sm->encoder.prevValue){
 			//Get the turn direction and save it
@@ -649,7 +643,7 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
     }
 
     // Handle digit blinking based on current set mode
-    if (systemEvents.periodicCheckEvent) {
+    if (sm->periodicCheckFlag) {
     	if (sm->setValueMode == SET_VOLTAGE) {
 			max7219_BlinkDigit2(SEGMENT_1, dhandle->voltageSet, sm->encoder.selDigit, 3, showDigit);
 			max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet,4);
@@ -659,21 +653,26 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
 		}
     	//Toggle showDigit
     	showDigit = !showDigit;
-    	//Erase periodic check flag
-    	systemEvents.periodicCheckEvent = false;
     }
 
     // On turnEvent update voltage/current
 	if (sm->encoder.turnEvent) {
 		//Reset event flag
 		sm->encoder.turnEvent = false;
+		char _str[40];
 		//Update displays
 		switch (sm->setValueMode) {
 			case SET_VOLTAGE:
 				updateVoltage();
+				//Print to debug
+				sprintf(_str,"VBUS selected: %lu mV", dhandle->voltageSet * 10);
+				USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 				break;
 			case SET_CURRENT:
 				updateCurrent();
+				//Print to debug
+				sprintf(_str,"IBUS selected: %lu mA", dhandle->currentSet);
+				USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 				break;
 		}
 	}
@@ -691,9 +690,15 @@ void handleSetValuesState(StateMachine *sm, SINKData_HandleTypeDef *dhandle) {
         sm->stateEntryTime = HAL_GetTick();
         sm->timeoutCounter = 500;  // 0.5 seconds timeout
         entryDone = false;
-    } else if (systemEvents.stateTimeoutEvent) {
-	    //Reset timeout event flag
-    	systemEvents.stateTimeoutEvent = false;
+    } else if (sm->stateTimeoutFlag) {
+
+    	//Make a USBPD request
+		int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
+		//Print to debug
+		char _str[70];
+		sprintf(_str,"APDO request: indexSRCPDO= %int, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
+		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+		USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
 
     	//Return to last state
 	    if (sm->lastState == STATE_IDLE) {
@@ -976,18 +981,14 @@ void updateVoltage(void) {
 
 	//Print selected voltage to disp, decimal at digit 3
 	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
-
-	//Print to debug
-	char _str[40];
-	sprintf(_str,"VBUS selected: %d mV", dhandle->voltageSet*10);
-	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-
 }
 
 // Helper function to update voltage and update AWD limit
 void updateCurrent(void) {
 	//Get direction of encoder turning
 	int currentTemp = dhandle->currentSet;
+	int dir = sm->encoder.direction;
+	int increment = sm->encoder.increment;
 	currentTemp += sm->encoder.direction * sm->encoder.increment;
 
 	//If required temp value is within limits, assign it to voltage else assign limits
@@ -1008,11 +1009,6 @@ void updateCurrent(void) {
 
 	//Print selected voltage to disp, decimal at digit 3
 	max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
-
-	//Print to debug
-	char _str[40];
-	sprintf(_str,"IBUS selected: %d mA", dhandle->currentSet);
-	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 }
 
 // Helper function to update voltage
@@ -1036,10 +1032,4 @@ void updateCurrentOCP(void) {
 
 	//Print selected voltage to disp, decimal at digit 3
 	max7219_PrintIspecial(SEGMENT_2, dhandle->currentOCPSet, 4);
-
-	//Print to debug
-	char _str[40];
-	sprintf(_str,"IOCP selected: %lu mA", dhandle->currentOCPSet);
-	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-
 }

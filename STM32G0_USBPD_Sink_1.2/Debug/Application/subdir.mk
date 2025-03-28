@@ -6,17 +6,14 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../Application/app.c \
-../Application/demo_app.c \
 ../Application/max7219.c 
 
 OBJS += \
 ./Application/app.o \
-./Application/demo_app.o \
 ./Application/max7219.o 
 
 C_DEPS += \
 ./Application/app.d \
-./Application/demo_app.d \
 ./Application/max7219.d 
 
 
@@ -27,7 +24,7 @@ Application/%.o Application/%.su Application/%.cyclo: ../Application/%.c Applica
 clean: clean-Application
 
 clean-Application:
-	-$(RM) ./Application/app.cyclo ./Application/app.d ./Application/app.o ./Application/app.su ./Application/demo_app.cyclo ./Application/demo_app.d ./Application/demo_app.o ./Application/demo_app.su ./Application/max7219.cyclo ./Application/max7219.d ./Application/max7219.o ./Application/max7219.su
+	-$(RM) ./Application/app.cyclo ./Application/app.d ./Application/app.o ./Application/app.su ./Application/max7219.cyclo ./Application/max7219.d ./Application/max7219.o ./Application/max7219.su
 
 .PHONY: clean-Application
 

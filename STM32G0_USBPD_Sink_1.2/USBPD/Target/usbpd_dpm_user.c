@@ -38,7 +38,6 @@
 /* USER CODE BEGIN Includes */
 #include "usbpd_user_services.h"
 #include "gui_api.h"
-#include "demo_app.h"
 #include "app.h"
 /* USER CODE END Includes */
 
@@ -296,7 +295,7 @@ void USBPD_DPM_Notification(uint8_t PortNum, USBPD_NotifyEventValue_TypeDef Even
 
     	char _str2[50];
 		// Use snprintf to limit the number of characters written
-		int len = snprintf(_str2, sizeof(_str2), "VBUSmeas:%lu mV, VBUSset:%lu mV", voltage, dhandle->voltageSet);
+		int len = snprintf(_str2, sizeof(_str2), "--------Output Enabled--------");
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str2, strlen(_str2));
       break;
 //    case USBPD_NOTIFY_HARDRESET_RX:
