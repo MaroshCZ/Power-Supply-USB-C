@@ -396,6 +396,7 @@ void handleCOMportstatus(uint8_t host_com_port_open){
 
 		 entryDone = true;
 	 } else if (host_com_port_open == 0) {
+		 //Reset lock LED
 		 HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
 
 		 //Unmask exti line 1, 2 and 3
@@ -404,8 +405,33 @@ void handleCOMportstatus(uint8_t host_com_port_open){
 		 EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask exti line 2
 		 EXTI->IMR1 |= EXTI_IMR1_IM1; //unmask exti line 1
 
+		 sm->currentState = STATE_IDLE;
+
 		 entryDone = false;
 	 }
+}
+void cleanString(const char* input, char* output, const char* delimiter) {
+    char temp[128];  // Temporary buffer for safe modification
+    strncpy(temp, input, sizeof(temp) - 1);
+    temp[sizeof(temp) - 1] = '\0';  // Ensure null-termination
+
+    char* token = strtok(temp, delimiter);
+    output[0] = '\0';  // Start with an empty output string
+
+    while (token != NULL) {
+        strcat(output, token);  // Append token to output
+        token = strtok(NULL, delimiter);
+    }
+}
+
+void trimSpacesCopy(const char *input, char *output) {
+    while (*input) {
+        if (!isspace((unsigned char)*input)) {
+            *output++ = *input;
+        }
+        input++;
+    }
+    *output = '\0';  // Null-terminate
 }
 
 void processUSBCommand(uint8_t* command, uint32_t length)
@@ -413,17 +439,57 @@ void processUSBCommand(uint8_t* command, uint32_t length)
 	// Null-terminate the command to ensure string functions work properly
 	command[length] = '\0';
 
-    if (strcmp((char*)command, "POWERON") == 0)
+	// Make a copy for tokenization
+	char cmd_copy[64] = {0};
+	strncpy(cmd_copy, (char*)command, sizeof(cmd_copy)-1);
+
+	// Clear white spaces..
+	char cmd_trimmed[64];
+	cleanString(cmd_copy, cmd_trimmed, " ");
+
+	// Extract command part (everything up to : )
+	char* cmd_part = strtok(cmd_trimmed, ":");
+	char* params = NULL;
+
+	// Parameters start after the delimiter
+	if (cmd_part != NULL && strlen(cmd_part) < length) {
+		params = strtok(NULL, ":");  // Get remaining part after ':'
+		//strcat(cmd_part, ":");
+	}
+
+	/*
+	const char* response[64];
+	strcpy(response,cmd_part);
+	strcat(response, "\r\n");
+	CDC_Transmit_FS((uint8_t*)response, strlen(response));
+	*/
+
+    if (strcmp(cmd_part, "OCP1") == 0)
     {
-        const char* response = "POWER is ON\r\n";
+        const char* response = "OCP is ON\r\n";
         CDC_Transmit_FS((uint8_t*)response, strlen(response));
+
+        sm->OCPMode = OCP_ENABLED;
+
+		//Update AWD limits
+		int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
+		int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD treshold
+		Update_AWD_Thresholds(0, isense_rawADCtrip, ADC_ANALOGWATCHDOG_2);
     }
-    else if (strcmp((char*)command, "POWEROFF") == 0)
+    else if (strcmp(cmd_part, "OCP0") == 0)
     {
-        const char* response = "POWER is OFF\r\n";
+        const char* response = strcat(cmd_part,"\r\n");
         CDC_Transmit_FS((uint8_t*)response, strlen(response));
+
+        sm->OCPMode = OCP_DISABLED;
+		//Update AWD limits
+		Update_AWD_Thresholds(0, OCP_DISABLED_HT, ADC_ANALOGWATCHDOG_2);
     }
-    else
+    else if (strcmp(cmd_part, "VSET1:") == 0)
+    {
+        const char* response = strcat(cmd_part,"\r\n");
+        CDC_Transmit_FS((uint8_t*)response, strlen(response));
+    } else
     {
         const char* response = "Unknown command\r\n";
         CDC_Transmit_FS((uint8_t*)response, strlen(response));
