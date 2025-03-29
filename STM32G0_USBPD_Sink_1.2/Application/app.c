@@ -385,12 +385,15 @@ void processSystemEvents(void) {
 
 void processUSBCommand(uint8_t* command, uint32_t length)
 {
-    if (strncmp((char*)command, "POWERON", length) == 0)
+	// Null-terminate the command to ensure string functions work properly
+	command[length] = '\0';
+
+    if (strcmp((char*)command, "POWERON") == 0)
     {
         const char* response = "POWER is ON\r\n";
         CDC_Transmit_FS((uint8_t*)response, strlen(response));
     }
-    else if (strncmp((char*)command, "POWEROFF", length) == 0)
+    else if (strcmp((char*)command, "POWEROFF") == 0)
     {
         const char* response = "POWER is OFF\r\n";
         CDC_Transmit_FS((uint8_t*)response, strlen(response));
