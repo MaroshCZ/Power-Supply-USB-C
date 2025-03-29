@@ -382,6 +382,31 @@ void processSystemEvents(void) {
     }
 }
 
+void handleCOMportstatus(uint8_t host_com_port_open){
+	 static bool entryDone = false;
+	 if (host_com_port_open == 1 && !entryDone) {
+		 //Drive lock LED
+		 HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
+
+		 //Disable BTN interrupts
+		 EXTI->IMR1 &= ~(EXTI_IMR1_IM2); //SW1
+		 EXTI->IMR1 &= ~(EXTI_IMR1_IM4); //SW2
+		 EXTI->IMR1 &= ~(EXTI_IMR1_IM1); //SW3
+		 EXTI->IMR1 &= ~(EXTI_IMR1_IM8); //ENC btn
+
+		 entryDone = true;
+	 } else if (host_com_port_open == 0) {
+		 HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
+
+		 //Unmask exti line 1, 2 and 3
+		 EXTI->IMR1 |= EXTI_IMR1_IM8; //unmask exti line 8
+		 EXTI->IMR1 |= EXTI_IMR1_IM4; //unmask exti line 4
+		 EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask exti line 2
+		 EXTI->IMR1 |= EXTI_IMR1_IM1; //unmask exti line 1
+
+		 entryDone = false;
+	 }
+}
 
 void processUSBCommand(uint8_t* command, uint32_t length)
 {

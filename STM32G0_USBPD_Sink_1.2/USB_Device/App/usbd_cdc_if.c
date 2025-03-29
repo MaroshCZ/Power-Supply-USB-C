@@ -227,7 +227,10 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
     break;
 
     case CDC_SET_CONTROL_LINE_STATE:
+    	 USBD_SetupReqTypedef *req = (USBD_SetupReqTypedef *)pbuf;
+    	 uint8_t host_com_port_open = (req->wValue & 0x0001) ? 1 : 0;
 
+    	 handleCOMportstatus(host_com_port_open);
     break;
 
     case CDC_SEND_BREAK:
