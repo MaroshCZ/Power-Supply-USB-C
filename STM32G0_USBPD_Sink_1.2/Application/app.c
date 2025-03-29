@@ -154,17 +154,16 @@ void HAL_ADCEx_LevelOutOfWindow2Callback(ADC_HandleTypeDef *hadc) {
  * Possibility to update parameters on the fly (read more in HAL_ADC_AnalogWDGConfig declaration)
  * Full config and AWD init in main.c
  */
-void Update_AWD_Thresholds(uint32_t low, uint32_t high) {
-	// Just update the thresholds for an already configured AWD
-	ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
-	AnalogWDGConfig.WatchdogNumber = ADC_ANALOGWATCHDOG_2; // Specify which AWD you're updating
-	AnalogWDGConfig.HighThreshold = high;
-	AnalogWDGConfig.LowThreshold = low;
-
-	if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
-	{
-	    Error_Handler();
-	}
+void Update_AWD_Thresholds(uint32_t low, uint32_t high, uint32_t adc_watchdog) {
+		// Just update the thresholds for an already configured AWD
+		ADC_AnalogWDGConfTypeDef AnalogWDGConfig = {0};
+		AnalogWDGConfig.WatchdogNumber = adc_watchdog; // Specify which AWD you're updating
+		AnalogWDGConfig.HighThreshold = high;
+		AnalogWDGConfig.LowThreshold = low;
+		if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
+		{
+		    Error_Handler();
+		}
 }
 /*
  * Initialization function
@@ -249,6 +248,7 @@ void app_loop(void) {
 	stateMachine.stateTimeoutFlag = false;
 	stateMachine.periodicCheckFlag = false;
 	stateMachine.encoderTurnedFlag = false;
+	stateMachine.awdgTriggeredFlag = false;
 }
 
 /*
@@ -332,14 +332,20 @@ void processButtonEvents(void) {
 		//Toggle OCP mode
 		switch(sm->OCPMode) {
 			case OCP_DISABLED:
-				// Enable the specific AWDG interrupt
-				__HAL_ADC_ENABLE_IT(&hadc1, ADC_IT_AWD2);
 				sm->OCPMode = OCP_ENABLED;
+
+				//Update AWD limits
+				int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
+				int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD treshold
+				Update_AWD_Thresholds(0, isense_rawADCtrip, ADC_ANALOGWATCHDOG_2);
 				break;
 			case OCP_ENABLED:
-				// Enable the specific AWDG interrupt
-				__HAL_ADC_DISABLE_IT(&hadc1, ADC_IT_AWD2);
 				sm->OCPMode = OCP_DISABLED;
+				//Update AWD limits
+				Update_AWD_Thresholds(0, OCP_DISABLED_HT, ADC_ANALOGWATCHDOG_2);
+
+				//__HAL_ADC_DISABLE_IT(&hadc1, ADC_IT_AWD2); can be also used to write bit but
+				//only when ADSTART bit is cleared to 0 (this ensures that no conversion is ongoing).
 				break;
 		}
     } else if (events->rotaryBtnEvent) {
@@ -688,6 +694,13 @@ void handleSetValuesState(void) {
 				//Print to debug !!calling it from inside updateVoltage() results in hardFault error!!
 				sprintf(_str,"IBUS selected: %lu mA", dhandle->currentSet);
 				USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+
+				if (sm->OCPMode == OCP_ENABLED) {
+					//Update AWD limits
+					int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
+					int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD treshold
+					Update_AWD_Thresholds(0, isense_rawADCtrip, ADC_ANALOGWATCHDOG_2);
+				}
 				break;
 		}
 	}
@@ -998,11 +1011,6 @@ void updateCurrent(void) {
 	} else {
 		dhandle->currentSet = currentTemp;
 	}
-
-	//Update AWD limits
-	int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
-	int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD treshold
-	Update_AWD_Thresholds(0, isense_rawADCtrip);
 
 	//Print selected voltage to disp, decimal at digit 3
 	max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);

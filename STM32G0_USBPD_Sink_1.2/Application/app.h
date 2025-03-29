@@ -47,12 +47,13 @@ typedef struct {
 
 } SINKData_HandleTypeDef;
 
-#define G_OCP          100u // V/V
-#define R_OCP_MOHMS      5u // 5 mOhms
-#define R_A         200000u // 200 kOhms
-#define R_B          36000u // 36 kOhms
-#define R_SENSE_MOHMS   30u // 30 mOhms
-#define G_SENSE         20u // V/V
+#define G_OCP          	   100u // V/V
+#define R_OCP_MOHMS     	 5u // 5 mOhms
+#define R_A         	200000u // 200 kOhms
+#define R_B         	 36000u // 36 kOhms
+#define R_SENSE_MOHMS  		30u // 30 mOhms
+#define G_SENSE             20u // V/V
+#define OCP_DISABLED_HT   6000u // high treshold [mA]
 
 //declaration of functions
 void app_init(void);
@@ -202,7 +203,7 @@ void processSystemEvents(void);
 
 /*Define additional fcns and ISR*/
 void updateCurrentOCP(void);
-void Update_AWD_Thresholds(uint32_t low, uint32_t high);
+void Update_AWD_Thresholds(uint32_t low, uint32_t high, uint32_t adc_watchdog);
 void TIM14_ISR(void);
 
 #endif /* APP_H_ */
