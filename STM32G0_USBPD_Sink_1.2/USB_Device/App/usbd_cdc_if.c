@@ -22,7 +22,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "app.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,7 +49,6 @@
   */
 
 /* USER CODE BEGIN PRIVATE_TYPES */
-
 /* USER CODE END PRIVATE_TYPES */
 
 /**
@@ -263,6 +262,17 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   /* USER CODE BEGIN 6 */
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
+
+  uint8_t* usb_buffer = getUSBbuffer();
+  memset(usb_buffer, '\0', 64);  // clear the usb_buffer
+  uint8_t len = (uint8_t)*Len;
+  memcpy(usb_buffer, Buf, len);  // copy received data to the usb_buffer
+
+  // Add logic to process received commands based on usb_buffer content
+  processUSBCommand(usb_buffer, len);
+
+  //Clear the Buf to avoid residual data
+  memset(Buf, '\0', len);
   return (USBD_OK);
   /* USER CODE END 6 */
 }

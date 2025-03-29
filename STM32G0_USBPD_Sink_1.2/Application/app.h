@@ -208,5 +208,6 @@ void updateCurrentOCP(void);
 uint32_t compensateVoltage(void);
 void Update_AWD_Thresholds(uint32_t low, uint32_t high, uint32_t adc_watchdog);
 void TIM14_ISR(void);
+uint8_t* getUSBbuffer(void);
 
 #endif /* APP_H_ */

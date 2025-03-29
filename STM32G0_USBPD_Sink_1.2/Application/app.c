@@ -53,8 +53,11 @@ typedef enum {
 
 
 //USB communication
-uint8_t *data = "Hello World from USB CDC\n";
-uint8_t usb_buffer[64];
+uint8_t usb_buffer[64]; //in C, array automaticaly decays to pointer to first element uint8_t*
+
+uint8_t *getUSBbuffer(void) {
+	return usb_buffer;
+}
 
 // Define a typedef for the state variable
 typedef AdjustmentState Adjustment_StateTypedef;
@@ -69,6 +72,7 @@ volatile Output_StateTypedef outputState = OUTPUT_OFF_STATE;
 static uint8_t rxBuffer[RX_BUFFER_SIZE];
 static uint32_t rxIndex = 0;
 uint32_t counter = 0;
+uint32_t usbReadTime = 0;
 
 //Initialize button event struct
 SystemEvents_TypeDef systemEvents = {0};
@@ -231,12 +235,10 @@ void app_init(void){
  * Loop function
  */
 void app_loop(void) {
-	//CDC_Transmit_FS(data, strlen(data));*/
 	// Process button events
 	processSystemEvents();
 
 	// Run the state machine
-	//runStateMachine(&stateMachine, &SNK_data);
 	runStateMachine();
 
 	// Reset button states after processing
@@ -381,6 +383,24 @@ void processSystemEvents(void) {
 }
 
 
+void processUSBCommand(uint8_t* command, uint32_t length)
+{
+    if (strncmp((char*)command, "POWERON", length) == 0)
+    {
+        const char* response = "POWER is ON\r\n";
+        CDC_Transmit_FS((uint8_t*)response, strlen(response));
+    }
+    else if (strncmp((char*)command, "POWEROFF", length) == 0)
+    {
+        const char* response = "POWER is OFF\r\n";
+        CDC_Transmit_FS((uint8_t*)response, strlen(response));
+    }
+    else
+    {
+        const char* response = "Unknown command\r\n";
+        CDC_Transmit_FS((uint8_t*)response, strlen(response));
+    }
+}
 /*
  * Define state Handle functions
  */
@@ -955,24 +975,6 @@ void LPUART_Transmit(USART_TypeDef *LPUARTx, const uint8_t *pData, uint16_t Size
 }
 */
 
-void processUSBCommand(uint8_t* command, uint32_t length)
-{
-    if (strncmp((char*)command, "POWERON", length) == 0)
-    {
-        const char* response = "POWER is ON\r\n";
-        CDC_Transmit_FS((uint8_t*)response, strlen(response));
-    }
-    else if (strncmp((char*)command, "POWEROFF", length) == 0)
-    {
-        const char* response = "POWER is OFF\r\n";
-        CDC_Transmit_FS((uint8_t*)response, strlen(response));
-    }
-    else
-    {
-        const char* response = "Unknown command\r\n";
-        CDC_Transmit_FS((uint8_t*)response, strlen(response));
-    }
-}
 
 
 // Helper function to update voltage
