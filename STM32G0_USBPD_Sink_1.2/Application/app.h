@@ -100,13 +100,13 @@ typedef enum {
     STATE_OCP_TOGGLE,
     STATE_SET_VALUES,
     // Sub-states can be handled within each state function
-} SystemState;
+} SystemState_TypeDef;
 
 // Definition of state machine struct
 typedef struct {
     // Current and last system state
-    SystemState currentState;
-    SystemState lastState;
+    SystemState_TypeDef currentState;
+    SystemState_TypeDef lastState;
 
     // State timers and counters
     uint32_t stateEntryTime;
@@ -158,7 +158,7 @@ typedef struct {
     // Last state for returning from special modes
     char lastStateStr[10];
 
-} StateMachine;
+} StateMachine_TypeDef;
 
 // Button event flags
 typedef struct {
@@ -179,21 +179,21 @@ typedef struct {
 
 	// ADC/AWDG events
 	volatile bool awdgEvent;
-} SystemEvents;
+} SystemEvents_TypeDef;
 
 
 
 void usart2_lupart2_handler(void);
 
 /*Define State functions*/
-void handleOffState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void handleOffState(StateMachine_TypeDef *sm, SINKData_HandleTypeDef *dhandle);
 void handleInitState(void);
 void handleIdleState(void);
 void handleActiveState(void);
-void handleLockState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
-void handleErrorState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
-void handleDisplayToggleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
-void handleOCPToggleState(StateMachine *sm, SINKData_HandleTypeDef *dhandle);
+void handleLockState(StateMachine_TypeDef *sm, SINKData_HandleTypeDef *dhandle);
+void handleErrorState(StateMachine_TypeDef *sm, SINKData_HandleTypeDef *dhandle);
+void handleDisplayToggleState(StateMachine_TypeDef *sm, SINKData_HandleTypeDef *dhandle);
+void handleOCPToggleState(StateMachine_TypeDef *sm, SINKData_HandleTypeDef *dhandle);
 void handleSetValuesState(void);
 
 /*Define procces functions and Statemachine*/
@@ -202,7 +202,10 @@ void processButtonEvents(void);
 void processSystemEvents(void);
 
 /*Define additional fcns and ISR*/
+void updateVoltage(void);
+void updateCurrent(void);
 void updateCurrentOCP(void);
+uint32_t compensateVoltage(void);
 void Update_AWD_Thresholds(uint32_t low, uint32_t high, uint32_t adc_watchdog);
 void TIM14_ISR(void);
 

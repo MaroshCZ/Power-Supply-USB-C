@@ -71,9 +71,9 @@ static uint32_t rxIndex = 0;
 uint32_t counter = 0;
 
 //Initialize button event struct
-SystemEvents systemEvents = {0};
+SystemEvents_TypeDef systemEvents = {0};
 //Init stateMachine struct
-StateMachine stateMachine = {
+StateMachine_TypeDef stateMachine = {
 		.currentState = STATE_INIT,
 		.encoder = {
 				.selDigit = 2,
@@ -96,8 +96,8 @@ SINKData_HandleTypeDef SNK_data = {
 
 // Define the pointer to the struct
 SINKData_HandleTypeDef *dhandle = &SNK_data;
-StateMachine *sm = &stateMachine;
-SystemEvents *events = &systemEvents;
+StateMachine_TypeDef *sm = &stateMachine;
+SystemEvents_TypeDef *events = &systemEvents;
 
 
 void runStateMachine(void) {
@@ -720,13 +720,14 @@ void handleSetValuesState(void) {
         entryDone = false;
     } else if (sm->stateTimeoutFlag) {
 
+    	uint32_t compVoltage = compensateVoltage();
     	//Make a USBPD request
-		int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
+		int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, compVoltage*10, dhandle->currentSet, dhandle ->selMethod);
 		//Print to debug
 		char _str[70];
 		sprintf(_str,"APDO request: indexSRCPDO= %int, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-		USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
+		USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, compVoltage*10, dhandle->currentSet);
 
     	//Return to last state
 	    if (sm->lastState == STATE_IDLE) {
@@ -1037,4 +1038,12 @@ void updateCurrentOCP(void) {
 
 	//Print selected voltage to disp, decimal at digit 3
 	max7219_PrintIspecial(SEGMENT_2, dhandle->currentOCPSet, 4);
+}
+
+//Make voltage correction for the voltage drops on rshunts
+uint32_t compensateVoltage(void) {
+	uint32_t correction = (dhandle->currentSet * (R_OCP_MOHMS + R_SENSE_MOHMS) ) / 1000;
+	uint32_t compVoltage = dhandle->voltageSet + correction;
+
+	return (compVoltage > dhandle->voltageMax) ? dhandle->voltageMax : compVoltage;
 }
