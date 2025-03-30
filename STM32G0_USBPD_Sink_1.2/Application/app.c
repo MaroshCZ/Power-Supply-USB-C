@@ -485,7 +485,6 @@ void processUSBCommand(uint8_t* command, uint32_t length)
     if (strcmp(cmd_part, "OCP1") == 0)
     {
     	snprintf(response, sizeof(response), "OCP enabled\r\n");
-        const char* response = "OCP is ON\r\n";
 
         sm->OCPMode = OCP_ENABLED;
 
@@ -590,7 +589,8 @@ void processUSBCommand(uint8_t* command, uint32_t length)
 	}
     else if (strcmp(cmd_part, "PROFILES?") == 0)
    	{
-   		snprintf(response, sizeof(response), "Profiles mockup\r\n");
+    	bool printToCOM = true;
+    	sourcecapa_limits(printToCOM);
    	}
     else
     {
@@ -1070,71 +1070,91 @@ void ocp_alert_isr(void) {
 	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_6);
 }
 
-#define MAX_LINE_PDO      7u
+
 /**
   * @brief  src capa menu navigation
   * @param  Nav
   * @retval None
   * source: demo_disco.c Display_sourcecapa_menu_nav
   */
-void sourcecapa_limits(void)
+void sourcecapa_limits(bool printToCOM)
 {
-  uint8_t _str[30];
-  uint8_t _max = DPM_Ports[0].DPM_NumberOfRcvSRCPDO;
-  uint8_t _start = 0;
-  SINKData_HandleTypeDef *dhandle = &SNK_data;
+	uint8_t _max = DPM_Ports[0].DPM_NumberOfRcvSRCPDO;
+	uint8_t _start = 0;
+	SINKData_HandleTypeDef *dhandle = &SNK_data;
+	static char all_profiles[500] = {0}; // Buffer for all profiles
+	uint16_t offset = 0; // Position tracker in the all_profiles buffer
+	char str_info[32] = {0};
 
-  for(int8_t index=_start; index < _max; index++)
-  {
-	switch(DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_TYPE_Msk)
+	// Clear the buffer at the start
+	memset(all_profiles, 0, sizeof(all_profiles));
+
+	for(int8_t index=_start; index < _max; index++)
 	{
-	case USBPD_PDO_TYPE_FIXED :
-	  {
-		uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_FIXED_MAX_CURRENT_Pos)*10;
-		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_VOLTAGE_Msk) >> USBPD_PDO_SRC_FIXED_VOLTAGE_Pos)*50;
-		//sprintf((char*)_str, "FIXED:%2dV %2d.%dA", (int)(maxvoltage/1000), (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
-		if (maxcurrent > dhandle->currentMax) {
-			  			dhandle -> currentMax = (int)maxcurrent+100;
-			  		}
+		char _str[50] = {0};
+		switch(DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_TYPE_Msk)
+		{
+		case USBPD_PDO_TYPE_FIXED :
+		{
+			uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_FIXED_MAX_CURRENT_Pos)*10;
+			uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_VOLTAGE_Msk) >> USBPD_PDO_SRC_FIXED_VOLTAGE_Pos)*50;
+			sprintf((char*)_str, "FIXED:%2dV %2d.%dA \r\n", (int)(maxvoltage/1000), (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
+			if (maxcurrent > dhandle->currentMax) {
+				dhandle -> currentMax = (int)maxcurrent;
+			}
+			break;
+		}
+		case USBPD_PDO_TYPE_BATTERY :
+		{
+		}
 		break;
-	  }
-	case USBPD_PDO_TYPE_BATTERY :
-	  {
-	  }
-	  break;
-	case USBPD_PDO_TYPE_VARIABLE :
-	  {
-		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Pos) * 50;
-		uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Pos) * 50;
-		uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Pos) * 10;
-		//sprintf((char*)_str, "V:%2d.%1d-%2d.%1dV %d.%dA", (int)(minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
-	  }
-	  break;
-	case USBPD_PDO_TYPE_APDO :
-	  {
-		uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Pos) * 100;
-		uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Pos) * 100;
-		uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_APDO_MAX_CURRENT_Pos) * 50;
-		//sprintf((char*)_str, "A:%2d.%1d-%2d.%1dV %d.%dA",(int) (minvoltageAPDOtemp/1000),(int)(minvoltageAPDOtemp/100)%10, (int)(maxvoltageAPDOtemp/1000),(int)(maxvoltageAPDOtemp/100)%10, (int)(maxcurrentAPDOtemp/1000), (int)((maxcurrentAPDOtemp % 1000) /100));
-
-		if (minvoltage < dhandle->voltageMin*10) {
-			dhandle -> voltageMin = (int)minvoltage/10;
+		case USBPD_PDO_TYPE_VARIABLE :
+		{
+			uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Pos) * 50;
+			uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Pos) * 50;
+			uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Pos) * 10;
+			sprintf((char*)_str, "V:%2d.%1d-%2d.%1dV %d.%dA \r\n", (int)(minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
 		}
-		if (maxvoltage > dhandle->voltageMax*10) {
-			dhandle -> voltageMax = (int)maxvoltage/10;
+		break;
+		case USBPD_PDO_TYPE_APDO :
+		{
+			uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Pos) * 100;
+			uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Pos) * 100;
+			uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_APDO_MAX_CURRENT_Pos) * 50;
+			sprintf((char*)_str, "APDO:%2d.%1d-%2d.%1dV %d.%dA \r\n",(int) (minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
+
+			if (minvoltage < dhandle->voltageMin*10) {
+				dhandle -> voltageMin = (int)minvoltage/10;
+			}
+			if (maxvoltage > dhandle->voltageMax*10) {
+				dhandle -> voltageMax = (int)maxvoltage/10;
+			}
+			if (maxcurrent > dhandle->currentMax) {
+				dhandle -> currentMax = (int)maxcurrent;
+			}
+		}
+		break;
+		default :
+		{
+			sprintf((char*)_str,"Unknown Source PDO \r\n");
+			break;
 		}
 
-		if (maxcurrent > dhandle->currentMax) {
-			dhandle -> currentMax = (int)maxcurrent+100;
 		}
-	  }
-	  break;
-	default :
-	  sprintf((char*)_str,"Unknown Source PDO");
-	  break;
+		// Add current profile to the buffer with bounds checking
+		uint16_t len = strlen(_str);
+		if (offset + len < sizeof(all_profiles) - 1) {
+			memcpy(all_profiles + offset, _str, len);
+			offset += len;
+		}
+	} //for end
+	// Ensure null termination
+	all_profiles[offset] = '\0';
 
+	// Send all profiles at once
+	if (printToCOM && offset > 0) {
+		CDC_Transmit_FS((uint8_t*)all_profiles, offset);
 	}
-  }
 }
 
 /*

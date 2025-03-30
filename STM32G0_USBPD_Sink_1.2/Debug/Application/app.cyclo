@@ -30,8 +30,8 @@
 ../Application/app.c:987:6:tim14_isr	1
 ../Application/app.c:999:6:sw2_lock_isr	2
 ../Application/app.c:1051:6:ocp_alert_isr	1
-../Application/app.c:1080:6:sourcecapa_limits	12
-../Application/app.c:1185:6:updateVoltage	3
-../Application/app.c:1206:6:updateCurrent	3
-../Application/app.c:1227:6:updateCurrentOCP	3
-../Application/app.c:1250:10:compensateVoltage	2
+../Application/app.c:1079:6:sourcecapa_limits	17
+../Application/app.c:1214:6:updateVoltage	3
+../Application/app.c:1235:6:updateCurrent	3
+../Application/app.c:1256:6:updateCurrentOCP	3
+../Application/app.c:1279:10:compensateVoltage	2

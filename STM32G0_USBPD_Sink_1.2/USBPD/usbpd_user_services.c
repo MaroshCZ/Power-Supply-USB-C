@@ -993,7 +993,8 @@ uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
 
 void USER_SERV_ExtractSRCCapa(void) {
 	//
-	sourcecapa_limits();
+	bool printToCOM = false;
+	sourcecapa_limits(printToCOM);
 }
 
 
