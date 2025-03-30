@@ -102,11 +102,20 @@ typedef enum {
     // Sub-states can be handled within each state function
 } SystemState_TypeDef;
 
+// Definition of PPS states
+typedef enum {
+    STATE_OPEN,
+    STATE_CLOSED
+} COMPortState_TypeDef;
+
+
+
 // Definition of state machine struct
 typedef struct {
     // Current and last system state
     SystemState_TypeDef currentState;
     SystemState_TypeDef lastState;
+    COMPortState_TypeDef comState;
 
     // State timers and counters
     uint32_t stateEntryTime;
@@ -180,6 +189,11 @@ typedef struct {
 	// ADC/AWDG events
 	volatile bool awdgEvent;
 } SystemEvents_TypeDef;
+
+typedef struct {
+    const char* command;
+    void (*handler)(void);
+} Command_t;
 
 
 

@@ -79,6 +79,7 @@ SystemEvents_TypeDef systemEvents = {0};
 //Init stateMachine struct
 StateMachine_TypeDef stateMachine = {
 		.currentState = STATE_INIT,
+		.comState = STATE_CLOSED,
 		.encoder = {
 				.selDigit = 2,
 				.increment = 10    // Default increment
@@ -385,6 +386,11 @@ void processSystemEvents(void) {
 void handleCOMportstatus(uint8_t host_com_port_open){
 	 static bool entryDone = false;
 	 if (host_com_port_open == 1 && !entryDone) {
+		 //Set COM state to OPEN
+		 sm->comState = STATE_OPEN;
+		 //Set default state timeout to 4000;
+		 sm->timeoutCounter = 4000;
+
 		 //Drive lock LED
 		 HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
 
@@ -396,6 +402,7 @@ void handleCOMportstatus(uint8_t host_com_port_open){
 
 		 entryDone = true;
 	 } else if (host_com_port_open == 0) {
+		 sm->comState = STATE_CLOSED;
 		 //Reset lock LED
 		 HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
 
@@ -405,6 +412,7 @@ void handleCOMportstatus(uint8_t host_com_port_open){
 		 EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask exti line 2
 		 EXTI->IMR1 |= EXTI_IMR1_IM1; //unmask exti line 1
 
+		 //If COM closed return savely to IDLE
 		 sm->currentState = STATE_IDLE;
 
 		 entryDone = false;
@@ -449,25 +457,35 @@ void processUSBCommand(uint8_t* command, uint32_t length)
 
 	// Extract command part (everything up to : )
 	char* cmd_part = strtok(cmd_trimmed, ":");
-	char* params = NULL;
+	char* params = NULL; // extracts the part after "numbers"
 
 	// Parameters start after the delimiter
 	if (cmd_part != NULL && strlen(cmd_part) < length) {
 		params = strtok(NULL, ":");  // Get remaining part after ':'
-		//strcat(cmd_part, ":");
 	}
 
+	// Define command table
 	/*
-	const char* response[64];
-	strcpy(response,cmd_part);
-	strcat(response, "\r\n");
-	CDC_Transmit_FS((uint8_t*)response, strlen(response));
-	*/
+	static const Command_t commands[] = {
+		{"*IDN?", idnHandler},
+		{"PROFILES", profilesHandler},
+		{"VOUT", voutHandler},
+		{"IOUT", ioutHandler},
+		{"VSET", vsetHandler},
+		{"ISET", isetHandler},
+		{"OCP", ocpHandler},
+		{"OUT", outHandler},
+		{NULL, NULL} // Sentinel
+	};*/
 
+	//Create buffer for response
+	char response[64];
+
+	//Process commands
     if (strcmp(cmd_part, "OCP1") == 0)
     {
+    	snprintf(response, sizeof(response), "OCP enabled\r\n");
         const char* response = "OCP is ON\r\n";
-        CDC_Transmit_FS((uint8_t*)response, strlen(response));
 
         sm->OCPMode = OCP_ENABLED;
 
@@ -478,23 +496,111 @@ void processUSBCommand(uint8_t* command, uint32_t length)
     }
     else if (strcmp(cmd_part, "OCP0") == 0)
     {
-        const char* response = strcat(cmd_part,"\r\n");
-        CDC_Transmit_FS((uint8_t*)response, strlen(response));
+    	snprintf(response, sizeof(response), "OCP disabled\r\n");
 
         sm->OCPMode = OCP_DISABLED;
 		//Update AWD limits
 		Update_AWD_Thresholds(0, OCP_DISABLED_HT, ADC_ANALOGWATCHDOG_2);
     }
-    else if (strcmp(cmd_part, "VSET1:") == 0)
+    else if (strcmp(cmd_part, "VSET1") == 0)
     {
-        const char* response = strcat(cmd_part,"\r\n");
-        CDC_Transmit_FS((uint8_t*)response, strlen(response));
-    } else
-    {
-        const char* response = "Unknown command\r\n";
-        CDC_Transmit_FS((uint8_t*)response, strlen(response));
+    	sm->rotaryBtnPressed = true;
+    	sm->setValueMode = SET_VOLTAGE;
+
+    	uint32_t voltage = atof(params)*100; // Convert float to uint (also V to centivolts)
+
+    	if (dhandle->voltageMin < voltage && voltage < dhandle->voltageMax) {
+    	   	dhandle->voltageSet = voltage; //save in centivolts
+    		snprintf(response, sizeof(response), "Voltage set to new value: %lu.%02lu V\r\n", dhandle->voltageSet / 100, dhandle->voltageSet % 100);
+    	} else {
+    		snprintf(response, sizeof(response), "ERROR: Voltage out of bounds\r\n");
+    	}
     }
+    else if (strcmp(cmd_part, "TIMEOUT1") == 0)
+	{
+		uint32_t ms = atof(params)*1000; // Convert float to uint milliseconds
+
+		if (0 < ms && ms < 10000) {
+			sm->timeoutCounter = ms;
+			snprintf(response, sizeof(response), "Timeout set to new value: %lu.%03lu s\r\n", ms / 1000, ms % 1000);
+		} else {
+			snprintf(response, sizeof(response), "ERROR: Timeout out of bounds (0-10s)\r\n");
+		}
+	}
+    else if (strcmp(cmd_part, "VSET1?") == 0)
+	{
+		// Convert to volts and format as "XX.XX V"
+		snprintf(response, sizeof(response), "Voltage is set to: %lu.%02lu V\r\n", dhandle->voltageSet / 100, dhandle->voltageSet % 100);
+
+		sm->OCPMode = OCP_DISABLED;
+		//Update AWD limits
+		Update_AWD_Thresholds(0, OCP_DISABLED_HT, ADC_ANALOGWATCHDOG_2);
+	}
+    else if (strcmp(cmd_part, "ISET1") == 0)
+	{
+    	sm->rotaryBtnPressed = true;
+    	sm->setValueMode = SET_CURRENT;
+
+		uint32_t current = atof(params)*1000; // Convert float parameter to integer
+
+		if (dhandle->currentMin < current && current < dhandle->currentMax) {
+			dhandle->currentSet = current; //save in mA
+			snprintf(response, sizeof(response), "Current set to new value: %lu.%03lu A\r\n", dhandle->currentSet / 1000, dhandle->currentSet % 1000);
+		} else {
+			snprintf(response, sizeof(response), "ERROR: Current out of bounds\r\n");
+		}
+
+	}
+    else if (strcmp(cmd_part, "ISET1?") == 0)
+  	{
+  		snprintf(response, sizeof(response), "Current is set to: %lu.%03lu A\r\n", dhandle->currentSet / 1000, dhandle->currentSet % 1000);
+
+  		sm->OCPMode = OCP_DISABLED;
+  		//Update AWD limits
+  		Update_AWD_Thresholds(0, OCP_DISABLED_HT, ADC_ANALOGWATCHDOG_2);
+  	}
+    else if (strcmp(cmd_part, "OUT0") == 0)
+   	{
+   		snprintf(response, sizeof(response), "Output disabled\r\n");
+   		//Simulate button press
+   		if (sm->currentState == STATE_ACTIVE) {
+   	   		sm->outputBtnPressed = true;
+   		}
+   	}
+    else if (strcmp(cmd_part, "OUT1") == 0)
+	{
+		snprintf(response, sizeof(response), "Output enabled\r\n");
+
+		//Simulate button press
+		if (sm->currentState == STATE_IDLE) {
+			sm->outputBtnPressed = true;
+		}
+	}
+    else if (strcmp(cmd_part, "VOUT1?") == 0)
+   	{
+   		snprintf(response, sizeof(response), "Measured output voltage: %lu.%02lu V\r\n", dhandle->voltageMeas / 100, dhandle->voltageMeas % 100);
+   	}
+    else if (strcmp(cmd_part, "IOUT1?") == 0)
+   	{
+  		snprintf(response, sizeof(response), "Current is set to: %lu.%03lu A\r\n", dhandle->currentMeas / 1000, dhandle->currentMeas % 1000);
+   	}
+    else if (strcmp(cmd_part, "*IDN?") == 0)
+	{
+		snprintf(response, sizeof(response), "USB-PD PPS Sink v0.2 (100W,22V,5A)\r\n");
+	}
+    else if (strcmp(cmd_part, "PROFILES?") == 0)
+   	{
+   		snprintf(response, sizeof(response), "Profiles mockup\r\n");
+   	}
+    else
+    {
+        snprintf(response, sizeof(response), "Unknown command\r\n");
+    }
+
+    // Send response
+    CDC_Transmit_FS((uint8_t*)response, strlen(response));
 }
+
 /*
  * Define state Handle functions
  */
@@ -577,7 +683,9 @@ void handleIdleState(void) {
         entryDone = false;
     } else if (sm->rotaryBtnPressed) {
         sm->currentState = STATE_SET_VALUES;
-        sm->timeoutCounter = 4000;  // 4 seconds timeout
+        if (sm->comState == STATE_CLOSED) {
+        	sm->timeoutCounter = 4000;  // 4 seconds timeout
+        }
         sm->rotaryBtnPressed = false;
         entryDone = false;
     }
@@ -642,7 +750,9 @@ void handleActiveState(void) {
         entryDone = false;
     } else if (sm->rotaryBtnPressed) {
         sm->currentState = STATE_SET_VALUES;
-        sm->timeoutCounter = 4000;  // 4 seconds timeout
+        if (sm->comState == STATE_CLOSED) {
+			sm->timeoutCounter = 4000;  // 4 seconds timeout
+		}
         sm->rotaryBtnPressed = false;
         entryDone = false;
     }
@@ -1138,7 +1248,7 @@ void updateCurrentOCP(void) {
 
 //Make voltage correction for the voltage drops on rshunts
 uint32_t compensateVoltage(void) {
-	uint32_t correction = (dhandle->currentSet * (R_OCP_MOHMS + R_SENSE_MOHMS) ) / 1000;
+	uint32_t correction = (dhandle->currentMeas * (R_OCP_MOHMS + R_SENSE_MOHMS) ) / 1000;
 	uint32_t compVoltage = dhandle->voltageSet + correction;
 
 	return (compVoltage > dhandle->voltageMax) ? dhandle->voltageMax : compVoltage;
