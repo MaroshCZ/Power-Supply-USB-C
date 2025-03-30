@@ -299,7 +299,6 @@ void TIM7_LPTIM2_IRQHandler(void)
 void TIM14_IRQHandler(void)
 {
   /* USER CODE BEGIN TIM14_IRQn 0 */
-  //tim14_isr();
   TIM14_ISR();
   /* USER CODE END TIM14_IRQn 0 */
   /* USER CODE BEGIN TIM14_IRQn 1 */

@@ -222,6 +222,8 @@ void updateCurrentOCP(void);
 uint32_t compensateVoltage(void);
 void Update_AWD_Thresholds(uint32_t low, uint32_t high, uint32_t adc_watchdog);
 void TIM14_ISR(void);
+void TIM15_ISR(void);
+void TIM7_ISR(void);
 uint8_t* getUSBbuffer(void);
 void handleCOMportstatus(uint8_t host_com_port_open);
 void trimSpacesCopy(const char *input, char *output);

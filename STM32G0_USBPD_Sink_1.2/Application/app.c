@@ -190,8 +190,8 @@ void app_init(void){
 	//TIM3 initialization of encoder
 	HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
 	__HAL_TIM_SET_COUNTER(&htim3, 30000); //write non 0 value to avoid shift from 0 -> max value
-	encoderVal = __HAL_TIM_GET_COUNTER(&htim3)/4;
-	//encoderValPrev = encoderVal;
+	sm->encoder.curValue = __HAL_TIM_GET_COUNTER(&htim3)/4;
+	sm->encoder.prevValue = sm->encoder.curValue;
 
 	/*
 	//Set tim IT freq to 10Khz (TIM4 runs on PCLK 64MHz)
@@ -286,6 +286,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
     	systemEvents.encoderTurnEvent = true;
     }
 }
+
 
 void TIM14_ISR(void) {
 	if (LL_TIM_IsActiveFlag_UPDATE(TIM14)) {
@@ -1048,29 +1049,6 @@ void sw2_lock_isr(void){
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 }
 
-void ocp_alert_isr(void) {
-	//Disable relay
-	//Change output state
-	outputState = OUTPUT_OFF_STATE;
-	//Disable output
-	HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
-
-
-	// Get number of int numbers in voltage var
-	//Print the voltage to the display, set decimal point after digit position 3 (display 1 has positions 4-1)
-	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
-
-	//Display output current
-	max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
-
-
-	ocp_reset_needed = 1;
-
-	//Clear IT flag
-	__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_6);
-}
-
-
 /**
   * @brief  src capa menu navigation
   * @param  Nav
@@ -1157,49 +1135,6 @@ void sourcecapa_limits(bool printToCOM)
 	}
 }
 
-/*
-void usart2_lupart2_handler(void)
-{
-    if (LL_LPUART_IsActiveFlag_RXNE_RXFNE(LPUART2) && LL_LPUART_IsEnabledIT_RXNE_RXFNE(LPUART2))
-    {
-        uint8_t received_char = LL_LPUART_ReceiveData8(LPUART2);
-        if (rxIndex < RX_BUFFER_SIZE-1)
-        {
-            rxBuffer[rxIndex++] = received_char;
-            if (rxIndex >= 2 && rxBuffer[rxIndex-2] == '\r' && rxBuffer[rxIndex-1] == '\n')
-            {
-            	// Check for CRLF ending
-				rxBuffer[rxIndex-2] = '\0';  // Null-terminate the string, removing CRLF
-
-				// Print received command for debugging
-				LPUART_Transmit(LPUART2, (const uint8_t*)"Received: ", 10);
-				LPUART_Transmit(LPUART2, rxBuffer, rxIndex-2);
-				LPUART_Transmit(LPUART2, (const uint8_t*)"\r\n", 2);
-
-                processCommand(rxBuffer, rxIndex);
-                rxIndex = 0;
-            }
-        }
-    }
-}
-
-void LPUART_Transmit(USART_TypeDef *LPUARTx, const uint8_t *pData, uint16_t Size)
-{
-    for (uint16_t i = 0; i < Size; i++)
-    {
-        // Wait until TXE flag is set (Transmit data register empty)
-        while (!LL_LPUART_IsActiveFlag_TXE(LPUARTx));
-
-        // Transmit 8-bit data
-        LL_LPUART_TransmitData8(LPUARTx, pData[i]);
-    }
-
-    // Wait until TC flag is set (Transmission complete)
-    while (!LL_LPUART_IsActiveFlag_TC(LPUARTx));
-}
-*/
-
-
 
 // Helper function to update voltage
 void updateVoltage(void) {
@@ -1208,14 +1143,10 @@ void updateVoltage(void) {
 	voltageTemp += sm->encoder.direction * sm->encoder.increment;
 
 	//If required temp value is within limits, assign it to voltage else assign limits
-	if (voltageTemp > dhandle->voltageMax) {
-		dhandle->voltageSet = dhandle->voltageMax;
-
-	} else if (voltageTemp < dhandle->voltageMin) {
-		dhandle->voltageSet = dhandle->voltageMin;
-
+	if (dhandle->voltageMin <= voltageTemp && voltageTemp <= dhandle->voltageMax) {
+		dhandle->voltageSet = voltageTemp; //asign new voltage
 	} else {
-		dhandle->voltageSet = voltageTemp;
+		return;
 	}
 
 	//Print selected voltage to disp, decimal at digit 3
@@ -1229,14 +1160,10 @@ void updateCurrent(void) {
 	currentTemp += sm->encoder.direction * sm->encoder.increment;
 
 	//If required temp value is within limits, assign it to voltage else assign limits
-	if (currentTemp > dhandle->currentMax) {
-		dhandle->currentSet = dhandle->currentMax;
-
-	} else if (currentTemp < dhandle->currentMin) {
-		dhandle->currentSet = dhandle->currentMin;
-
+	if (dhandle->currentMin <= currentTemp && currentTemp <= dhandle->currentMax) {
+		dhandle->currentSet = currentTemp; //asign new voltage
 	} else {
-		dhandle->currentSet = currentTemp;
+		return;
 	}
 
 	//Print selected voltage to disp, decimal at digit 3
