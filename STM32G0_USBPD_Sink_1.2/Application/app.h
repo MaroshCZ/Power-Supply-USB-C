@@ -59,6 +59,7 @@ typedef struct {
   USBPD_Profiles_TypeDef 	srcProfiles[8];
   uint8_t 					numProfiles;
   uint8_t					selectedProfile;
+  bool 						hasAPDO;
 
 } SINKData_HandleTypeDef;
 

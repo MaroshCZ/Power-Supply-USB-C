@@ -85,6 +85,7 @@ StateMachine_TypeDef stateMachine = {
 		.comState = STATE_CLOSED,
 		.lockMode = UNLOCKED,
 		.OCPMode = OCP_DISABLED,
+		.pwrMode = MODE_FIXED,
 		.encoder = {
 				.selDigit = 2,
 				.increment = 10    // Default increment
@@ -92,12 +93,14 @@ StateMachine_TypeDef stateMachine = {
 };
 
 SINKData_HandleTypeDef SNK_data = {
-	.voltageMin = 500,
-	.voltageSet = 600, //initial value to display
+	.voltageMin = 500, //initial min voltage
+	.voltageSet = 500, //initial value to display
+	.voltageMax = 500, //initial max voltage
 	.currentSet = 1000, //initial value to display
 	.currentMin = 0,
 	.currentOCPSet = 1000,
 	.selMethod = PDO_SEL_METHOD_MAX_CUR,
+	.hasAPDO = false,
 };
 
 // Define the pointer to the struct
@@ -707,12 +710,7 @@ void handleInitState(void) {
     if (!entryDone) {
     	// Set the state entry time and timeout duration
 		sm->stateEntryTime = HAL_GetTick();
-		sm->timeoutCounter = 2000;  // 2 seconds timeout
-
-    	//Show SRC limits on displays
-        //max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
-        //max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
-
+		sm->timeoutCounter = 5000;  // 2 seconds timeout
 
         // Save state for return from temporary states
         strcpy(sm->lastStateStr, "INIT");
@@ -725,13 +723,29 @@ void handleInitState(void) {
 	// DO ACTIONS - Executed every time the state is processed
 	//==========================================================
 
-    // Check if the timeout has elapsed
-    if (HAL_GetTick() - sm->stateEntryTime > sm->timeoutCounter) {
-		//After initialization transition to IDLE state
-		sm->currentState = STATE_IDLE;
-		entryDone = false;
-    }
 
+    //=================================================
+	// TRANSITION CHECKS - Check for state transitions
+	//=================================================
+    if (dhandle->srcProfiles[0].profileType != UNKNOWN) {
+    	// Display maximal values
+    	max7219_PrintIspecial(SEGMENT_2, dhandle->currentMax, 4);
+    	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageMax, 3);
+
+    	// If APDO available set APDO mode
+    	if (dhandle->hasAPDO == true) {
+    		sm->pwrMode = MODE_APDO;
+    	} else {
+    		sm->pwrMode = MDOE_FIXED;
+    	}
+
+    	// Check if the timeout has elapsed
+		if (HAL_GetTick() - sm->stateEntryTime > sm->timeoutCounter) {
+			//After initialization transition to IDLE state
+			sm->currentState = STATE_IDLE;
+			entryDone = false;
+		}
+    }
 }
 
 void handleIdleState(void) {
@@ -1113,7 +1127,7 @@ void sourcecapa_limits(bool printToCOM)
 
 	uint8_t _max = DPM_Ports[0].DPM_NumberOfRcvSRCPDO;
 	uint8_t _start = 0;
-	SINKData_HandleTypeDef *dhandle = &SNK_data;
+	//SINKData_HandleTypeDef *dhandle = &SNK_data;
 	dhandle->numProfiles = _max;
 	static char all_profiles[500] = {0}; // Buffer for all profiles
 	uint16_t offset = 0; // Position tracker in the all_profiles buffer
@@ -1166,6 +1180,10 @@ void sourcecapa_limits(bool printToCOM)
 				uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_APDO_MAX_CURRENT_Pos) * 50;
 				sprintf((char*)_str, "APDO:%2d.%1d-%2d.%1dV %d.%dA \r\n",(int) (minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
 
+				// Set flag
+				dhandle->hasAPDO = true;
+
+				// Extract min and max values
 				if (minvoltage < dhandle->voltageMin*10) {
 					dhandle -> voltageMin = (int)minvoltage/10;
 				}
@@ -1249,8 +1267,6 @@ void updateVoltage(void) {
 				if (dhandle->currentSet > dhandle->currentMax) {
 					dhandle->currentSet = dhandle->currentMax;
 				}
-
-
 			break;
 		case MODE_APDO:
 			//Get direction of encoder turning
