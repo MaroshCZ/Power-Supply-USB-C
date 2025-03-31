@@ -29,6 +29,7 @@ typedef struct {
 }Encoder_TypeDef;
 
 typedef enum {
+	UNKNOWN,
 	FIXED,
 	APDO
 }USBPD_Profile_Type_TypeDef;
@@ -55,8 +56,9 @@ typedef struct {
   uint32_t              	currentMax;       /*!< Maximal SRC current in mA */
   uint32_t              	currentMin;       /*!< Minimal current in mA (0)*/
   USBPD_USER_SERV_PDO_SelectionMethodTypeDef selMethod;
-  USBPD_Profiles_TypeDef 	srcProfiles[7];
+  USBPD_Profiles_TypeDef 	srcProfiles[8];
   uint8_t 					numProfiles;
+  uint8_t					selectedProfile;
 
 } SINKData_HandleTypeDef;
 

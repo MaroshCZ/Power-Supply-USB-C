@@ -280,7 +280,7 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
     EXTI->IMR1 &= ~GPIO_Pin;
 
     // Start debounce timer
-    TIM7->ARR = 300;
+    TIM7->ARR = 50;
     LL_TIM_SetCounter(TIM7, 0);
     LL_TIM_EnableCounter(TIM7);
 }
@@ -995,6 +995,7 @@ void handleSetValuesState(void) {
 				//Print to debug !!calling it from inside updateVoltage() results in hardFault error!!
 				sprintf(_str,"VBUS selected: %lu mV", dhandle->voltageSet * 10);
 				USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+
 				break;
 			case SET_CURRENT:
 				updateCurrent();
@@ -1002,6 +1003,7 @@ void handleSetValuesState(void) {
 				sprintf(_str,"IBUS selected: %lu mA", dhandle->currentSet);
 				USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 
+				//IF OCP enabled update the tresholds
 				if (sm->OCPMode == OCP_ENABLED) {
 					//Update AWD limits
 					int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
@@ -1112,6 +1114,7 @@ void sourcecapa_limits(bool printToCOM)
 	uint8_t _max = DPM_Ports[0].DPM_NumberOfRcvSRCPDO;
 	uint8_t _start = 0;
 	SINKData_HandleTypeDef *dhandle = &SNK_data;
+	dhandle->numProfiles = _max;
 	static char all_profiles[500] = {0}; // Buffer for all profiles
 	uint16_t offset = 0; // Position tracker in the all_profiles buffer
 	char str_info[32] = {0};
@@ -1122,80 +1125,81 @@ void sourcecapa_limits(bool printToCOM)
 	for(int8_t index=_start; index < _max; index++)
 	{
 		char _str[50] = {0};
+
 		switch(DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_TYPE_Msk)
 		{
-		case USBPD_PDO_TYPE_FIXED :
-		{
-			uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_FIXED_MAX_CURRENT_Pos)*10;
-			uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_VOLTAGE_Msk) >> USBPD_PDO_SRC_FIXED_VOLTAGE_Pos)*50;
-			sprintf((char*)_str, "FIXED:%2dV %2d.%dA \r\n", (int)(maxvoltage/1000), (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
-			if (maxcurrent > dhandle->currentMax) {
-				dhandle -> currentMax = (int)maxcurrent;
+			case USBPD_PDO_TYPE_FIXED :
+			{
+				uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_FIXED_MAX_CURRENT_Pos)*10;
+				uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_VOLTAGE_Msk) >> USBPD_PDO_SRC_FIXED_VOLTAGE_Pos)*50;
+				sprintf((char*)_str, "FIXED:%2dV %2d.%dA \r\n", (int)(maxvoltage/1000), (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
+				if (maxcurrent > dhandle->currentMax) {
+					dhandle -> currentMax = (int)maxcurrent;
+				}
+				// Copy profiles to SNK data
+				if (firstEntry) {
+					if ((maxvoltage/1000 * maxcurrent/1000) <= 100) {
+						dhandle->srcProfiles[index].voltageMax = maxvoltage/10; //save in centivolts
+						dhandle->srcProfiles[index].currentMax = maxcurrent; //save in mA
+						dhandle->srcProfiles[index].profileType = FIXED;
+					}
+				}
+
+				break;
 			}
-			// Copy profiles to SNK data
-			if (firstEntry) {
-				if ((maxvoltage/1000 * maxcurrent/1000) <= 100) {
-					dhandle->srcProfiles[index].voltageMax = maxvoltage/10; //save in centivolts
-					dhandle->srcProfiles[index].currentMax = maxcurrent; //save in mA
-					dhandle->srcProfiles[index].profileType = FIXED;
+			case USBPD_PDO_TYPE_BATTERY :
+			{
+			}
+			break;
+			case USBPD_PDO_TYPE_VARIABLE :
+			{
+				uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Pos) * 50;
+				uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Pos) * 50;
+				uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Pos) * 10;
+				sprintf((char*)_str, "V:%2d.%1d-%2d.%1dV %d.%dA \r\n", (int)(minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
+			}
+			break;
+			case USBPD_PDO_TYPE_APDO :
+			{
+				uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Pos) * 100;
+				uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Pos) * 100;
+				uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_APDO_MAX_CURRENT_Pos) * 50;
+				sprintf((char*)_str, "APDO:%2d.%1d-%2d.%1dV %d.%dA \r\n",(int) (minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
+
+				if (minvoltage < dhandle->voltageMin*10) {
+					dhandle -> voltageMin = (int)minvoltage/10;
+				}
+				if (maxvoltage > dhandle->voltageMax*10) {
+					dhandle -> voltageMax = (int)maxvoltage/10;
+				}
+				if (maxcurrent > dhandle->currentMax) {
+					dhandle -> currentMax = (int)maxcurrent;
+				}
+
+				// Copy profiles to SNK data
+				if (firstEntry) {
+					if ((maxvoltage/1000 * maxcurrent/1000) <= 100) {
+						dhandle->srcProfiles[index].voltageMin = minvoltage/10; //save in centivolts
+						dhandle->srcProfiles[index].voltageMax = maxvoltage/10; //save in centivolts
+						dhandle->srcProfiles[index].currentMax = maxcurrent; //save in mA
+						dhandle->srcProfiles[index].profileType = APDO;
+					}
 				}
 			}
-
 			break;
-		}
-		case USBPD_PDO_TYPE_BATTERY :
-		{
-		}
-		break;
-		case USBPD_PDO_TYPE_VARIABLE :
-		{
-			uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_VOLTAGE_Pos) * 50;
-			uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_VARIABLE_MIN_VOLTAGE_Pos) * 50;
-			uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_VARIABLE_MAX_CURRENT_Pos) * 10;
-			sprintf((char*)_str, "V:%2d.%1d-%2d.%1dV %d.%dA \r\n", (int)(minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
-		}
-		break;
-		case USBPD_PDO_TYPE_APDO :
-		{
-			uint32_t minvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MIN_VOLTAGE_Pos) * 100;
-			uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Msk) >> USBPD_PDO_SRC_APDO_MAX_VOLTAGE_Pos) * 100;
-			uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_APDO_MAX_CURRENT_Pos) * 50;
-			sprintf((char*)_str, "APDO:%2d.%1d-%2d.%1dV %d.%dA \r\n",(int) (minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
-
-			if (minvoltage < dhandle->voltageMin*10) {
-				dhandle -> voltageMin = (int)minvoltage/10;
-			}
-			if (maxvoltage > dhandle->voltageMax*10) {
-				dhandle -> voltageMax = (int)maxvoltage/10;
-			}
-			if (maxcurrent > dhandle->currentMax) {
-				dhandle -> currentMax = (int)maxcurrent;
+			default :
+			{
+				sprintf((char*)_str,"Unknown Source PDO \r\n");
+				break;
 			}
 
-			// Copy profiles to SNK data
-			if (firstEntry) {
-				if ((maxvoltage/1000 * maxcurrent/1000) <= 100) {
-					dhandle->srcProfiles[index].voltageMin = minvoltage/10; //save in centivolts
-					dhandle->srcProfiles[index].voltageMax = maxvoltage/10; //save in centivolts
-					dhandle->srcProfiles[index].currentMax = maxcurrent; //save in mA
-					dhandle->srcProfiles[index].profileType = APDO;
-				}
 			}
-		}
-		break;
-		default :
-		{
-			sprintf((char*)_str,"Unknown Source PDO \r\n");
-			break;
-		}
-
-		}
-		// Add current profile to the buffer with bounds checking
-		uint16_t len = strlen(_str);
-		if (offset + len < sizeof(all_profiles) - 1) {
-			memcpy(all_profiles + offset, _str, len);
-			offset += len;
-		}
+			// Add current profile to the buffer with bounds checking
+			uint16_t len = strlen(_str);
+			if (offset + len < sizeof(all_profiles) - 1) {
+				memcpy(all_profiles + offset, _str, len);
+				offset += len;
+		} //switch end
 
 	} //for end
 
@@ -1214,16 +1218,62 @@ void sourcecapa_limits(bool printToCOM)
 
 // Helper function to update voltage
 void updateVoltage(void) {
-	//Get direction of encoder turning
-	int voltageTemp = dhandle->voltageSet;
-	voltageTemp += sm->encoder.direction * sm->encoder.increment;
 
-	//If required temp value is within limits, assign it to voltage else assign limits
-	if (dhandle->voltageMin <= voltageTemp && voltageTemp <= dhandle->voltageMax) {
-		dhandle->voltageSet = voltageTemp; //asign new voltage
-	} else {
-		return;
+	switch (sm -> pwrMode) {
+		case MODE_FIXED:
+				// Create helper variable
+				int8_t index = dhandle->selectedProfile + sm->encoder.direction;;
+
+				//Find index of next FixedPDO based on encoder turn direction
+				if ((0 <= index) && (index <= dhandle->numProfiles -1)) {
+					if (dhandle->srcProfiles[index].profileType != FIXED) {
+						index = 0; //we are out of fixed profiles that are defined at beginning, return to 0
+					}
+				} else if (index < 0) {
+					// Search for the last FixedPDO
+					for (index = dhandle->numProfiles -1; index >= 0; index--) {
+						if (dhandle->srcProfiles[index].profileType == FIXED) {
+							break;
+						}
+					} //for loop end
+				}
+
+				dhandle->selectedProfile = index;
+				// Apply parameters of found srcProfile index
+				dhandle->voltageMax = dhandle->srcProfiles[index].voltageMax;
+				dhandle->voltageMin = dhandle->voltageMax;
+				dhandle->voltageSet = dhandle->voltageMax;
+				dhandle->currentMax = dhandle->srcProfiles[index].currentMax;
+
+				//If new voltage has lower current limit adjust accordingly
+				if (dhandle->currentSet > dhandle->currentMax) {
+					dhandle->currentSet = dhandle->currentMax;
+				}
+
+
+			break;
+		case MODE_APDO:
+			//Get direction of encoder turning
+			int voltageTemp = dhandle->voltageSet;
+			voltageTemp += sm->encoder.direction * sm->encoder.increment;
+
+
+
+
+
+
+			//If required temp value is within limits, assign it to voltage else assign limits
+			if (dhandle->voltageMin <= voltageTemp && voltageTemp <= dhandle->voltageMax) {
+				dhandle->voltageSet = voltageTemp; //asign new voltage
+			} else {
+				return;
+			}
+
+			break;
+		default:
+			break;
 	}
+
 
 	//Print selected voltage to disp, decimal at digit 3
 	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
