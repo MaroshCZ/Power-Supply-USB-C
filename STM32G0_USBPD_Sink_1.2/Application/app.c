@@ -287,6 +287,19 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
     }
 }
 
+/*
+ * Timer7 interrupt routine for button debouncing
+ */
+void TIM7_ISR(void){
+	//Unmask exti line 1, 2 and 3
+	EXTI->IMR1 |= EXTI_IMR1_IM8; //unmask interrupt mask register on exti line 8
+	EXTI->IMR1 |= EXTI_IMR1_IM4; //unmask interrupt mask register on exti line 4
+	EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask interrupt mask register on exti line 2
+	EXTI->IMR1 |= EXTI_IMR1_IM1; //unmask interrupt mask register on exti line 1
+
+	//Clear update flag on TIM7
+	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
+}
 
 void TIM14_ISR(void) {
 	if (LL_TIM_IsActiveFlag_UPDATE(TIM14)) {
@@ -964,38 +977,6 @@ void handleSetValuesState(void) {
 
     }
 }
-
-
-
-
-/*
- * Timer7 interrupt routine for button debouncing
- */
-void tim7_btn_isr(void){
-	//Unmask exti line 1, 2 and 3
-	EXTI->IMR1 |= EXTI_IMR1_IM8; //unmask interrupt mask register on exti line 8
-	EXTI->IMR1 |= EXTI_IMR1_IM4; //unmask interrupt mask register on exti line 4
-	EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask interrupt mask register on exti line 2
-	EXTI->IMR1 |= EXTI_IMR1_IM1; //unmask interrupt mask register on exti line 1
-
-	//Clear update flag on TIM7
-	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
-}
-
-/*
- * Timer interrupt routine
- */
-void tim14_isr(void){
-	//Unmask exti line 6
-	EXTI->IMR1 |= EXTI_IMR1_IM6; //unmask interrupt (PB6)
-
-	//Alert set during turning off/on output, we need to clean it
-	ocp_reset_needed = 1;
-
-	//Clear update flag on TIM7
-	LL_TIM_ClearFlag_UPDATE(TIM14); //Clear update flag on TIMER7
-}
-
 
 void sw2_lock_isr(void){
 	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PB2)
