@@ -858,8 +858,8 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : SW2_DEBUG_BTN_Pin */
   GPIO_InitStruct.Pin = SW2_DEBUG_BTN_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(SW2_DEBUG_BTN_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : LED_LOCK_Pin */
@@ -885,7 +885,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin : SW1_TOGGLE_I_V_Pin */
   GPIO_InitStruct.Pin = SW1_TOGGLE_I_V_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(SW1_TOGGLE_I_V_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : CS_MAX7219_Pin OCP_RESET_Pin */
@@ -897,8 +897,8 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pin : ENC_TOGGLE_UNITS_Pin */
   GPIO_InitStruct.Pin = ENC_TOGGLE_UNITS_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(ENC_TOGGLE_UNITS_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : CC2_G4_Pin */

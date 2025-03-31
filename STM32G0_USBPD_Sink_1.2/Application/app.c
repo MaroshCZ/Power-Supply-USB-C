@@ -74,12 +74,17 @@ static uint32_t rxIndex = 0;
 uint32_t counter = 0;
 uint32_t usbReadTime = 0;
 
-//Initialize button event struct
+//Initialize button event and time struct
 SystemEvents_TypeDef systemEvents = {0};
+BtnPressTimes_TypeDef btnPressTimes = {0};
+volatile uint32_t debouncedPins = 0;  // Bitmask for tracking debounced buttons
+
 //Init stateMachine struct
 StateMachine_TypeDef stateMachine = {
 		.currentState = STATE_INIT,
 		.comState = STATE_CLOSED,
+		.lockMode = UNLOCKED,
+		.OCPMode = OCP_DISABLED,
 		.encoder = {
 				.selDigit = 2,
 				.increment = 10    // Default increment
@@ -176,8 +181,9 @@ void Update_AWD_Thresholds(uint32_t low, uint32_t high, uint32_t adc_watchdog) {
 void app_init(void){
 
 	//TIM7 initialization
-	LL_TIM_EnableIT_UPDATE(TIM7); //Enable interrupt generation when timer goes to max value and UPDATE event flag is set
 	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
+	LL_TIM_EnableIT_UPDATE(TIM7); //Enable interrupt generation when timer goes to max value and UPDATE event flag is set
+	//LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
 
 	//TIM14 initialization
 	LL_TIM_DisableIT_UPDATE(TIM14); //Enable interrupt generation when timer goes to max value and UPDATE event flag is set
@@ -245,7 +251,9 @@ void app_loop(void) {
 	// Reset button states after processing
 	stateMachine.outputBtnPressed = false;
 	stateMachine.lockBtnPressed = false;
+	stateMachine.lockBtnLongPressed = false;
 	stateMachine.voltageCurrentBtnPressed = false;
+	stateMachine.voltageCurrentBtnLongPressed = false;
 	stateMachine.rotaryBtnPressed = false;
 	stateMachine.encoderTurnedFlag = false;
 	stateMachine.stateTimeoutFlag = false;
@@ -261,23 +269,71 @@ void app_loop(void) {
 void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
     if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
         systemEvents.voltageCurrentBtnEvent = true;
-        EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
+        //EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
     } else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
-        systemEvents.lockBtnEvent = true;
-        EXTI->IMR1 &= ~(EXTI_IMR1_IM4);
+        btnPressTimes.lockBtn = HAL_GetTick();
+        systemEvents.btnPressEvent = true;
+        //EXTI->IMR1 &= ~(EXTI_IMR1_IM4);
         //lockButtonPressTime = HAL_GetTick();
     } else if (GPIO_Pin == SW3_OFF_ON_Pin) {
         systemEvents.outputBtnEvent = true;
-        EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
+        //EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
     } else if (GPIO_Pin == ENC_TOGGLE_UNITS_Pin) {
         systemEvents.rotaryBtnEvent = true;
-        EXTI->IMR1 &= ~(EXTI_IMR1_IM8);
+        //EXTI->IMR1 &= ~(EXTI_IMR1_IM8);
     }
 
+    // Store the pressed button in bitmask for tracking debounce
+    debouncedPins |= GPIO_Pin;
+    // Mask the interrupt for this button
+    EXTI->IMR1 &= ~GPIO_Pin;
+
     // Start debounce timer
-    TIM7->ARR = 200;
+    TIM7->ARR = 50;
     LL_TIM_SetCounter(TIM7, 0);
     LL_TIM_EnableCounter(TIM7);
+}
+
+/*
+ * Define Callbacks and ISR
+ */
+//BTN ISR to set event flags
+void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
+
+	if (systemEvents.btnPressEvent == true) {
+		uint32_t releaseTime = HAL_GetTick();
+
+		if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
+			if ((releaseTime - btnPressTimes.voltageCurrentBtn) > 1000) {
+				systemEvents.voltageCurrentBtnLongEvent = true;
+			} else {
+				systemEvents.voltageCurrentBtnEvent = true;
+			}
+
+		} else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
+
+			if ((releaseTime - btnPressTimes.lockBtn) > 1000) {
+				systemEvents.lockBtnLongEvent = true;
+			} else {
+				systemEvents.lockBtnEvent = true;
+			}
+		} else {
+			return;
+		}
+
+		// Start debounce timer
+		TIM7->ARR = 50;
+		LL_TIM_SetCounter(TIM7, 0);
+		LL_TIM_EnableCounter(TIM7);
+
+		//Reset btnPressEvent
+		systemEvents.btnPressEvent = false;
+
+		 // Store the pressed button in bitmask for tracking debounce
+		debouncedPins |= GPIO_Pin;
+		// Mask the interrupt for this button
+		EXTI->IMR1 &= ~GPIO_Pin;
+	}
 }
 
 //TIM capture callback
@@ -291,14 +347,17 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
  * Timer7 interrupt routine for button debouncing
  */
 void TIM7_ISR(void){
-	//Unmask exti line 1, 2 and 3
-	EXTI->IMR1 |= EXTI_IMR1_IM8; //unmask interrupt mask register on exti line 8
-	EXTI->IMR1 |= EXTI_IMR1_IM4; //unmask interrupt mask register on exti line 4
-	EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask interrupt mask register on exti line 2
-	EXTI->IMR1 |= EXTI_IMR1_IM1; //unmask interrupt mask register on exti line 1
+	//Unmask exti line 1, 2 and 4,8
 
-	//Clear update flag on TIM7
-	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
+	LL_TIM_ClearFlag_UPDATE(TIM7);
+	LL_TIM_DisableCounter(TIM7);
+
+	// Unmask only the buttons that were debounced
+	EXTI->IMR1 |= debouncedPins;
+
+	// Reset the bitmask after unmasking
+	debouncedPins = 0;
+
 }
 
 void TIM14_ISR(void) {
@@ -344,27 +403,55 @@ void processButtonEvents(void) {
     	sm->voltageCurrentBtnPressed = true;
     } else if (events->lockBtnEvent) {
     	events->lockBtnEvent = false;
-		sm->lockBtnPressed = true;
 
-		//Toggle OCP mode
-		switch(sm->OCPMode) {
-			case OCP_DISABLED:
-				sm->OCPMode = OCP_ENABLED;
+    	if (sm->lockMode == UNLOCKED) {
+    		sm->lockBtnPressed = true;
 
-				//Update AWD limits
-				int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
-				int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD treshold
-				Update_AWD_Thresholds(0, isense_rawADCtrip, ADC_ANALOGWATCHDOG_2);
-				break;
-			case OCP_ENABLED:
-				sm->OCPMode = OCP_DISABLED;
-				//Update AWD limits
-				Update_AWD_Thresholds(0, OCP_DISABLED_HT, ADC_ANALOGWATCHDOG_2);
+			//Toggle OCP mode
+			switch(sm->OCPMode) {
+				case OCP_DISABLED:
+					sm->OCPMode = OCP_ENABLED;
 
-				//__HAL_ADC_DISABLE_IT(&hadc1, ADC_IT_AWD2); can be also used to write bit but
-				//only when ADSTART bit is cleared to 0 (this ensures that no conversion is ongoing).
-				break;
-		}
+					//Update AWD limits
+					int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
+					int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD treshold
+					Update_AWD_Thresholds(0, isense_rawADCtrip, ADC_ANALOGWATCHDOG_2);
+					break;
+				case OCP_ENABLED:
+					sm->OCPMode = OCP_DISABLED;
+					//Update AWD limits
+					Update_AWD_Thresholds(0, OCP_DISABLED_HT, ADC_ANALOGWATCHDOG_2);
+
+					//__HAL_ADC_DISABLE_IT(&hadc1, ADC_IT_AWD2); can be also used to write bit but
+					//only when ADSTART bit is cleared to 0 (this ensures that no conversion is ongoing).
+					break;
+			}
+    	}
+
+    } else if (events->lockBtnLongEvent) {
+    	events->lockBtnLongEvent = false;
+    	sm->lockBtnLongPressed = true;
+
+    	if (sm->lockMode == LOCKED) {
+    		sm->lockMode = UNLOCKED;
+
+    		//Drive lock LED
+    		HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
+
+    		// Mask buttons except OUT
+    		EXTI->IMR1 |= EXTI_IMR1_IM8; //unmask ENCbtn
+    		EXTI->IMR1 |= EXTI_IMR1_IM2; //unmask SW1 I/V
+    	} else {
+    		sm->lockMode = LOCKED;
+
+    		//Drive lock LED
+    		HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
+
+    		// Unmask buttons except OUT
+    		EXTI->IMR1 &= ~(EXTI_IMR1_IM2); // mask SW1 I/V
+    		EXTI->IMR1 &= ~(EXTI_IMR1_IM8); // mask ENCbtnt
+    	}
+
     } else if (events->rotaryBtnEvent) {
     	//Reset btn event flag
     	events->rotaryBtnEvent = false;
@@ -687,14 +774,6 @@ void handleIdleState(void) {
     if (sm->outputBtnPressed) {
         sm->currentState = STATE_ACTIVE;
         entryDone = false;
-    } else if (sm->lockBtnHoldActive) {
-        sm->currentState = STATE_LOCK;
-        entryDone = false;
-    } else if (sm->ocpBtnPressed) {
-        sm->currentState = STATE_OCP_TOGGLE;
-        sm->stateEntryTime = HAL_GetTick();
-        sm->timeoutCounter = 500;  // 0.5 seconds timeout
-        entryDone = false;
     } else if (sm->rotaryBtnPressed) {
         sm->currentState = STATE_SET_VALUES;
         if (sm->comState == STATE_CLOSED) {
@@ -724,7 +803,7 @@ void handleActiveState(void) {
         strcpy(sm->lastStateStr, "ACTIVE");
         sm->lastState = STATE_ACTIVE;
 
-        // Initialize the check timer
+        // Initialize the periodic check timer
         TIM14->ARR = 500;
 		LL_TIM_SetCounter(TIM14, 0); //set counter register value of timer 7 to 0
 		LL_TIM_EnableIT_UPDATE(TIM14); // Enable update interrupt
@@ -756,9 +835,6 @@ void handleActiveState(void) {
     if (sm->outputBtnPressed) {
         sm->currentState = STATE_IDLE;
         entryDone = false;
-    } else if (sm->lockBtnHoldActive) {
-        sm->currentState = STATE_LOCK;
-        entryDone = false;
     } else if (sm->awdgTriggeredFlag) {
         sm->currentState = STATE_IDLE;
         entryDone = false;
@@ -771,7 +847,8 @@ void handleActiveState(void) {
         entryDone = false;
     }
 
-    if (sm->outputBtnPressed || sm->ocpBtnPressed) {
+    //EXIT ACTION
+    if (!entryDone) {
     	LL_TIM_DisableCounter(TIM14);
     }
 }
@@ -797,7 +874,7 @@ void handleSetValuesState(void) {
 		LL_TIM_EnableIT_UPDATE(TIM14); // Enable update interrupt
 		LL_TIM_EnableCounter(TIM14);
 
-		// Initialize the periodic timer
+		// Initialize the timeout timer
 		LL_TIM_DisableCounter(TIM15);
 		TIM15->ARR = sm->timeoutCounter;
 		LL_TIM_SetCounter(TIM15, 0); //set counter register value of timer 14 to 0
@@ -947,16 +1024,9 @@ void handleSetValuesState(void) {
 	//=================================================
 	// TRANSITION CHECKS - Check for state transitions
 	//=================================================
-    // Process events and transitions
-	if (sm->lockBtnHoldActive) {
-        sm->currentState = STATE_LOCK;
-        entryDone = false;
-    } else if (sm->ocpBtnPressed) {
-        sm->currentState = STATE_OCP_TOGGLE;
-        sm->stateEntryTime = HAL_GetTick();
-        sm->timeoutCounter = 500;  // 0.5 seconds timeout
-        entryDone = false;
-    } else if (sm->stateTimeoutFlag) {
+
+    // If timeout from setValues make USB PD request with new values
+    if (sm->stateTimeoutFlag) {
 
     	uint32_t compVoltage = compensateVoltage();
     	//Make a USBPD request
@@ -974,8 +1044,13 @@ void handleSetValuesState(void) {
 	        sm->currentState = STATE_ACTIVE;
 	    }
 	    entryDone = false;
-
     }
+
+    //EXIT ACTION
+	if (!entryDone) {
+		LL_TIM_DisableCounter(TIM14);
+	}
+
 }
 
 void sw2_lock_isr(void){

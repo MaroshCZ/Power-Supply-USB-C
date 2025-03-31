@@ -124,9 +124,9 @@ typedef struct {
     // Button states
     bool outputBtnPressed;
     bool lockBtnPressed;
-    bool lockBtnHoldActive;
-    bool ocpBtnPressed;
+    bool lockBtnLongPressed;
     bool voltageCurrentBtnPressed;
+    bool voltageCurrentBtnLongPressed;
     bool rotaryBtnPressed;
 
     // Other flags
@@ -143,6 +143,12 @@ typedef struct {
 		OCP_DISABLED,
 		OCP_ENABLED
 	} OCPMode;
+
+	// Lock mode
+	enum {
+		LOCKED,
+		UNLOCKED
+	} lockMode;
 
     // Display states
     enum {
@@ -176,8 +182,9 @@ typedef struct {
 	volatile bool lockBtnEvent;
 	volatile bool lockBtnLongEvent;
 	volatile bool voltageCurrentBtnEvent;
-	volatile bool ocpBtnEvent;
+	volatile bool voltageCurrentBtnLongEvent;
 	volatile bool rotaryBtnEvent;
+	volatile bool btnPressEvent;
 
 	// Encoder events
 	volatile bool encoderTurnEvent;
@@ -190,12 +197,11 @@ typedef struct {
 	volatile bool awdgEvent;
 } SystemEvents_TypeDef;
 
+// Button press times
 typedef struct {
-    const char* command;
-    void (*handler)(void);
-} Command_t;
-
-
+	volatile uint32_t voltageCurrentBtn;
+	volatile uint32_t lockBtn;
+} BtnPressTimes_TypeDef;
 
 void usart2_lupart2_handler(void);
 
