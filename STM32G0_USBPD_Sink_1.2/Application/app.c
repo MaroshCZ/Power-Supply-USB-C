@@ -101,6 +101,7 @@ SINKData_HandleTypeDef SNK_data = {
 	.currentOCPSet = 1000,
 	.selMethod = PDO_SEL_METHOD_MAX_CUR,
 	.hasAPDO = false,
+	.srcProfiles[0].profileType = UNKNOWN,
 };
 
 // Define the pointer to the struct
@@ -736,7 +737,7 @@ void handleInitState(void) {
     	if (dhandle->hasAPDO == true) {
     		sm->pwrMode = MODE_APDO;
     	} else {
-    		sm->pwrMode = MDOE_FIXED;
+    		sm->pwrMode = MODE_FIXED;
     	}
 
     	// Check if the timeout has elapsed
@@ -1239,8 +1240,9 @@ void updateVoltage(void) {
 
 	switch (sm -> pwrMode) {
 		case MODE_FIXED:
+		{
 				// Create helper variable
-				int8_t index = dhandle->selectedProfile + sm->encoder.direction;;
+				int8_t index = dhandle->selectedProfile + sm->encoder.direction;
 
 				//Find index of next FixedPDO based on encoder turn direction
 				if ((0 <= index) && (index <= dhandle->numProfiles -1)) {
@@ -1267,26 +1269,57 @@ void updateVoltage(void) {
 				if (dhandle->currentSet > dhandle->currentMax) {
 					dhandle->currentSet = dhandle->currentMax;
 				}
+		}
 			break;
 		case MODE_APDO:
+		{
 			//Get direction of encoder turning
 			int voltageTemp = dhandle->voltageSet;
 			voltageTemp += sm->encoder.direction * sm->encoder.increment;
 
+			// Extract total bounds of APDO
+			for (int8_t i = 0; i <= dhandle->numProfiles-1; i++) {
+				if (dhandle->srcProfiles[i].profileType == APDO) {
+					if (dhandle->srcProfiles[i].voltageMin < dhandle->voltageMin) {
+						dhandle->voltageMin = dhandle->srcProfiles[i].voltageMin;
+					}
+					if (dhandle->srcProfiles[i].voltageMax > dhandle->voltageMax) {
+						dhandle->voltageMax = dhandle->srcProfiles[i].voltageMax;
+					}
+					if (dhandle->srcProfiles[i].currentMax > dhandle->currentMax) {
+						dhandle->currentMax = dhandle->srcProfiles[i].currentMax;
+					}
+				}
 
+			}
 
-
-
-
-			//If required temp value is within limits, assign it to voltage else assign limits
+			// If required temp value is within limits, assign it to voltage else assign limits
 			if (dhandle->voltageMin <= voltageTemp && voltageTemp <= dhandle->voltageMax) {
 				dhandle->voltageSet = voltageTemp; //asign new voltage
 			} else {
 				return;
 			}
 
+			int8_t index = dhandle->selectedProfile;
+			// Search if there is APDO with higher current and satisfies voltageSet
+			for (int8_t i = dhandle->numProfiles-1; i >= 0; i--) {
+				if (dhandle->srcProfiles[i].profileType == APDO) {
+					if (dhandle->voltageSet < dhandle->srcProfiles[i].voltageMax) {
+						dhandle->currentMax = dhandle->srcProfiles[i].currentMax;
+						index = i;
+					}
+				}
+				else {
+					break;
+				}
+			}
+			dhandle->selectedProfile = index;
+			//dhandle->selectedProfile = USER_SERV_FindSRCIndex(0, &powerRequestDetails, compVoltage*10, dhandle->currentSet, dhandle ->selMethod);
+		}
 			break;
 		default:
+		{
+		}
 			break;
 	}
 
