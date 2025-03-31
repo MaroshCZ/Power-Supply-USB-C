@@ -28,22 +28,35 @@ typedef struct {
 	bool turnEvent;	   // Turn event
 }Encoder_TypeDef;
 
+typedef enum {
+	FIXED,
+	APDO
+}USBPD_Profile_Type_TypeDef;
+
+typedef struct {
+	uint32_t  					voltageMin;
+	uint32_t  					voltageMax;
+	uint32_t 					currentMax;
+	USBPD_Profile_Type_TypeDef  profileType;
+}USBPD_Profiles_TypeDef;
+
 typedef struct {
   //USBPD_PPSSDB_TypeDef  DPM_RcvPPSStatus;           /*!< PPS Status received by port partner                         */
   //USBPD_SKEDB_TypeDef   DPM_RcvSNKExtendedCapa;     /*!< SNK Extended Capability received by port partner            */
-  uint32_t              voltageSet;       /*!< User selected voltage in centivolts */
-  uint32_t              currentSet;       /*!< User selected OCP limit in mA */
-  uint32_t				currentOCPSet;
+  uint32_t            	    voltageSet;       /*!< User selected voltage in centivolts */
+  uint32_t              	currentSet;       /*!< User selected OCP limit in mA */
+  uint32_t					currentOCPSet;
 
-  uint32_t              voltageMeas;      /*!< Measured output voltage in centivolts */
-  uint32_t              currentMeas;      /*!< Measured output current in centivolts */
+  uint32_t             		voltageMeas;      /*!< Measured output voltage in centivolts */
+  uint32_t              	currentMeas;      /*!< Measured output current in centivolts */
 
-  uint32_t              voltageMin;       /*!< Minimal SRC voltage in centivolts */
-  uint32_t              voltageMax;       /*!< Maximal SRC voltage in centivolts */
-  uint32_t              currentMax;       /*!< Maximal SRC current in mA */
-  uint32_t              currentMin;       /*!< Minimal current in mA (0)*/
+  uint32_t              	voltageMin;       /*!< Minimal SRC voltage in centivolts */
+  uint32_t              	voltageMax;       /*!< Maximal SRC voltage in centivolts */
+  uint32_t              	currentMax;       /*!< Maximal SRC current in mA */
+  uint32_t              	currentMin;       /*!< Minimal current in mA (0)*/
   USBPD_USER_SERV_PDO_SelectionMethodTypeDef selMethod;
-  Encoder_TypeDef       encoder;
+  USBPD_Profiles_TypeDef 	srcProfiles[7];
+  uint8_t 					numProfiles;
 
 } SINKData_HandleTypeDef;
 
@@ -94,10 +107,7 @@ typedef enum {
     STATE_INIT,
     STATE_IDLE,
     STATE_ACTIVE,
-    STATE_LOCK,
     STATE_ERROR,
-    //STATE_DISPLAY_TOGGLE,
-    STATE_OCP_TOGGLE,
     STATE_SET_VALUES,
     // Sub-states can be handled within each state function
 } SystemState_TypeDef;
@@ -149,6 +159,12 @@ typedef struct {
 		LOCKED,
 		UNLOCKED
 	} lockMode;
+
+	// Lock mode
+	enum {
+		MODE_FIXED,
+		MODE_APDO
+	} pwrMode;
 
     // Display states
     enum {
@@ -233,6 +249,5 @@ void TIM15_ISR(void);
 
 uint8_t* getUSBbuffer(void);
 void handleCOMportstatus(uint8_t host_com_port_open);
-void trimSpacesCopy(const char *input, char *output);
 void cleanString(const char* input, char* output, const char* delimiter);
 #endif /* APP_H_ */

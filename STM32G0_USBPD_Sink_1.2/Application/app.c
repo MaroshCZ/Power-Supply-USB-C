@@ -98,10 +98,6 @@ SINKData_HandleTypeDef SNK_data = {
 	.currentMin = 0,
 	.currentOCPSet = 1000,
 	.selMethod = PDO_SEL_METHOD_MAX_CUR,
-	.encoder = {
-		.selDigit = 2,
-		.increment = 10    // Default increment
-	}
 };
 
 // Define the pointer to the struct
@@ -125,14 +121,8 @@ void runStateMachine(void) {
 		case STATE_ACTIVE:
 			handleActiveState();
 			break;
-		case STATE_LOCK:
-			//handleLockState(sm, dhandle);
-			break;
 		case STATE_ERROR:
 			//handleErrorState(sm, dhandle);
-			break;
-		case STATE_OCP_TOGGLE:
-			//handleOCPToggleState(sm, dhandle);
 			break;
 		case STATE_SET_VALUES:
 			handleSetValuesState();
@@ -268,7 +258,8 @@ void app_loop(void) {
 //BTN ISR to set event flags
 void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
     if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
-        systemEvents.voltageCurrentBtnEvent = true;
+        btnPressTimes.voltageCurrentBtn = HAL_GetTick();
+        systemEvents.btnPressEvent = true;
         //EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
     } else if (GPIO_Pin == SW2_DEBUG_BTN_Pin) {
         btnPressTimes.lockBtn = HAL_GetTick();
@@ -289,7 +280,7 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
     EXTI->IMR1 &= ~GPIO_Pin;
 
     // Start debounce timer
-    TIM7->ARR = 50;
+    TIM7->ARR = 300;
     LL_TIM_SetCounter(TIM7, 0);
     LL_TIM_EnableCounter(TIM7);
 }
@@ -398,9 +389,20 @@ void processButtonEvents(void) {
     	//Reset btn event flag
         events->outputBtnEvent = false;
         sm->outputBtnPressed = true;
+
     } else if (events->voltageCurrentBtnEvent) {
     	events->voltageCurrentBtnEvent = false;
     	sm->voltageCurrentBtnPressed = true;
+    } else if (events->voltageCurrentBtnLongEvent) {
+       	events->voltageCurrentBtnLongEvent = false;
+       	sm->voltageCurrentBtnLongPressed = true;
+
+       	if (sm->pwrMode == MODE_FIXED) {
+       		sm->pwrMode = MODE_APDO;
+       	} else {
+       		sm->pwrMode = MODE_FIXED;
+       	}
+
     } else if (events->lockBtnEvent) {
     	events->lockBtnEvent = false;
 
@@ -531,16 +533,6 @@ void cleanString(const char* input, char* output, const char* delimiter) {
         strcat(output, token);  // Append token to output
         token = strtok(NULL, delimiter);
     }
-}
-
-void trimSpacesCopy(const char *input, char *output) {
-    while (*input) {
-        if (!isspace((unsigned char)*input)) {
-            *output++ = *input;
-        }
-        input++;
-    }
-    *output = '\0';  // Null-terminate
 }
 
 void processUSBCommand(uint8_t* command, uint32_t length)
@@ -1053,6 +1045,7 @@ void handleSetValuesState(void) {
 
 }
 
+/*
 void sw2_lock_isr(void){
 	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PB2)
 	EXTI->IMR1 &= ~(EXTI_IMR1_IM2);
@@ -1103,7 +1096,7 @@ void sw2_lock_isr(void){
 	//HAL_GPIO_TogglePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin);
 	//Get Voltage level into TRACE
 	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-}
+}*/
 
 /**
   * @brief  src capa menu navigation
@@ -1113,6 +1106,9 @@ void sw2_lock_isr(void){
   */
 void sourcecapa_limits(bool printToCOM)
 {
+	// Entry actions (if just entered this state)
+	static bool firstEntry = true;
+
 	uint8_t _max = DPM_Ports[0].DPM_NumberOfRcvSRCPDO;
 	uint8_t _start = 0;
 	SINKData_HandleTypeDef *dhandle = &SNK_data;
@@ -1136,6 +1132,15 @@ void sourcecapa_limits(bool printToCOM)
 			if (maxcurrent > dhandle->currentMax) {
 				dhandle -> currentMax = (int)maxcurrent;
 			}
+			// Copy profiles to SNK data
+			if (firstEntry) {
+				if ((maxvoltage/1000 * maxcurrent/1000) <= 100) {
+					dhandle->srcProfiles[index].voltageMax = maxvoltage/10; //save in centivolts
+					dhandle->srcProfiles[index].currentMax = maxcurrent; //save in mA
+					dhandle->srcProfiles[index].profileType = FIXED;
+				}
+			}
+
 			break;
 		}
 		case USBPD_PDO_TYPE_BATTERY :
@@ -1166,6 +1171,16 @@ void sourcecapa_limits(bool printToCOM)
 			if (maxcurrent > dhandle->currentMax) {
 				dhandle -> currentMax = (int)maxcurrent;
 			}
+
+			// Copy profiles to SNK data
+			if (firstEntry) {
+				if ((maxvoltage/1000 * maxcurrent/1000) <= 100) {
+					dhandle->srcProfiles[index].voltageMin = minvoltage/10; //save in centivolts
+					dhandle->srcProfiles[index].voltageMax = maxvoltage/10; //save in centivolts
+					dhandle->srcProfiles[index].currentMax = maxcurrent; //save in mA
+					dhandle->srcProfiles[index].profileType = APDO;
+				}
+			}
 		}
 		break;
 		default :
@@ -1181,7 +1196,9 @@ void sourcecapa_limits(bool printToCOM)
 			memcpy(all_profiles + offset, _str, len);
 			offset += len;
 		}
+
 	} //for end
+
 	// Ensure null termination
 	all_profiles[offset] = '\0';
 
@@ -1189,6 +1206,9 @@ void sourcecapa_limits(bool printToCOM)
 	if (printToCOM && offset > 0) {
 		CDC_Transmit_FS((uint8_t*)all_profiles, offset);
 	}
+
+	// Clear first entry flag
+	firstEntry = false;
 }
 
 
