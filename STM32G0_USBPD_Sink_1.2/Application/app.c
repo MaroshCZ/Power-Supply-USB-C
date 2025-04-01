@@ -1255,7 +1255,9 @@ void updateVoltage(void) {
 						if (dhandle->srcProfiles[index].profileType == FIXED) {
 							break;
 						}
-					} //for loop end
+					}
+				} else if (index >= dhandle->numProfiles) {
+					index = 0;
 				}
 
 				dhandle->selectedProfile = index;
