@@ -70,6 +70,10 @@ typedef struct {
 #define R_SENSE_MOHMS  		30u // 30 mOhms
 #define G_SENSE             20u // V/V
 #define OCP_DISABLED_HT   6000u // high treshold [mA]
+#define ADC_MAX_VALUE 	  4095u // ADC resolution
+#define DEBOUNCE_TIME_MS    50u // btn debounce time
+#define ENCODER_INITIAL_VALUE 30000u
+#define SEGMENT_DISP_INTENSIVITY 7u
 
 //declaration of functions
 void app_init(void);
@@ -239,6 +243,7 @@ void handleSetValuesState(void);
 void runStateMachine(void); //StateMachine *sm, SINKData_HandleTypeDef *dhandle
 void processButtonEvents(void);
 void processSystemEvents(void);
+void processUSBCommand(uint8_t* command, uint32_t length);
 
 /*Define additional fcns and ISR*/
 void updateVoltage(void);

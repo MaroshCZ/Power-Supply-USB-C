@@ -27,30 +27,11 @@ int32_t BSP_USBPD_PWR_VBUSGetCurrentOCP(uint32_t Instance, int32_t *pCurrentOCP)
 int32_t BSP_PWR_VBUSGetCurrentOCP(uint32_t PortId);
 
 //Variables declaration
-int encoderVal; //TIM2 CNT register reading
-int encoderValPrev;
 int dac_value = 500;
 
-int ocp_reset_needed = 0;
-
-uint32_t srcPdoIndex; //variable that holds Pdo index from FindVoltageIndex
 USBPD_DPM_SNKPowerRequestDetailsTypeDef powerRequestDetails;
-USBPD_StatusTypeDef powerProfiles;
 
 __IO uint16_t aADCxConvertedValues[ADC_NUM_OF_SAMPLES] = {0};
-
-typedef enum {
-	ADJUSTMENT_CURRENT = 0x0u,      /*!< Current adjustment state */
-	ADJUSTMENT_VOLTAGE = 0x1u,      /*!< Voltage adjustment state */
-	ADJUSTMENT_CURRENT_OCP = 0x2u   /*!< CurrentOCP adjustment state */
-} AdjustmentState;
-
-typedef enum {
-	OUTPUT_OFF_STATE = 0x0u,      /*!< Current adjustment state */
-	OUTPUT_ON_STATE = 0x1u,      /*!< Voltage adjustment state */
-
-} OutputState;
-
 
 //USB communication
 uint8_t usb_buffer[64]; //in C, array automaticaly decays to pointer to first element uint8_t*
@@ -58,21 +39,6 @@ uint8_t usb_buffer[64]; //in C, array automaticaly decays to pointer to first el
 uint8_t *getUSBbuffer(void) {
 	return usb_buffer;
 }
-
-// Define a typedef for the state variable
-typedef AdjustmentState Adjustment_StateTypedef;
-typedef OutputState Output_StateTypedef;
-
-// Declare a variable to hold the current state
-volatile Adjustment_StateTypedef currentState = ADJUSTMENT_VOLTAGE;
-volatile Output_StateTypedef outputState = OUTPUT_OFF_STATE;
-
-/*Add variables for LUPART2*/
-#define RX_BUFFER_SIZE 64
-static uint8_t rxBuffer[RX_BUFFER_SIZE];
-static uint32_t rxIndex = 0;
-uint32_t counter = 0;
-uint32_t usbReadTime = 0;
 
 //Initialize button event and time struct
 SystemEvents_TypeDef systemEvents = {0};
@@ -173,6 +139,8 @@ void Update_AWD_Thresholds(uint32_t low, uint32_t high, uint32_t adc_watchdog) {
  * Initialization function
  */
 void app_init(void){
+	//TIM4 initialization
+	HAL_TIM_Base_Start(&htim4);
 
 	//TIM7 initialization
 	LL_TIM_ClearFlag_UPDATE(TIM7); //Clear update flag on TIMER7
@@ -189,21 +157,10 @@ void app_init(void){
 
 	//TIM3 initialization of encoder
 	HAL_TIM_Encoder_Start_IT(&htim3, TIM_CHANNEL_ALL);
-	__HAL_TIM_SET_COUNTER(&htim3, 30000); //write non 0 value to avoid shift from 0 -> max value
+	uint32_t maxCounterValue = __HAL_TIM_GET_AUTORELOAD(&htim3); // Get the max value
+	__HAL_TIM_SET_COUNTER(&htim3, maxCounterValue / 2); // Set the counter to half of the max value to avoid shift from 0 -> max value
 	sm->encoder.curValue = __HAL_TIM_GET_COUNTER(&htim3)/4;
 	sm->encoder.prevValue = sm->encoder.curValue;
-
-	/*
-	//Set tim IT freq to 10Khz (TIM4 runs on PCLK 64MHz)
-	TIM4->PSC = 64-1;
-	TIM4->ARR = 100-1;
-
-	// Enable update interrupt
-	LL_TIM_EnableIT_UPDATE(TIM4);
-	LL_TIM_ClearFlag_UPDATE(TIM4);
-	LL_TIM_SetCounter(TIM4, 0);
-	LL_TIM_EnableCounter(TIM4);*/
-
 
 	//Init DAC
 	HAL_DAC_Start(&hdac1, DAC_CHANNEL_1);
@@ -217,16 +174,9 @@ void app_init(void){
 	HAL_ADCEx_Calibration_Start(&hadc1);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&aADCxConvertedValues, ADC_NUM_OF_SAMPLES);
 
-	//TIM4 initialization
-	HAL_TIM_Base_Start(&htim4);
-
 	//Init 7 segment display
-	max7219_Init( 7 );
+	max7219_Init( SEGMENT_DISP_INTENSIVITY );
 	max7219_Decode_On();
-
-	//Print decimal points and initial values
-	max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
-	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
 
 	//HAL_GPIO_WritePin(OCP_RESET_GPIO_Port, OCP_RESET_Pin, GPIO_PIN_SET);
 }
@@ -284,7 +234,7 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
     EXTI->IMR1 &= ~GPIO_Pin;
 
     // Start debounce timer
-    TIM7->ARR = 50;
+    TIM7->ARR = DEBOUNCE_TIME_MS;
     LL_TIM_SetCounter(TIM7, 0);
     LL_TIM_EnableCounter(TIM7);
 }
@@ -317,7 +267,7 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
 		}
 
 		// Start debounce timer
-		TIM7->ARR = 50;
+		TIM7->ARR = DEBOUNCE_TIME_MS;
 		LL_TIM_SetCounter(TIM7, 0);
 		LL_TIM_EnableCounter(TIM7);
 
@@ -347,8 +297,9 @@ void TIM7_ISR(void){
 	LL_TIM_ClearFlag_UPDATE(TIM7);
 	LL_TIM_DisableCounter(TIM7);
 
-	// Unmask only the buttons that were debounced
-	EXTI->IMR1 |= debouncedPins;
+	EXTI->IMR1 |= debouncedPins; // Unmask debounced pins
+	EXTI->FPR1 = debouncedPins; // clear falling edge interrupt
+	EXTI->RPR1 = debouncedPins; // clear rising edge interrupt
 
 	// Reset the bitmask after unmasking
 	debouncedPins = 0;
@@ -541,6 +492,14 @@ void cleanString(const char* input, char* output, const char* delimiter) {
 
 void processUSBCommand(uint8_t* command, uint32_t length)
 {
+	// If only fixed profiles, abort communication
+	if (dhandle->hasAPDO == true) {
+		sm->pwrMode = MODE_APDO;
+	}
+	else {
+		return;
+	}
+
 	// Null-terminate the command to ensure string functions work properly
 	command[length] = '\0';
 
@@ -560,20 +519,6 @@ void processUSBCommand(uint8_t* command, uint32_t length)
 	if (cmd_part != NULL && strlen(cmd_part) < length) {
 		params = strtok(NULL, ":");  // Get remaining part after ':'
 	}
-
-	// Define command table
-	/*
-	static const Command_t commands[] = {
-		{"*IDN?", idnHandler},
-		{"PROFILES", profilesHandler},
-		{"VOUT", voutHandler},
-		{"IOUT", ioutHandler},
-		{"VSET", vsetHandler},
-		{"ISET", isetHandler},
-		{"OCP", ocpHandler},
-		{"OUT", outHandler},
-		{NULL, NULL} // Sentinel
-	};*/
 
 	//Create buffer for response
 	char response[64];
@@ -1132,7 +1077,6 @@ void sourcecapa_limits(bool printToCOM)
 	dhandle->numProfiles = _max;
 	static char all_profiles[500] = {0}; // Buffer for all profiles
 	uint16_t offset = 0; // Position tracker in the all_profiles buffer
-	char str_info[32] = {0};
 
 	// Clear the buffer at the start
 	memset(all_profiles, 0, sizeof(all_profiles));
@@ -1314,15 +1258,24 @@ void updateVoltage(void) {
 			for (int8_t i = dhandle->numProfiles-1; i >= 0; i--) {
 				if (dhandle->srcProfiles[i].profileType == APDO) {
 					if (dhandle->voltageSet < dhandle->srcProfiles[i].voltageMax) {
+						//update max current
 						dhandle->currentMax = dhandle->srcProfiles[i].currentMax;
+
+						//store profile index
 						index = i;
+					} else {
+						break;
 					}
-				}
-				else {
+				} else {
 					break;
 				}
 			}
 			dhandle->selectedProfile = index;
+
+			//If new voltage has lower current limit adjust accordingly
+			if (dhandle->currentSet > dhandle->currentMax) {
+				dhandle->currentSet = dhandle->currentMax;
+			}
 			//dhandle->selectedProfile = USER_SERV_FindSRCIndex(0, &powerRequestDetails, compVoltage*10, dhandle->currentSet, dhandle ->selMethod);
 		}
 			break;
