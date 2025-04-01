@@ -1148,9 +1148,15 @@ void sourcecapa_limits(bool printToCOM)
 				uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_FIXED_MAX_CURRENT_Pos)*10;
 				uint32_t maxvoltage = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_FIXED_VOLTAGE_Msk) >> USBPD_PDO_SRC_FIXED_VOLTAGE_Pos)*50;
 				sprintf((char*)_str, "FIXED:%2dV %2d.%dA \r\n", (int)(maxvoltage/1000), (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
+
+				// Extract min and max values
+				if (maxvoltage > dhandle->voltageMax*10) {
+					dhandle -> voltageMax = (int)maxvoltage/10;
+				}
 				if (maxcurrent > dhandle->currentMax) {
 					dhandle -> currentMax = (int)maxcurrent;
 				}
+
 				// Copy profiles to SNK data
 				if (firstEntry) {
 					if ((maxvoltage/1000 * maxcurrent/1000) <= 100) {
@@ -1184,7 +1190,8 @@ void sourcecapa_limits(bool printToCOM)
 				// Set flag
 				dhandle->hasAPDO = true;
 
-				// Extract min and max values
+				// Extract min and max values (since APDOs are last it will rewrite FIXED values,
+				// this is what we want since if APDO is present the sink will default to APDO mode
 				if (minvoltage < dhandle->voltageMin*10) {
 					dhandle -> voltageMin = (int)minvoltage/10;
 				}

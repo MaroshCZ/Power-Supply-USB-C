@@ -28,7 +28,7 @@
 ../Application/app.c:794:6:handleActiveState	16	static
 ../Application/app.c:863:6:handleSetValuesState	136	static
 ../Application/app.c:1124:6:sourcecapa_limits	184	static
-../Application/app.c:1239:6:updateVoltage	16	static
-../Application/app.c:1334:6:updateCurrent	16	static
-../Application/app.c:1351:6:updateCurrentOCP	24	static
-../Application/app.c:1374:10:compensateVoltage	16	static
+../Application/app.c:1246:6:updateVoltage	16	static
+../Application/app.c:1341:6:updateCurrent	16	static
+../Application/app.c:1358:6:updateCurrentOCP	24	static
+../Application/app.c:1381:10:compensateVoltage	16	static
