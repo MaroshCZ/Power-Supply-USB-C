@@ -38,7 +38,7 @@ typedef struct {
 	uint32_t  					voltageMin;
 	uint32_t  					voltageMax;
 	uint32_t 					currentMax;
-	USBPD_Profile_Type_TypeDef  profileType;
+	USBPD_Profile_Type_TypeDef  profileType; // UNKNOWN/FIXED/APDO
 }USBPD_Profiles_TypeDef;
 
 typedef struct {
@@ -55,11 +55,11 @@ typedef struct {
   uint32_t              	voltageMax;       /*!< Maximal SRC voltage in centivolts */
   uint32_t              	currentMax;       /*!< Maximal SRC current in mA */
   uint32_t              	currentMin;       /*!< Minimal current in mA (0)*/
-  USBPD_USER_SERV_PDO_SelectionMethodTypeDef selMethod;
-  USBPD_Profiles_TypeDef 	srcProfiles[8];
-  uint8_t 					numProfiles;
-  uint8_t					selectedProfile;
-  bool 						hasAPDO;
+  USBPD_USER_SERV_PDO_SelectionMethodTypeDef selMethod; /*!< Minimal current in mA (0)*/
+  USBPD_Profiles_TypeDef 	srcProfiles[8];   /*!< Struct holding profiles data*/
+  uint8_t 					numProfiles;      /*!< Number of avaible profiles on adapter (source)*/
+  uint8_t					selectedProfile;  /*!< Index of selected profile*/
+  bool 						hasAPDO;          /*!< hasAPDO flag*/
 
 } SINKData_HandleTypeDef;
 
@@ -69,28 +69,11 @@ typedef struct {
 #define R_B         	 36000u // 36 kOhms
 #define R_SENSE_MOHMS  		30u // 30 mOhms
 #define G_SENSE             20u // V/V
-#define OCP_DISABLED_HT   6000u // high treshold [mA]
+#define OCP_DISABLED_HT   3908u // high treshold [mA] 5250mA*G_OCP*R_SENSE/1000 * 4095/3300 = 3908
 #define ADC_MAX_VALUE 	  4095u // ADC resolution
 #define DEBOUNCE_TIME_MS    50u // btn debounce time
 #define ENCODER_INITIAL_VALUE 30000u
 #define SEGMENT_DISP_INTENSIVITY 7u
-
-//declaration of functions
-void app_init(void);
-void app_loop(void);
-
-//declaration of isr
-void encoder_turn_isr(void);
-void enc_toggle_units_isr(void);
-void button_timer_isr(void);
-void timer14_isr(void);
-void tim7_btn_isr(void);
-void sw1_toggle_i_v_isr(void);
-void sw3_on_off_isr(void);
-void sw2_lock_isr(void);
-void ocp_alert_isr(void);
-
-void sourcecapa_limits(bool printToCOM);
 
 #define ADC_NUM_OF_SAMPLES 3
 extern ADC_HandleTypeDef hadc1;
@@ -103,8 +86,9 @@ extern TIM_HandleTypeDef htim4;
    aADCxConvertedValues[0u]: VSENSE
    aADCxConvertedValues[1u]: ISENSE
 */
+
+// Raw values converted by ADC
 extern __IO uint16_t aADCxConvertedValues[ADC_NUM_OF_SAMPLES];
-//get_dhandle(SINKData_HandleTypeDef *)
 
 //__IO: Indicates that this variable can change at any time, usually due to hardware activity.
 
@@ -173,21 +157,11 @@ typedef struct {
 		MODE_APDO
 	} pwrMode;
 
-    // Display states
-    enum {
-        SHOW_LIMITS,
-        SHOW_SET,
-        SHOW_MEASURED
-    } displayMode;
-
     // Set value states
     enum {
         SET_VOLTAGE,
         SET_CURRENT
     } setValueMode;
-
-    // OCP state
-    bool ocpEnabled;
 
     // Error flags
     uint8_t errorCode;
@@ -226,17 +200,32 @@ typedef struct {
 	volatile uint32_t lockBtn;
 } BtnPressTimes_TypeDef;
 
-void usart2_lupart2_handler(void);
+// Declaration of main app functions
+void app_init(void);
+void app_loop(void);
+
+// Declaration of ISR
+void encoder_turn_isr(void);
+void enc_toggle_units_isr(void);
+void button_timer_isr(void);
+void timer14_isr(void);
+void tim7_btn_isr(void);
+void sw1_toggle_i_v_isr(void);
+void sw3_on_off_isr(void);
+void sw2_lock_isr(void);
+void ocp_alert_isr(void);
+
+void TIM7_ISR(void);
+void TIM14_ISR(void);
+void TIM15_ISR(void);
+
 
 /*Define State functions*/
-void handleOffState(StateMachine_TypeDef *sm, SINKData_HandleTypeDef *dhandle);
+void handleOffState(void); //or: StateMachine_TypeDef *sm, SINKData_HandleTypeDef *dhandle
 void handleInitState(void);
 void handleIdleState(void);
 void handleActiveState(void);
-void handleLockState(StateMachine_TypeDef *sm, SINKData_HandleTypeDef *dhandle);
-void handleErrorState(StateMachine_TypeDef *sm, SINKData_HandleTypeDef *dhandle);
-void handleDisplayToggleState(StateMachine_TypeDef *sm, SINKData_HandleTypeDef *dhandle);
-void handleOCPToggleState(StateMachine_TypeDef *sm, SINKData_HandleTypeDef *dhandle);
+void handleErrorState(void);
 void handleSetValuesState(void);
 
 /*Define procces functions and Statemachine*/
@@ -245,16 +234,15 @@ void processButtonEvents(void);
 void processSystemEvents(void);
 void processUSBCommand(uint8_t* command, uint32_t length);
 
-/*Define additional fcns and ISR*/
+/*Define additional fcns*/
+void sourcecapa_limits(bool printToCOM);
 void updateVoltage(void);
 void updateCurrent(void);
 void updateCurrentOCP(void);
 uint32_t compensateVoltage(void);
 void Update_AWD_Thresholds(uint32_t low, uint32_t high, uint32_t adc_watchdog);
-void TIM7_ISR(void);
-void TIM14_ISR(void);
-void TIM15_ISR(void);
 
+/*Define helper functions for SCPI communication with PC*/
 uint8_t* getUSBbuffer(void);
 void handleCOMportstatus(uint8_t host_com_port_open);
 void cleanString(const char* input, char* output, const char* delimiter);

@@ -926,6 +926,30 @@ __weak int32_t BSP_USBPD_PWR_VBUSSetVoltage_APDO(uint32_t Instance,
 __weak int32_t BSP_USBPD_PWR_VBUSGetVoltage(uint32_t Instance, uint32_t *pVoltage)
 {
   /* USER CODE BEGIN BSP_USBPD_PWR_VBUSGetVoltage */
+	/**
+	  * @note   Voltage is measured trough a voltage divider
+	  *
+	  *
+	  *  PD_sense --------.       PD_sense(VBUS) = ADC_V * (R_A + R_B) / R_B
+	  * 				  |
+	  * 				.---.
+	  *                 |R_A|
+	  *                 '---'
+	  *                   |
+	  *                   .------ ADC_V (MCU)
+	  * 				  |
+	  * 				.---.
+	  *                 |R_B|
+	  *                 '---'
+	  * 				  |
+	  * 			   .-----.
+	  * 				\GND/
+	  * 				 'V'
+	  * R_A = 200kOhms
+	  * R_B = 40.2kOhms
+	  * Vref(VDD) ~ 3.3V
+	  * @retval BSP status
+	  */
   /* Check if instance is valid */
   int32_t ret = BSP_ERROR_NONE;
   if ((Instance >= USBPD_PWR_INSTANCES_NBR) || (NULL == pVoltage))
@@ -966,6 +990,28 @@ __weak int32_t BSP_USBPD_PWR_VBUSGetVoltage(uint32_t Instance, uint32_t *pVoltag
 __weak int32_t BSP_USBPD_PWR_VBUSGetCurrent(uint32_t Instance, int32_t *pCurrent)
 {
   /* USER CODE BEGIN BSP_USBPD_PWR_VBUSGetCurrent */
+	/**
+	  * @note   Current level on PD_sense line measured with MCP6C02T-020 amplifier
+	  * @note   It amplifies voltage difference on shunt resistor R_SENSE(R_S)
+	  *
+	  *  PD_sense--.                        PD_sense(isense) = ADC_I/(G * Rsense)
+	  *       	   |   .-------------.
+	  *       	   .---> MCP6C02-020 |
+	  *        	   |   |             |
+	  *       	 .---. |             |
+	  *       	 |R_S| |             >------ADC_I (MCU)
+	  *       	 '---' |             |
+	  *       	   |   |             |
+	  *       	   .--->             |
+	  *       	   |   '-------------'
+	  *       	   .
+	  *       	   .
+	  *
+	  * R_SENSE (R_S) = 30 mOhms
+	  * Gain (G)      = 20 V/V
+	  * @retval BSP status
+	  */
+
   /* Check if instance is valid       */
   int32_t ret;
 

@@ -58,6 +58,7 @@ StateMachine_TypeDef stateMachine = {
 			}
 };
 
+//Init SINKData struct
 SINKData_HandleTypeDef SNK_data = {
 	.voltageMin = 500, //initial min voltage
 	.voltageSet = 500, //initial value to display
@@ -75,36 +76,6 @@ SINKData_HandleTypeDef *dhandle = &SNK_data;
 StateMachine_TypeDef *sm = &stateMachine;
 SystemEvents_TypeDef *events = &systemEvents;
 
-
-void runStateMachine(void) {
-	// Process events and transitions
-	switch (sm->currentState) {
-		case STATE_OFF:
-			//handleOffState(sm, dhandle);
-			break;
-		case STATE_INIT:
-			handleInitState();
-			break;
-		case STATE_IDLE:
-			handleIdleState();
-			break;
-		case STATE_ACTIVE:
-			handleActiveState();
-			break;
-		case STATE_ERROR:
-			//handleErrorState(sm, dhandle);
-			break;
-		case STATE_SET_VALUES:
-			handleSetValuesState();
-			break;
-		default:
-			// Error handling
-			sm->currentState = STATE_ERROR;
-			//sm->errorCode = ERROR_INVALID_STATE;
-			break;
-	}
-
-}
 
 // Callback when ADC conversion is complete
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
@@ -183,7 +154,7 @@ void app_init(void){
 
 
 /*
- * Loop function
+ * Main loop function
  */
 void app_loop(void) {
 	// Process button events
@@ -207,8 +178,42 @@ void app_loop(void) {
 }
 
 /*
+ * Main function for state machine
+ */
+void runStateMachine(void) {
+	// Process events and transitions
+	switch (sm->currentState) {
+		case STATE_OFF:
+			//handleOffState();
+			break;
+		case STATE_INIT:
+			handleInitState();
+			break;
+		case STATE_IDLE:
+			handleIdleState();
+			break;
+		case STATE_ACTIVE:
+			handleActiveState();
+			break;
+		case STATE_ERROR:
+			//handleErrorState();
+			break;
+		case STATE_SET_VALUES:
+			handleSetValuesState();
+			break;
+		default:
+			// Error handling
+			sm->currentState = STATE_ERROR;
+			//sm->errorCode = ERROR_INVALID_STATE;
+			break;
+	}
+
+}
+
+/*
  * Define Callbacks and ISR
  */
+
 //BTN ISR to set event flags
 void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
     if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
@@ -219,7 +224,6 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
         btnPressTimes.lockBtn = HAL_GetTick();
         systemEvents.btnPressEvent = true;
         //EXTI->IMR1 &= ~(EXTI_IMR1_IM4);
-        //lockButtonPressTime = HAL_GetTick();
     } else if (GPIO_Pin == SW3_OFF_ON_Pin) {
         systemEvents.outputBtnEvent = true;
         //EXTI->IMR1 &= ~(EXTI_IMR1_IM1);
@@ -242,12 +246,14 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin) {
 /*
  * Define Callbacks and ISR
  */
+
 //BTN ISR to set event flags
 void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
 
 	if (systemEvents.btnPressEvent == true) {
 		uint32_t releaseTime = HAL_GetTick();
 
+		// Decide between long/short presses
 		if (GPIO_Pin == SW1_TOGGLE_I_V_Pin) {
 			if ((releaseTime - btnPressTimes.voltageCurrentBtn) > 1000) {
 				systemEvents.voltageCurrentBtnLongEvent = true;
@@ -271,10 +277,10 @@ void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin) {
 		LL_TIM_SetCounter(TIM7, 0);
 		LL_TIM_EnableCounter(TIM7);
 
-		//Reset btnPressEvent
+		// Reset btnPressEvent
 		systemEvents.btnPressEvent = false;
 
-		 // Store the pressed button in bitmask for tracking debounce
+		// Store the pressed button in bitmask for tracking debounce
 		debouncedPins |= GPIO_Pin;
 		// Mask the interrupt for this button
 		EXTI->IMR1 &= ~GPIO_Pin;
@@ -292,8 +298,7 @@ void HAL_TIM_IC_CaptureCallback(TIM_HandleTypeDef *htim) {
  * Timer7 interrupt routine for button debouncing
  */
 void TIM7_ISR(void){
-	//Unmask exti line 1, 2 and 4,8
-
+	//Clear TIM update flag and stop timer
 	LL_TIM_ClearFlag_UPDATE(TIM7);
 	LL_TIM_DisableCounter(TIM7);
 
@@ -306,6 +311,10 @@ void TIM7_ISR(void){
 
 }
 
+/*
+ * TIM14 interrupt routine for periodic check inside states
+ *
+ */
 void TIM14_ISR(void) {
 	if (LL_TIM_IsActiveFlag_UPDATE(TIM14)) {
 		// Clear the update interrupt flag
@@ -321,7 +330,10 @@ void TIM14_ISR(void) {
 	}
 }
 
-
+/*
+ * TIM15 interrupt routine for timeouts of states
+ *
+ */
 void TIM15_ISR(void) {
 	if (LL_TIM_IsActiveFlag_UPDATE(TIM15)) {
 		// Clear the update interrupt flag
@@ -331,7 +343,6 @@ void TIM15_ISR(void) {
 		systemEvents.stateTimeoutEvent = true;
 		//Reset CNT value
 		//LL_TIM_DisableCounter(TIM15);  // Stop the timer after timeout
-
 	}
 }
 
@@ -352,6 +363,7 @@ void processButtonEvents(void) {
        	events->voltageCurrentBtnLongEvent = false;
        	sm->voltageCurrentBtnLongPressed = true;
 
+       	// Toggle pwrMode
        	if (sm->pwrMode == MODE_FIXED) {
        		sm->pwrMode = MODE_APDO;
        	} else {
@@ -376,6 +388,7 @@ void processButtonEvents(void) {
 					break;
 				case OCP_ENABLED:
 					sm->OCPMode = OCP_DISABLED;
+
 					//Update AWD limits
 					Update_AWD_Thresholds(0, OCP_DISABLED_HT, ADC_ANALOGWATCHDOG_2);
 
@@ -401,7 +414,7 @@ void processButtonEvents(void) {
     	} else {
     		sm->lockMode = LOCKED;
 
-    		//Drive lock LED
+    		// Drive lock LED
     		HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
 
     		// Unmask buttons except OUT
@@ -410,7 +423,7 @@ void processButtonEvents(void) {
     	}
 
     } else if (events->rotaryBtnEvent) {
-    	//Reset btn event flag
+    	// Reset btn event flag
     	events->rotaryBtnEvent = false;
 		sm->rotaryBtnPressed = true;
 
@@ -422,14 +435,17 @@ void processSystemEvents(void) {
     // Process different event types using specialized functions
     processButtonEvents();
 
+    // Process encoder actions
     if (events->encoderTurnEvent) {
     	sm->encoderTurnedFlag = true;
     	events->encoderTurnEvent = false;
     }
+    // Process timeout of TIM15
     if (events->stateTimeoutEvent) {
 		sm->stateTimeoutFlag= true;
 		events->stateTimeoutEvent = false;
 	}
+    // Process periodic check of TIM14
 	if (events->periodicCheckEvent) {
 		sm->periodicCheckFlag= true;
 		events->periodicCheckEvent = false;
@@ -441,6 +457,11 @@ void processSystemEvents(void) {
     }
 }
 
+/**
+ * @brief Handle COM port status changes. Drive indicator LED and disable/enable button actions.
+ *
+ * @param host_com_port_open: is a bit value from CDC_Control_FS() case CDC_SET_CONTROL_LINE_STATE
+ */
 void handleCOMportstatus(uint8_t host_com_port_open){
 	 static bool entryDone = false;
 	 if (host_com_port_open == 1 && !entryDone) {
@@ -461,6 +482,7 @@ void handleCOMportstatus(uint8_t host_com_port_open){
 		 entryDone = true;
 	 } else if (host_com_port_open == 0) {
 		 sm->comState = STATE_CLOSED;
+
 		 //Reset lock LED
 		 HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
 
@@ -476,6 +498,14 @@ void handleCOMportstatus(uint8_t host_com_port_open){
 		 entryDone = false;
 	 }
 }
+
+/**
+ * @brief Clean specified delimiter from string array.
+ *
+ * @param input: Input string to be cleaned
+ * @param output: Destination buffer for cleaned string
+ * @param delimiter: Delimiter character(s) to be removed
+ */
 void cleanString(const char* input, char* output, const char* delimiter) {
     char temp[128];  // Temporary buffer for safe modification
     strncpy(temp, input, sizeof(temp) - 1);
@@ -490,9 +520,23 @@ void cleanString(const char* input, char* output, const char* delimiter) {
     }
 }
 
+
+/**
+ * @brief Process USB commands received from host.
+ *
+ * @param command: Pointer to command buffer
+ * @param length: Length of the command
+ *
+ * Handles various commands for power supply control including:
+ * - OCP (Over-Current Protection) enable/disable
+ * - Voltage and current settings
+ * - Output enable/disable
+ * - Query commands for device status
+ */
 void processUSBCommand(uint8_t* command, uint32_t length)
 {
-	// If only fixed profiles, abort communication
+	// Verify device has Adjustable Power Delivery Object capability
+    // If only fixed profiles available, abort communication
 	if (dhandle->hasAPDO == true) {
 		sm->pwrMode = MODE_APDO;
 	}
@@ -503,34 +547,34 @@ void processUSBCommand(uint8_t* command, uint32_t length)
 	// Null-terminate the command to ensure string functions work properly
 	command[length] = '\0';
 
-	// Make a copy for tokenization
+	// Make a copy for tokenization to preserve original command
 	char cmd_copy[64] = {0};
 	strncpy(cmd_copy, (char*)command, sizeof(cmd_copy)-1);
 
-	// Clear white spaces..
+	// Remove whitespace characters
 	char cmd_trimmed[64];
 	cleanString(cmd_copy, cmd_trimmed, " ");
 
-	// Extract command part (everything up to : )
+	// Extract command part (everything up to ":" )
 	char* cmd_part = strtok(cmd_trimmed, ":");
-	char* params = NULL; // extracts the part after "numbers"
+	char* params = NULL; // Will hold the parameter value after the colon
 
 	// Parameters start after the delimiter
 	if (cmd_part != NULL && strlen(cmd_part) < length) {
 		params = strtok(NULL, ":");  // Get remaining part after ':'
 	}
 
-	//Create buffer for response
+	//Create buffer for response mesage
 	char response[64];
 
-	//Process commands
+	// Process different command types
     if (strcmp(cmd_part, "OCP1") == 0)
     {
     	snprintf(response, sizeof(response), "OCP enabled\r\n");
 
         sm->OCPMode = OCP_ENABLED;
 
-		//Update AWD limits
+		// Update Analog Watchdog limits for over-current detection
 		int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
 		int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD treshold
 		Update_AWD_Thresholds(0, isense_rawADCtrip, ADC_ANALOGWATCHDOG_2);
@@ -540,16 +584,19 @@ void processUSBCommand(uint8_t* command, uint32_t length)
     	snprintf(response, sizeof(response), "OCP disabled\r\n");
 
         sm->OCPMode = OCP_DISABLED;
-		//Update AWD limits
+
+        // Set Analog Watchdog to disabled threshold
 		Update_AWD_Thresholds(0, OCP_DISABLED_HT, ADC_ANALOGWATCHDOG_2);
     }
     else if (strcmp(cmd_part, "VSET1") == 0)
     {
+    	// Set voltage mode and update voltage setting
     	sm->rotaryBtnPressed = true;
     	sm->setValueMode = SET_VOLTAGE;
 
     	uint32_t voltage = atof(params)*100; // Convert float to uint (also V to centivolts)
 
+    	// Validate voltage is within allowed range
     	if (dhandle->voltageMin < voltage && voltage < dhandle->voltageMax) {
     	   	dhandle->voltageSet = voltage; //save in centivolts
     		snprintf(response, sizeof(response), "Voltage set to new value: %lu.%02lu V\r\n", dhandle->voltageSet / 100, dhandle->voltageSet % 100);
@@ -561,6 +608,7 @@ void processUSBCommand(uint8_t* command, uint32_t length)
 	{
 		uint32_t ms = atof(params)*1000; // Convert float to uint milliseconds
 
+		// Validate timeout is within acceptable range (0-10 seconds)
 		if (0 < ms && ms < 10000) {
 			sm->timeoutCounter = ms;
 			snprintf(response, sizeof(response), "Timeout set to new value: %lu.%03lu s\r\n", ms / 1000, ms % 1000);
@@ -570,12 +618,8 @@ void processUSBCommand(uint8_t* command, uint32_t length)
 	}
     else if (strcmp(cmd_part, "VSET1?") == 0)
 	{
-		// Convert to volts and format as "XX.XX V"
+		// Convert mV to V and format as "XX.XX V"
 		snprintf(response, sizeof(response), "Voltage is set to: %lu.%02lu V\r\n", dhandle->voltageSet / 100, dhandle->voltageSet % 100);
-
-		sm->OCPMode = OCP_DISABLED;
-		//Update AWD limits
-		Update_AWD_Thresholds(0, OCP_DISABLED_HT, ADC_ANALOGWATCHDOG_2);
 	}
     else if (strcmp(cmd_part, "ISET1") == 0)
 	{
@@ -584,6 +628,7 @@ void processUSBCommand(uint8_t* command, uint32_t length)
 
 		uint32_t current = atof(params)*1000; // Convert float parameter to integer
 
+		// Validate current is within allowed range
 		if (dhandle->currentMin < current && current < dhandle->currentMax) {
 			dhandle->currentSet = current; //save in mA
 			snprintf(response, sizeof(response), "Current set to new value: %lu.%03lu A\r\n", dhandle->currentSet / 1000, dhandle->currentSet % 1000);
@@ -594,16 +639,13 @@ void processUSBCommand(uint8_t* command, uint32_t length)
 	}
     else if (strcmp(cmd_part, "ISET1?") == 0)
   	{
+    	// Convert mA to A and format as "X.XXX A"
   		snprintf(response, sizeof(response), "Current is set to: %lu.%03lu A\r\n", dhandle->currentSet / 1000, dhandle->currentSet % 1000);
-
-  		sm->OCPMode = OCP_DISABLED;
-  		//Update AWD limits
-  		Update_AWD_Thresholds(0, OCP_DISABLED_HT, ADC_ANALOGWATCHDOG_2);
   	}
     else if (strcmp(cmd_part, "OUT0") == 0)
    	{
    		snprintf(response, sizeof(response), "Output disabled\r\n");
-   		//Simulate button press
+   	    // Simulate button press if device is in active state
    		if (sm->currentState == STATE_ACTIVE) {
    	   		sm->outputBtnPressed = true;
    		}
@@ -612,34 +654,39 @@ void processUSBCommand(uint8_t* command, uint32_t length)
 	{
 		snprintf(response, sizeof(response), "Output enabled\r\n");
 
-		//Simulate button press
+		// Simulate button press if device is in idle state
 		if (sm->currentState == STATE_IDLE) {
 			sm->outputBtnPressed = true;
 		}
 	}
     else if (strcmp(cmd_part, "VOUT1?") == 0)
    	{
+    	// Query measured output voltage
    		snprintf(response, sizeof(response), "Measured output voltage: %lu.%02lu V\r\n", dhandle->voltageMeas / 100, dhandle->voltageMeas % 100);
    	}
     else if (strcmp(cmd_part, "IOUT1?") == 0)
    	{
+    	// Query measured output current
   		snprintf(response, sizeof(response), "Current is set to: %lu.%03lu A\r\n", dhandle->currentMeas / 1000, dhandle->currentMeas % 1000);
    	}
     else if (strcmp(cmd_part, "*IDN?") == 0)
 	{
-		snprintf(response, sizeof(response), "USB-PD PPS Sink v0.2 (100W,22V,5A)\r\n");
+    	// Return device identification string
+		snprintf(response, sizeof(response), "PPS-SINK-v0.2 (100W,21V,5A)\r\n");
 	}
     else if (strcmp(cmd_part, "PROFILES?") == 0)
    	{
+    	// Query available power profiles
     	bool printToCOM = true;
     	sourcecapa_limits(printToCOM);
    	}
     else
     {
+    	// Handle unknown commands
         snprintf(response, sizeof(response), "Unknown command\r\n");
     }
 
-    // Send response
+    // Send response back to host
     CDC_Transmit_FS((uint8_t*)response, strlen(response));
 }
 
@@ -692,6 +739,10 @@ void handleInitState(void) {
 			entryDone = false;
 		}
     }
+
+    //=================================================
+    // EXIT ACTIONS - Things to be done during exit
+    //=================================================
 }
 
 void handleIdleState(void) {
@@ -708,8 +759,6 @@ void handleIdleState(void) {
 
         // Ensure output is off
         HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
-
-        // Check temperature and control fan (not shown in your code)
 
         // Save state for return from temporary states
         strcpy(sm->lastStateStr, "IDLE");
@@ -734,14 +783,15 @@ void handleIdleState(void) {
         sm->rotaryBtnPressed = false;
         entryDone = false;
     }
+
+    //=================================================
+    // EXIT ACTIONS - Things to be done during exit
+    //=================================================
 }
 
 void handleActiveState(void) {
-	//Declare static variables
-	// Set check interval Make the timer persistent across function calls
-	//static uint32_t lastCheckTime = 0; // declared to 0 only once, then retains value
+	// Entry actions (if just entered this state)
     static bool entryDone = false;
-	//const uint32_t CHECK_INTERVAL_MS = 500; // Check every 500ms
 
 	//=======================================================
 	// ENTRY ACTIONS - Executed once when entering the state
@@ -757,7 +807,7 @@ void handleActiveState(void) {
 
         // Initialize the periodic check timer
         TIM14->ARR = 500;
-		LL_TIM_SetCounter(TIM14, 0); //set counter register value of timer 7 to 0
+		LL_TIM_SetCounter(TIM14, 0); //set counter register value of timer 14 to 0
 		LL_TIM_EnableIT_UPDATE(TIM14); // Enable update interrupt
 		LL_TIM_EnableCounter(TIM14);
 
@@ -799,7 +849,9 @@ void handleActiveState(void) {
         entryDone = false;
     }
 
-    //EXIT ACTION
+    //=================================================
+    // EXIT ACTIONS - Things to be done during exit
+    //=================================================
     if (!entryDone) {
     	LL_TIM_DisableCounter(TIM14);
     }
@@ -822,14 +874,14 @@ void handleSetValuesState(void) {
 
         // Initialize the periodic timer
 		TIM14->ARR = 500;
-		LL_TIM_SetCounter(TIM14, 0); //set counter register value of timer 14 to 0
+		LL_TIM_SetCounter(TIM14, 0); //set counter register value of Timer14 to 0
 		LL_TIM_EnableIT_UPDATE(TIM14); // Enable update interrupt
 		LL_TIM_EnableCounter(TIM14);
 
 		// Initialize the timeout timer
 		LL_TIM_DisableCounter(TIM15);
 		TIM15->ARR = sm->timeoutCounter;
-		LL_TIM_SetCounter(TIM15, 0); //set counter register value of timer 14 to 0
+		LL_TIM_SetCounter(TIM15, 0); //set counter register value of Timer15 to 0
 		LL_TIM_EnableIT_UPDATE(TIM15); // Enable update interrupt
 		LL_TIM_EnableCounter(TIM15);
 
@@ -849,7 +901,7 @@ void handleSetValuesState(void) {
 		LL_TIM_EnableCounter(TIM15);
 	}
 
-	//Process voltageCurrentBtn press
+	// Process voltageCurrentBtn press
 	if (sm->voltageCurrentBtnPressed) {
 		//Reset flag
 		sm->voltageCurrentBtnPressed = false;
@@ -913,9 +965,6 @@ void handleSetValuesState(void) {
 		// Handle encoder pulse event
 		int encoderVal = (TIM3 -> CNT) >> 2;
 
-		//
-		//Erase FLAG!!
-		//
 		sm->encoder.curValue= encoderVal;
 
 		if (encoderVal != sm->encoder.prevValue){
@@ -982,16 +1031,17 @@ void handleSetValuesState(void) {
     // If timeout from setValues make USB PD request with new values
     if (sm->stateTimeoutFlag) {
 
+    	// Compensate voltage for losses on shunt resistors
     	uint32_t compVoltage = compensateVoltage();
-    	//Make a USBPD request
+    	// Make a USBPD request
 		int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, compVoltage*10, dhandle->currentSet, dhandle ->selMethod);
-		//Print to debug
+		// Print to debug
 		char _str[70];
 		sprintf(_str,"APDO request: indexSRCPDO= %int, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 		USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, compVoltage*10, dhandle->currentSet);
 
-    	//Return to last state
+    	//Return to last (previous) state
 	    if (sm->lastState == STATE_IDLE) {
 	        sm->currentState = STATE_IDLE;
 	    } else if (sm->lastState == STATE_ACTIVE) {
@@ -1000,7 +1050,9 @@ void handleSetValuesState(void) {
 	    entryDone = false;
     }
 
-    //EXIT ACTION
+    //=================================================
+    // EXIT ACTIONS - Things to be done during exit
+    //=================================================
 	if (!entryDone) {
 		LL_TIM_DisableCounter(TIM14);
 	}
@@ -1061,8 +1113,8 @@ void sw2_lock_isr(void){
 }*/
 
 /**
-  * @brief  src capa menu navigation
-  * @param  Nav
+  * @brief  Extract source (adapter) capabilities and save them to SNKData_handle. If required print those capa. also to COM
+  * @param  printToCom: Bool for specifying to print/not print to COM
   * @retval None
   * source: demo_disco.c Display_sourcecapa_menu_nav
   */
@@ -1131,7 +1183,7 @@ void sourcecapa_limits(bool printToCOM)
 				uint32_t maxcurrent = ((DPM_Ports[0].DPM_ListOfRcvSRCPDO[index] & USBPD_PDO_SRC_APDO_MAX_CURRENT_Msk) >> USBPD_PDO_SRC_APDO_MAX_CURRENT_Pos) * 50;
 				sprintf((char*)_str, "APDO:%2d.%1d-%2d.%1dV %d.%dA \r\n",(int) (minvoltage/1000),(int)(minvoltage/100)%10, (int)(maxvoltage/1000),(int)(maxvoltage/100)%10, (int)(maxcurrent/1000), (int)((maxcurrent % 1000) /100));
 
-				// Set flag
+				// Set hasAPDO flag
 				dhandle->hasAPDO = true;
 
 				// Extract min and max values (since APDOs are last it will rewrite FIXED values,
@@ -1192,10 +1244,10 @@ void updateVoltage(void) {
 	switch (sm -> pwrMode) {
 		case MODE_FIXED:
 		{
-				// Create helper variable
+				// Create helper index variable
 				int8_t index = dhandle->selectedProfile + sm->encoder.direction;
 
-				//Find index of next FixedPDO based on encoder turn direction
+				// Find index of next FixedPDO based on encoder turn direction (They are always at the beginning of Profiles list)
 				if ((0 <= index) && (index <= dhandle->numProfiles -1)) {
 					if (dhandle->srcProfiles[index].profileType != FIXED) {
 						index = 0; //we are out of fixed profiles that are defined at beginning, return to 0
@@ -1212,18 +1264,20 @@ void updateVoltage(void) {
 				}
 
 				dhandle->selectedProfile = index;
+
 				// Apply parameters of found srcProfile index
 				dhandle->voltageMax = dhandle->srcProfiles[index].voltageMax;
 				dhandle->voltageMin = dhandle->voltageMax;
 				dhandle->voltageSet = dhandle->voltageMax;
 				dhandle->currentMax = dhandle->srcProfiles[index].currentMax;
 
-				//If new voltage has lower current limit adjust accordingly
+				// If new voltage has lower current limit adjust accordingly
 				if (dhandle->currentSet > dhandle->currentMax) {
 					dhandle->currentSet = dhandle->currentMax;
 				}
 		}
 			break;
+
 		case MODE_APDO:
 		{
 			//Get direction of encoder turning
@@ -1252,9 +1306,9 @@ void updateVoltage(void) {
 			} else {
 				return;
 			}
-
+			// Update index
 			int8_t index = dhandle->selectedProfile;
-			// Search if there is APDO with higher current and satisfies voltageSet
+			// Search if there is APDO with higher current capability and satisfies voltageSet
 			for (int8_t i = dhandle->numProfiles-1; i >= 0; i--) {
 				if (dhandle->srcProfiles[i].profileType == APDO) {
 					if (dhandle->voltageSet < dhandle->srcProfiles[i].voltageMax) {
@@ -1270,13 +1324,14 @@ void updateVoltage(void) {
 					break;
 				}
 			}
+
 			dhandle->selectedProfile = index;
 
-			//If new voltage has lower current limit adjust accordingly
+			// If new voltage has lower current limit adjust accordingly
 			if (dhandle->currentSet > dhandle->currentMax) {
 				dhandle->currentSet = dhandle->currentMax;
 			}
-			//dhandle->selectedProfile = USER_SERV_FindSRCIndex(0, &powerRequestDetails, compVoltage*10, dhandle->currentSet, dhandle ->selMethod);
+			// dhandle->selectedProfile = USER_SERV_FindSRCIndex(0, &powerRequestDetails, compVoltage*10, dhandle->currentSet, dhandle ->selMethod);
 		}
 			break;
 		default:
@@ -1290,13 +1345,13 @@ void updateVoltage(void) {
 	max7219_PrintIspecial(SEGMENT_1, dhandle->voltageSet, 3);
 }
 
-// Helper function to update voltage and update AWD limit
+// Helper function to update current
 void updateCurrent(void) {
 	//Get direction of encoder turning
 	int currentTemp = dhandle->currentSet;
 	currentTemp += sm->encoder.direction * sm->encoder.increment;
 
-	//If required temp value is within limits, assign it to voltage else assign limits
+	// If required temp value is within limits, assign it to voltage else assign limits
 	if (dhandle->currentMin <= currentTemp && currentTemp <= dhandle->currentMax) {
 		dhandle->currentSet = currentTemp; //asign new voltage
 	} else {
@@ -1307,7 +1362,7 @@ void updateCurrent(void) {
 	max7219_PrintIspecial(SEGMENT_2, dhandle->currentSet, 4);
 }
 
-// Helper function to update voltage
+// Helper function to update OCP current (INA 301)
 void updateCurrentOCP(void) {
 	//Get direction of encoder turning
 	int currentTemp = dhandle->currentOCPSet;
@@ -1330,10 +1385,11 @@ void updateCurrentOCP(void) {
 	max7219_PrintIspecial(SEGMENT_2, dhandle->currentOCPSet, 4);
 }
 
-//Make voltage correction for the voltage drops on rshunts
+// Make voltage correction for the voltage drops on shunt resistors
 uint32_t compensateVoltage(void) {
 	uint32_t correction = (dhandle->currentMeas * (R_OCP_MOHMS + R_SENSE_MOHMS) ) / 1000;
 	uint32_t compVoltage = dhandle->voltageSet + correction;
 
+	// If corrected value is within limits proceed, else ask for mask Voltage
 	return (compVoltage > dhandle->voltageMax) ? dhandle->voltageMax : compVoltage;
 }
