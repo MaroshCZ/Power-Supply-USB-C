@@ -22,7 +22,6 @@
 #include "usbd_cdc_if.h"
 #include <usbpd_trace.h>
 
-
 int32_t BSP_USBPD_PWR_VBUSGetCurrentOCP(uint32_t Instance, int32_t *pCurrentOCP);
 int32_t BSP_PWR_VBUSGetCurrentOCP(uint32_t PortId);
 
@@ -840,12 +839,12 @@ void handleActiveState(void) {
 		uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 to get centivolts since only 4 digit display..
 		uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
 
-		dhandle ->currentMeas = cur;
+		dhandle ->currentMeas = correctCurrentMeas(cur);
 		dhandle ->voltageMeas = vol;
 		//Display output voltage
 		max7219_PrintIspecial(SEGMENT_1, vol, 3);
 		//Display output current
-		max7219_PrintIspecial(SEGMENT_2, cur, 4);
+		max7219_PrintIspecial(SEGMENT_2, dhandle ->currentMeas, 4);
 
 		periodicCheckFlagCounter += 1;
 		if(periodicCheckFlagCounter >= 10){
@@ -1430,6 +1429,19 @@ uint32_t compensateVoltage(void) {
 	return (compVoltage > dhandle->voltageMax) ? dhandle->voltageMax : compVoltage;
 }
 
+int32_t correctCurrentMeas(uint32_t measuredCurrent) {
+	// Using the formula: er = 0.065 * x + 7.5956
+	// To avoid floats, convert to int: (65 * x + 75956 + 5000) / 10000
+	// The + 5000 ensures proper rounding to nearest integer
+	int32_t currentError = (65 * measuredCurrent + 75956 + 5000) / 10000;
+	int32_t correctedCurrent = measuredCurrent - currentError;
+	if (correctedCurrent > 3){
+		return correctedCurrent;
+	}
+	else {
+		return 0;
+	}
+}
 
 void correctOutputVoltage(void) {
 	if (sm->pwrMode == MODE_APDO && sm->currentState == STATE_ACTIVE) {
