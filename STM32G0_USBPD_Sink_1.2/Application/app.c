@@ -50,7 +50,7 @@ StateMachine_TypeDef stateMachine = {
 		.currentState = STATE_INIT,
 		.comState = STATE_CLOSED,
 		.lockMode = UNLOCKED,
-		.OCPMode = OCP_DISABLED,
+		.OCPMode = OCP_ENABLED,
 		.pwrMode = MODE_FIXED,
 		.encoder = {
 				.selDigit = 2,
@@ -64,6 +64,7 @@ SINKData_HandleTypeDef SNK_data = {
 	.voltageSet = 500, //initial value to display
 	.voltageMax = 500, //initial max voltage
 	.currentSet = 1000, //initial value to display
+	.awdgTresholdSet = 744, //set initial OCP to 1A
 	.currentMin = 0,
 	.currentOCPSet = 1000,
 	.selMethod = PDO_SEL_METHOD_MAX_CUR,
@@ -80,7 +81,7 @@ SystemEvents_TypeDef *events = &systemEvents;
 // Callback when ADC conversion is complete
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
-  HAL_GPIO_TogglePin(LED_USER_GPIO_Port, LED_USER_Pin);
+  //HAL_GPIO_TogglePin(LED_USER_GPIO_Port, LED_USER_Pin);
 }
 
 // Callback when ADWG2 (CH7 ISENSE) goes out of range
@@ -144,6 +145,10 @@ void app_init(void){
 	//Calibrate and start ADC sensing with DMA
 	HAL_ADCEx_Calibration_Start(&hadc1);
 	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&aADCxConvertedValues, ADC_NUM_OF_SAMPLES);
+
+	//Set initial OCP treshold
+	Update_AWD_Thresholds(0, dhandle->awdgTresholdSet, ADC_ANALOGWATCHDOG_2); //~1A
+	HAL_GPIO_WritePin(LED_USER_GPIO_Port, LED_USER_Pin, GPIO_PIN_SET);
 
 	//Init 7 segment display
 	max7219_Init( SEGMENT_DISP_INTENSIVITY );
@@ -375,22 +380,30 @@ void processButtonEvents(void) {
 
     	if (sm->lockMode == UNLOCKED) {
     		sm->lockBtnPressed = true;
+    		int isense_Vtrip_mV;
+    		int isense_rawADCtrip;
 
 			//Toggle OCP mode
 			switch(sm->OCPMode) {
 				case OCP_DISABLED:
 					sm->OCPMode = OCP_ENABLED;
+					HAL_GPIO_WritePin(LED_USER_GPIO_Port, LED_USER_Pin, GPIO_PIN_SET);
 
 					//Update AWD limits
-					int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
-					int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD treshold
+					isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
+					isense_rawADCtrip = (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD treshold
+					dhandle->awdgTresholdSet = isense_rawADCtrip;
 					Update_AWD_Thresholds(0, isense_rawADCtrip, ADC_ANALOGWATCHDOG_2);
 					break;
 				case OCP_ENABLED:
 					sm->OCPMode = OCP_DISABLED;
+					HAL_GPIO_WritePin(LED_USER_GPIO_Port, LED_USER_Pin, GPIO_PIN_RESET);
 
-					//Update AWD limits
-					Update_AWD_Thresholds(0, OCP_DISABLED_HT, ADC_ANALOGWATCHDOG_2);
+					//If OCP disabled by user, set it to source max current
+					isense_Vtrip_mV = (dhandle->currentMax *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
+					isense_rawADCtrip = (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD treshold
+					dhandle->awdgTresholdSet = isense_rawADCtrip;
+					Update_AWD_Thresholds(0, isense_rawADCtrip, ADC_ANALOGWATCHDOG_2);
 
 					//__HAL_ADC_DISABLE_IT(&hadc1, ADC_IT_AWD2); can be also used to write bit but
 					//only when ADSTART bit is cleared to 0 (this ensures that no conversion is ongoing).
@@ -480,7 +493,9 @@ void handleCOMportstatus(uint8_t host_com_port_open){
 		 EXTI->IMR1 &= ~(EXTI_IMR1_IM8); //ENC btn
 
 		 entryDone = true;
-	 } else if (host_com_port_open == 0) {
+
+	 // Adding && entryDone is vital since it would otherwise entry this statement during debug
+	 } else if (host_com_port_open == 0 && entryDone) {
 		 sm->comState = STATE_CLOSED;
 
 		 //Reset lock LED
@@ -792,6 +807,8 @@ void handleIdleState(void) {
 void handleActiveState(void) {
 	// Entry actions (if just entered this state)
     static bool entryDone = false;
+    static int8_t periodicCheckFlagCounter = 0;
+
 
 	//=======================================================
 	// ENTRY ACTIONS - Executed once when entering the state
@@ -829,6 +846,12 @@ void handleActiveState(void) {
 		max7219_PrintIspecial(SEGMENT_1, vol, 3);
 		//Display output current
 		max7219_PrintIspecial(SEGMENT_2, cur, 4);
+
+		periodicCheckFlagCounter += 1;
+		if(periodicCheckFlagCounter >= 10){
+			periodicCheckFlagCounter = 0;
+			//correctOutputVoltage();
+		}
     }
 
     //=================================================
@@ -1017,6 +1040,7 @@ void handleSetValuesState(void) {
 					//Update AWD limits
 					int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
 					int isense_rawADCtrip= (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD treshold
+					dhandle->awdgTresholdSet = isense_rawADCtrip;
 					Update_AWD_Thresholds(0, isense_rawADCtrip, ADC_ANALOGWATCHDOG_2);
 				}
 				break;
@@ -1034,12 +1058,23 @@ void handleSetValuesState(void) {
     	// Compensate voltage for losses on shunt resistors
     	uint32_t compVoltage = compensateVoltage();
     	// Make a USBPD request
-		int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, compVoltage*10, dhandle->currentSet, dhandle ->selMethod);
-		// Print to debug
+
+    	int indexSRCAPDO;
+		if (sm->comState == STATE_OPEN) {
+			// Find index via USER_SERV_FindSRCIndex() based on requested values
+			indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
+		}
+		else {
+			// Use index from updateVoltage()
+			indexSRCAPDO = dhandle->selectedProfile +1;
+		}
+
+
+    	// Print to debug
 		char _str[70];
 		sprintf(_str,"APDO request: indexSRCPDO= %int, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-		USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, compVoltage*10, dhandle->currentSet);
+		USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
 
     	//Return to last (previous) state
 	    if (sm->lastState == STATE_IDLE) {
@@ -1059,6 +1094,7 @@ void handleSetValuesState(void) {
 
 }
 
+// Legacy function for handling INA301
 /*
 void sw2_lock_isr(void){
 	//Mask unwanted button interrupts caused by debouncing on exti line 2 (PB2)
@@ -1392,4 +1428,35 @@ uint32_t compensateVoltage(void) {
 
 	// If corrected value is within limits proceed, else ask for mask Voltage
 	return (compVoltage > dhandle->voltageMax) ? dhandle->voltageMax : compVoltage;
+}
+
+
+void correctOutputVoltage(void) {
+	if (sm->pwrMode == MODE_APDO && sm->currentState == STATE_ACTIVE) {
+		//uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 to get centivolts since only 4 digit display..
+		//uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
+
+		//dhandle ->currentMeas = cur;
+		//dhandle ->voltageMeas = vol;
+
+		dhandle->voltageError = dhandle ->voltageMeas - dhandle->voltageSet; //in cV
+
+		if (abs(dhandle->voltageError) > 3) {
+			uint32_t voltageErrorRounded;
+			//round toward zero in 20mV steps
+			if (dhandle->voltageError >= 0) {
+				voltageErrorRounded= (dhandle->voltageError / 2) * 2;  // Floor for positive numbers
+			} else {
+				voltageErrorRounded= ((dhandle->voltageError + 1) / 2) * 2;  // Ceiling for negative numbers
+			}
+
+			dhandle->correctedRequestVoltage = dhandle->voltageSet - voltageErrorRounded; //cV
+			uint32_t indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->correctedRequestVoltage*10, dhandle->currentSet, dhandle ->selMethod);
+			// Print to debug
+			char _str[110];
+			sprintf(_str,"APDO correction request: indexSRCPDO= %int, setVBUS= %lu mV, measVBUS=%lu mV, corVBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle ->voltageMeas*10, dhandle->correctedRequestVoltage*10, dhandle->currentSet);
+			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+			USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->correctedRequestVoltage*10, dhandle->currentSet);
+		}
+	}
 }

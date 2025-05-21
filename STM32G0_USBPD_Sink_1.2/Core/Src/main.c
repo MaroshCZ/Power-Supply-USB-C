@@ -313,7 +313,7 @@ static void MX_ADC1_Init(void)
   AnalogWDGConfig.WatchdogMode = ADC_ANALOGWATCHDOG_SINGLE_REG;
   AnalogWDGConfig.Channel = ADC_CHANNEL_7;
   AnalogWDGConfig.ITMode = ENABLE;
-  AnalogWDGConfig.HighThreshold = 1000;
+  AnalogWDGConfig.HighThreshold = 1500;
   AnalogWDGConfig.LowThreshold = 0;
   if (HAL_ADC_AnalogWDGConfig(&hadc1, &AnalogWDGConfig) != HAL_OK)
   {
@@ -929,54 +929,6 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-/**
-* @brief EXTI line detection callbacks
-* @param GPIO_Pin Specifies the pins connected EXTI line
-* @retval None
-*/
-/*
-void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
-{
-	if (GPIO_Pin == SW2_DEBUG_BTN_Pin) // Will display in trace the VBUS value when user button is pressed
-	{
-		//Get Voltage level into TRACE
-
-		char _str[60];
-		uint32_t voltage = BSP_PWR_VBUSGetVoltage(0);
-		uint32_t current= BSP_PWR_VBUSGetCurrent(0);
-		uint32_t currentOCP= BSP_PWR_VBUSGetCurrentOCP(0);
-
-		// Use snprintf to limit the number of characters written
-		int len = snprintf(_str, sizeof(_str), "VBUS:%lu mV, IBUS:%lu mA, IOCP:%lu mA", voltage, current, currentOCP);
-
-		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-
-
-
-			//Only applies if an error was specified (= if the case couldn't success)
-
-			if (USBPD_OK != status)
-			{
-				switch (status)
-				{
-				  case USBPD_BUSY:
-					error = GUI_REJ_DPM_NOT_READY;
-					break;
-				  case USBPD_TIMEOUT:
-					error = GUI_REJ_DPM_TIMEOUT;
-					break;
-				  case USBPD_NOTSUPPORTED:
-				  case USBPD_ERROR:
-				  default:
-					error = GUI_REJ_DPM_REJECT;
-					break;
-				}
-			}
-
-	}
-
-}*/
-
 
 /* USER CODE END 4 */
 

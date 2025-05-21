@@ -47,16 +47,20 @@ typedef struct {
   uint32_t            	    voltageSet;       /*!< User selected voltage in centivolts */
   uint32_t              	currentSet;       /*!< User selected OCP limit in mA */
   uint32_t					currentOCPSet;
+  uint32_t					awdgTresholdSet;
 
   uint32_t             		voltageMeas;      /*!< Measured output voltage in centivolts */
   uint32_t              	currentMeas;      /*!< Measured output current in centivolts */
+
+  int32_t					voltageError;
+  uint32_t					correctedRequestVoltage;
 
   uint32_t              	voltageMin;       /*!< Minimal SRC voltage in centivolts */
   uint32_t              	voltageMax;       /*!< Maximal SRC voltage in centivolts */
   uint32_t              	currentMax;       /*!< Maximal SRC current in mA */
   uint32_t              	currentMin;       /*!< Minimal current in mA (0)*/
   USBPD_USER_SERV_PDO_SelectionMethodTypeDef selMethod; /*!< Minimal current in mA (0)*/
-  USBPD_Profiles_TypeDef 	srcProfiles[8];   /*!< Struct holding profiles data*/
+  USBPD_Profiles_TypeDef 	srcProfiles[7];   /*!< Struct holding profiles data, max of 7 profiles according to USB PD specification*/
   uint8_t 					numProfiles;      /*!< Number of avaible profiles on adapter (source)*/
   uint8_t					selectedProfile;  /*!< Index of selected profile*/
   bool 						hasAPDO;          /*!< hasAPDO flag*/
@@ -240,6 +244,7 @@ void updateVoltage(void);
 void updateCurrent(void);
 void updateCurrentOCP(void);
 uint32_t compensateVoltage(void);
+void correctOutputVoltage(void);
 void Update_AWD_Thresholds(uint32_t low, uint32_t high, uint32_t adc_watchdog);
 
 /*Define helper functions for SCPI communication with PC*/
