@@ -246,6 +246,7 @@ void updateCurrentOCP(void);
 uint32_t compensateVoltage(void);
 int32_t roundToNearest20mV(int32_t valueInMv);
 int32_t correctCurrentMeas(uint32_t measuredCurrent);
+int32_t correctVoltageMeas(uint32_t measuredVoltage);
 void correctOutputVoltage(void);
 void Update_AWD_Thresholds(uint32_t low, uint32_t high, uint32_t adc_watchdog);
 

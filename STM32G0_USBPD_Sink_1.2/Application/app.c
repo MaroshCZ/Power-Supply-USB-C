@@ -22,6 +22,9 @@
 #include "usbd_cdc_if.h"
 #include <usbpd_trace.h>
 
+int32_t fullyCompensatedVoltageV;
+int32_t currentCompensatedVoltageV;
+
 int32_t BSP_USBPD_PWR_VBUSGetCurrentOCP(uint32_t Instance, int32_t *pCurrentOCP);
 int32_t BSP_PWR_VBUSGetCurrentOCP(uint32_t PortId);
 
@@ -839,8 +842,9 @@ void handleActiveState(void) {
 		uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 to get centivolts since only 4 digit display..
 		uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
 
-		dhandle ->currentMeas = correctCurrentMeas(cur);
+		dhandle ->currentMeas = correctCurrentMeas(3028);
 		dhandle ->voltageMeas = vol;
+		correctVoltageMeas(14310);
 		//Display output voltage
 		max7219_PrintIspecial(SEGMENT_1, vol, 3);
 		//Display output current
@@ -1454,11 +1458,19 @@ int32_t roundToNearest20mV(int32_t valueInMv) {
     return valueInMv - (valueInMv % 20) + (valueInMv % 20 >= 10 ? 20 : 0);
 }
 
+/**
+  * @brief  Current measurement correction
+  * @param  measuredCurrent: Measured current with ADC [mA]
+  * @retval correctedCurrent [mA]
+  */
 int32_t correctCurrentMeas(uint32_t measuredCurrent) {
-	// Using the formula: er = 0.065 * x + 7.5956
-	// To avoid floats, convert to int: (65 * x + 75956 + 5000) / 10000
+	// Using the formula: er = 0.065 * current + 7.5956 (measured on PinePower)
+	// Skew of correction was slightly changed to 0.059, to better match with other adapters
+	// To avoid floats, convert to int: (59 * current + 75956 + 5000) / 10000
 	// The + 5000 ensures proper rounding to nearest integer
-	int32_t currentError = (65 * measuredCurrent + 75956 + 5000) / 10000;
+	const uint32_t a = 59;		// Coefficient: 0.059 * 10000
+	const uint32_t b = 75956;    // Coefficient: 7.9556 * 10000
+	int32_t currentError = (a * measuredCurrent + b + 5000) / 10000;
 	int32_t correctedCurrent = measuredCurrent - currentError;
 	if (correctedCurrent > 3){
 		return correctedCurrent;
@@ -1466,6 +1478,43 @@ int32_t correctCurrentMeas(uint32_t measuredCurrent) {
 	else {
 		return 0;
 	}
+}
+
+/**
+ * @brief  Corrects voltage measurement to compensate for system errors.
+ * Performs two-step correction:
+ * 1. Current-dependent compensation: Accounts for losses in shunt resistor, relay and path
+ *    Using formula: error = 0.0721 * voltage - 17.279 [mV]
+ * 2. Voltage-dependent compensation: Corrects for voltage divider and ADC reference errors
+ *    Using formula: error = 0.0000002 * voltage^2 - 0.00989229 * voltage + 107.30097708 [mV]
+ *
+  * @param  measuredVoltage: Measured voltage on voltage divider with ADC [mV]
+  * @retval correctedVoltage: Corrected output voltage [mV]
+  */
+int32_t correctVoltageMeas(uint32_t measuredVoltage) {
+	// Step 1: Current-dependent compensation
+	// Using the formula: er = 0.0721 * current - 17.279 [mV] (measured on PinePower)
+	// Integer implementation: (721 * current - 172790 + 5000) / 10000
+	const uint32_t a = 721;		// Coefficient: 0.0721 * 10000
+	const uint32_t b = 172790;    // Coefficient: 17.279 * 10000
+	int32_t currentError = (a * dhandle->currentMeas - b + 5000) / 10000;
+	int32_t currentCorrectedVoltage = measuredVoltage - currentError;
+	currentCompensatedVoltageV = currentCorrectedVoltage;
+
+	// Compensation in dependence of voltage
+	// Using the formula: er = 0.00000020x^2 - 0.00989229x + 107.30097708 (measured on PinePower)
+	// To avoid floats, convert to int: (2x^2 - 98923 + 1073009771) / 10000
+	const uint32_t e = 2;   			// Coefficient: 0.0000002 * 10000000
+	const uint32_t f = 98923;		// Coefficient: 0.00989229 * 10000000
+	const uint64_t g = 1073009771;    // Coefficient: 107.30097708 * 10000000
+
+
+	int64_t voltageError = (int32_t)((e * ((int64_t)currentCorrectedVoltage * currentCorrectedVoltage) - (int64_t)f * currentCorrectedVoltage + g) / 10000000);
+
+	int32_t fullyCompensatedVoltage = currentCorrectedVoltage - (int32_t)voltageError;
+	fullyCompensatedVoltageV = fullyCompensatedVoltage;
+
+	return fullyCompensatedVoltage;
 }
 
 void correctOutputVoltage(void) {
