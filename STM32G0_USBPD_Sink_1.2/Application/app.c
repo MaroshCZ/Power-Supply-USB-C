@@ -1054,26 +1054,29 @@ void handleSetValuesState(void) {
     // If timeout from setValues make USB PD request with new values
     if (sm->stateTimeoutFlag) {
 
-    	// Compensate voltage for losses on shunt resistors
-    	uint32_t compVoltage = compensateVoltage();
-    	// Make a USBPD request
-
-    	int indexSRCAPDO;
-		if (sm->comState == STATE_OPEN) {
+    	// BUILD AND SEND REQUEST //
+		if (sm->pwrMode == MODE_APDO) {
+			// Compensate voltage for losses on shunt resistors
+			uint32_t compVoltage = compensateVoltage(); // [cV]
 			// Find index via USER_SERV_FindSRCIndex() based on requested values
-			indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->voltageSet*10, dhandle->currentSet, dhandle ->selMethod);
+			int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, compVoltage*10, dhandle->currentSet, dhandle ->selMethod);
+			// Print to debug
+			char _str[70];
+			sprintf(_str,"APDO request: indexSRCPDO= %int, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
+			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+			// Send request to Policy Engine
+			USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, compVoltage*10, dhandle->currentSet);
 		}
-		else {
+		else if (sm->pwrMode == MODE_FIXED){
 			// Use index from updateVoltage()
-			indexSRCAPDO = dhandle->selectedProfile +1;
+			int indexSRCPDO = dhandle->selectedProfile +1;
+			// Print to debug
+			char _str[70];
+			sprintf(_str,"APDO request: indexSRCPDO= %int, VBUS= %lu mV, Ibus= %lu mA", indexSRCPDO, 10*dhandle->voltageSet, dhandle->currentSet);
+			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
+			// Send request to Policy Engine
+			USBPD_DPM_RequestSRCPDO(0, indexSRCPDO, dhandle->voltageSet*10, dhandle->currentSet);
 		}
-
-
-    	// Print to debug
-		char _str[70];
-		sprintf(_str,"APDO request: indexSRCPDO= %int, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
-		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
-		USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->voltageSet*10, dhandle->currentSet);
 
     	//Return to last (previous) state
 	    if (sm->lastState == STATE_IDLE) {
@@ -1420,13 +1423,35 @@ void updateCurrentOCP(void) {
 	max7219_PrintIspecial(SEGMENT_2, dhandle->currentOCPSet, 4);
 }
 
-// Make voltage correction for the voltage drops on shunt resistors
+// Make voltage correction for the voltage drop in system.
+// Purpose of this compensation is approximation of the voltageDrop
+// based on measured current before the request is made.
+// Since it is based on currentMeas, it works only when OUT is enabled.
+// This should give us Uout close to user desired Uset.
+// Characteristic was obtained from PinePower 65W adapter.
 uint32_t compensateVoltage(void) {
-	uint32_t correction = (dhandle->currentMeas * (R_OCP_MOHMS + R_SENSE_MOHMS) ) / 1000;
-	uint32_t compVoltage = dhandle->voltageSet + correction;
+	// Using the formula: voltageDrop = 0.2942x * x - 49.8529
+	// To avoid floats, convert to int: (2942 * x - 498530 + 5000) / 10000
+	// The + 5000 ensures proper rounding to nearest integer
+	uint32_t a = 2942;
+	uint32_t b = 498529;
+	int32_t voltageDrop = (a*dhandle->currentMeas - b + 5000)/10000;
+	uint32_t compVoltage;
+
+	// Below 150mA the voltageDrop might be negative
+	if (dhandle->currentMeas > 180 && voltageDrop > 0){
+		compVoltage = roundToNearest20mV(dhandle->voltageSet*10 + voltageDrop) / 10; //divide by 10 to get [cV]
+	}
+	else {
+		compVoltage = dhandle->voltageSet; // [cV]
+	}
 
 	// If corrected value is within limits proceed, else ask for mask Voltage
 	return (compVoltage > dhandle->voltageMax) ? dhandle->voltageMax : compVoltage;
+}
+
+int32_t roundToNearest20mV(int32_t valueInMv) {
+    return valueInMv - (valueInMv % 20) + (valueInMv % 20 >= 10 ? 20 : 0);
 }
 
 int32_t correctCurrentMeas(uint32_t measuredCurrent) {
