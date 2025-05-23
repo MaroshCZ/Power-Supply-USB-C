@@ -114,7 +114,6 @@ typedef enum {
 } COMPortState_TypeDef;
 
 
-
 // Definition of state machine struct
 typedef struct {
     // Current and last system state
@@ -155,7 +154,14 @@ typedef struct {
 		UNLOCKED
 	} lockMode;
 
-	// Lock mode
+	enum {
+		LED_ON,
+		LED_OFF,
+		LED_BLINK_SLOW,
+		LED_BLINK_FAST,
+	} lockLedState;
+
+	// PWR mode
 	enum {
 		MODE_FIXED,
 		MODE_APDO
@@ -234,6 +240,8 @@ void runStateMachine(void); //StateMachine *sm, SINKData_HandleTypeDef *dhandle
 void processButtonEvents(void);
 void processSystemEvents(void);
 void processUSBCommand(uint8_t* command, uint32_t length);
+void processLockLedState(void);
+
 
 /*Define additional fcns*/
 void sourcecapa_limits(bool printToCOM);
@@ -246,6 +254,7 @@ int32_t correctCurrentMeas(uint32_t measuredCurrent);
 int32_t correctVoltageMeas(uint32_t measuredVoltage, uint32_t measuredCurrent);
 void correctOutputVoltage(void);
 void Update_AWD_Thresholds(uint32_t low, uint32_t high, uint32_t adc_watchdog);
+void updateLockLED(void);
 
 /*Define helper functions for SCPI communication with PC*/
 uint8_t* getUSBbuffer(void);

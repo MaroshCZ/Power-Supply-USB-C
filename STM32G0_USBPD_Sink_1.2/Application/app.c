@@ -59,6 +59,7 @@ StateMachine_TypeDef stateMachine = {
 		.comState = STATE_CLOSED,
 		.lockMode = UNLOCKED,
 		.OCPMode = OCP_ENABLED,
+		.lockLedState = LED_ON,
 		.pwrMode = MODE_FIXED,
 		.encoder = {
 				.selDigit = 2,
@@ -172,6 +173,9 @@ void app_init(void){
 void app_loop(void) {
 	// Process button events
 	processSystemEvents();
+
+	// Update lock/ocp LED
+	updateLockLED();
 
 	// Run the state machine
 	runStateMachine();
@@ -397,7 +401,7 @@ void processButtonEvents(void) {
 					sm->OCPMode = OCP_ENABLED;
 
 					//Set lock LED
-					HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
+					//HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
 
 					//Update AWD limits
 					isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
@@ -409,7 +413,7 @@ void processButtonEvents(void) {
 					sm->OCPMode = OCP_DISABLED;
 
 					//Reset lock LED
-					HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
+					//HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
 
 					//If OCP disabled by user, set it to source max current
 					isense_Vtrip_mV = (dhandle->currentMax *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
@@ -458,10 +462,26 @@ void processButtonEvents(void) {
     }
 }
 
+void processLockLedState(void) {
+	 if (sm->OCPMode == OCP_DISABLED && sm->lockMode == UNLOCKED)
+		sm->lockLedState = LED_OFF;
+	else if (sm->OCPMode == OCP_ENABLED && sm->lockMode == UNLOCKED)
+		sm->lockLedState = LED_ON;
+	else if (sm->OCPMode == OCP_DISABLED && sm->lockMode == LOCKED)
+		sm->lockLedState = LED_BLINK_SLOW;
+	else if (sm->OCPMode == OCP_ENABLED && sm->lockMode == LOCKED)
+		sm->lockLedState = LED_BLINK_FAST;
+}
+
+
 // Main system event processor that calls specialized handlers
 void processSystemEvents(void) {
     // Process different event types using specialized functions
     processButtonEvents();
+
+    // Process LockLed state based on decision matrix
+    processLockLedState();
+
 
     // Process encoder actions
     if (events->encoderTurnEvent) {
@@ -605,7 +625,6 @@ void processUSBCommand(uint8_t* command, uint32_t length)
     	snprintf(response, sizeof(response), "OCP enabled\r\n");
 
         sm->OCPMode = OCP_ENABLED;
-        HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
 
 		// Update Analog Watchdog limits for over-current detection
 		int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
@@ -1593,4 +1612,30 @@ void correctOutputVoltage(void) {
 
 		}
 	}
+}
+
+void updateLockLED(void) {
+    static uint32_t lastToggle = 0;
+    uint32_t now = HAL_GetTick();  // nebo millis()
+
+    switch (sm->lockLedState) {
+        case LED_OFF:
+            HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
+            break;
+        case LED_ON:
+            HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
+            break;
+        case LED_BLINK_SLOW:
+            if (now - lastToggle >= 500) {
+                HAL_GPIO_TogglePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin);
+                lastToggle = now;
+            }
+            break;
+        case LED_BLINK_FAST:
+            if (now - lastToggle >= 150) {
+                HAL_GPIO_TogglePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin);
+                lastToggle = now;
+            }
+            break;
+    }
 }
