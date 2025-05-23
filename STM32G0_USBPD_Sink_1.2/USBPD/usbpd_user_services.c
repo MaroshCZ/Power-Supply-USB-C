@@ -52,7 +52,7 @@
 /* USER CODE BEGIN Private_Variables */
 
 /* Method used to find the "best" PDO */
-USBPD_USER_SERV_PDO_SelectionMethodTypeDef USER_SERV_PDO_Sel_Method = PDO_SEL_METHOD_MAX_PWR;
+USBPD_USER_SERV_PDO_SelectionMethodTypeDef USER_SERV_PDO_Sel_Method = PDO_SEL_METHOD_MIN_VOLT;
 
 extern USBPD_ParamsTypeDef              DPM_Params[USBPD_PORT_COUNT];
 extern USBPD_SettingsTypeDef            DPM_Settings[USBPD_PORT_COUNT];

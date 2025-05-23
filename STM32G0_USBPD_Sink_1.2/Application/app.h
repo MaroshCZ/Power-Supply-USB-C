@@ -49,8 +49,8 @@ typedef struct {
   uint32_t					currentOCPSet;
   uint32_t					awdgTresholdSet;
 
-  uint32_t             		voltageMeas;      /*!< Measured output voltage in centivolts */
-  uint32_t              	currentMeas;      /*!< Measured output current in centivolts */
+  uint32_t             		voltageMeas;      /*!< Measured output voltage in mV */
+  uint32_t              	currentMeas;      /*!< Measured output current in mAmps */
 
   int32_t					voltageError;
   uint32_t					correctedRequestVoltage;
@@ -171,9 +171,6 @@ typedef struct {
     uint8_t errorCode;
     bool errorActive;
 
-    // Last state for returning from special modes
-    char lastStateStr[10];
-
 } StateMachine_TypeDef;
 
 // Button event flags
@@ -243,10 +240,10 @@ void sourcecapa_limits(bool printToCOM);
 void updateVoltage(void);
 void updateCurrent(void);
 void updateCurrentOCP(void);
-uint32_t compensateVoltage(void);
+uint32_t compensateVoltage(uint32_t measuredVoltage);
 int32_t roundToNearest20mV(int32_t valueInMv);
 int32_t correctCurrentMeas(uint32_t measuredCurrent);
-int32_t correctVoltageMeas(uint32_t measuredVoltage);
+int32_t correctVoltageMeas(uint32_t measuredVoltage, uint32_t measuredCurrent);
 void correctOutputVoltage(void);
 void Update_AWD_Thresholds(uint32_t low, uint32_t high, uint32_t adc_watchdog);
 

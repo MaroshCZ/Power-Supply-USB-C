@@ -24,6 +24,12 @@
 
 int32_t fullyCompensatedVoltageV;
 int32_t currentCompensatedVoltageV;
+int32_t compVoltageV;
+int32_t currentErrorV;
+uint64_t term1V;
+uint64_t term2V;
+int64_t	voltageErrorV;
+int32_t voltageErrorRoundedV;
 
 int32_t BSP_USBPD_PWR_VBUSGetCurrentOCP(uint32_t Instance, int32_t *pCurrentOCP);
 int32_t BSP_PWR_VBUSGetCurrentOCP(uint32_t PortId);
@@ -389,7 +395,9 @@ void processButtonEvents(void) {
 			switch(sm->OCPMode) {
 				case OCP_DISABLED:
 					sm->OCPMode = OCP_ENABLED;
-					HAL_GPIO_WritePin(LED_USER_GPIO_Port, LED_USER_Pin, GPIO_PIN_SET);
+
+					//Set lock LED
+					HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
 
 					//Update AWD limits
 					isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
@@ -399,7 +407,9 @@ void processButtonEvents(void) {
 					break;
 				case OCP_ENABLED:
 					sm->OCPMode = OCP_DISABLED;
-					HAL_GPIO_WritePin(LED_USER_GPIO_Port, LED_USER_Pin, GPIO_PIN_RESET);
+
+					//Reset lock LED
+					HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
 
 					//If OCP disabled by user, set it to source max current
 					isense_Vtrip_mV = (dhandle->currentMax *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
@@ -421,7 +431,9 @@ void processButtonEvents(void) {
     		sm->lockMode = UNLOCKED;
 
     		//Drive lock LED
-    		HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
+    		//HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
+    		HAL_GPIO_WritePin(LED_USER_GPIO_Port, LED_USER_Pin, GPIO_PIN_RESET);
+
 
     		// Mask buttons except OUT
     		EXTI->IMR1 |= EXTI_IMR1_IM8; //unmask ENCbtn
@@ -430,7 +442,8 @@ void processButtonEvents(void) {
     		sm->lockMode = LOCKED;
 
     		// Drive lock LED
-    		HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
+    		//HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
+    		HAL_GPIO_WritePin(LED_USER_GPIO_Port, LED_USER_Pin, GPIO_PIN_SET);
 
     		// Unmask buttons except OUT
     		EXTI->IMR1 &= ~(EXTI_IMR1_IM2); // mask SW1 I/V
@@ -486,7 +499,8 @@ void handleCOMportstatus(uint8_t host_com_port_open){
 		 sm->timeoutCounter = 4000;
 
 		 //Drive lock LED
-		 HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
+		 //HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
+		 HAL_GPIO_WritePin(LED_USER_GPIO_Port, LED_USER_Pin, GPIO_PIN_SET);
 
 		 //Disable BTN interrupts
 		 EXTI->IMR1 &= ~(EXTI_IMR1_IM2); //SW1
@@ -501,7 +515,8 @@ void handleCOMportstatus(uint8_t host_com_port_open){
 		 sm->comState = STATE_CLOSED;
 
 		 //Reset lock LED
-		 HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
+		 //HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_RESET);
+		 HAL_GPIO_WritePin(LED_USER_GPIO_Port, LED_USER_Pin, GPIO_PIN_RESET);
 
 		 //Unmask exti line 1, 2 and 3
 		 EXTI->IMR1 |= EXTI_IMR1_IM8; //unmask exti line 8
@@ -590,6 +605,7 @@ void processUSBCommand(uint8_t* command, uint32_t length)
     	snprintf(response, sizeof(response), "OCP enabled\r\n");
 
         sm->OCPMode = OCP_ENABLED;
+        HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
 
 		// Update Analog Watchdog limits for over-current detection
 		int isense_Vtrip_mV = (dhandle->currentSet *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
@@ -601,6 +617,10 @@ void processUSBCommand(uint8_t* command, uint32_t length)
     	snprintf(response, sizeof(response), "OCP disabled\r\n");
 
         sm->OCPMode = OCP_DISABLED;
+        int isense_Vtrip_mV = (dhandle->currentMax *G_SENSE*R_SENSE_MOHMS)/1000; // mV  (mA * mOhms * Gain)
+        int isense_rawADCtrip = (isense_Vtrip_mV *4095) / VDDA_APPLI; //value for AWD treshold
+        dhandle->awdgTresholdSet = isense_rawADCtrip;
+        Update_AWD_Thresholds(0, isense_rawADCtrip, ADC_ANALOGWATCHDOG_2);
 
         // Set Analog Watchdog to disabled threshold
 		Update_AWD_Thresholds(0, OCP_DISABLED_HT, ADC_ANALOGWATCHDOG_2);
@@ -679,7 +699,7 @@ void processUSBCommand(uint8_t* command, uint32_t length)
     else if (strcmp(cmd_part, "VOUT1?") == 0)
    	{
     	// Query measured output voltage
-   		snprintf(response, sizeof(response), "Measured output voltage: %lu.%02lu V\r\n", dhandle->voltageMeas / 100, dhandle->voltageMeas % 100);
+   		snprintf(response, sizeof(response), "Measured output voltage: %lu.%02lu V\r\n", dhandle->voltageMeas / 1000, dhandle->voltageMeas % 1000);
    	}
     else if (strcmp(cmd_part, "IOUT1?") == 0)
    	{
@@ -723,7 +743,6 @@ void handleInitState(void) {
 		sm->timeoutCounter = 5000;  // 2 seconds timeout
 
         // Save state for return from temporary states
-        strcpy(sm->lastStateStr, "INIT");
         sm->lastState = STATE_INIT;
 
         entryDone = true;
@@ -778,7 +797,6 @@ void handleIdleState(void) {
         HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_RESET);
 
         // Save state for return from temporary states
-        strcpy(sm->lastStateStr, "IDLE");
         sm->lastState = STATE_IDLE;
 
         entryDone = true;
@@ -821,7 +839,6 @@ void handleActiveState(void) {
         HAL_GPIO_WritePin(RELAY_ON_OFF_GPIO_Port, RELAY_ON_OFF_Pin, GPIO_PIN_SET);
 
         // Save state for return from temporary states
-        strcpy(sm->lastStateStr, "ACTIVE");
         sm->lastState = STATE_ACTIVE;
 
         // Initialize the periodic check timer
@@ -839,21 +856,29 @@ void handleActiveState(void) {
 
     //Periodic check to display measured values
     if (sm->periodicCheckFlag) {
-		uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 to get centivolts since only 4 digit display..
-		uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
+		uint32_t vol = BSP_PWR_VBUSGetVoltage(0); // [mV]
+		uint32_t cur = BSP_PWR_VBUSGetCurrent(0); // [mA]
 
-		dhandle ->currentMeas = correctCurrentMeas(3028);
+		//dhandle ->currentMeas = correctCurrentMeas(cur);
+		dhandle ->currentMeas = correctCurrentMeas(cur);
 		dhandle ->voltageMeas = vol;
-		correctVoltageMeas(14310);
+
+		//Experimental function
+		int32_t correctedVoltage = correctVoltageMeas(dhandle->voltageMeas, dhandle ->currentMeas); //[mV]
+
+
 		//Display output voltage
-		max7219_PrintIspecial(SEGMENT_1, vol, 3);
+		max7219_PrintIspecial(SEGMENT_1, correctedVoltage/10, 3); // divide voltage by 10 to get [cV]
 		//Display output current
 		max7219_PrintIspecial(SEGMENT_2, dhandle ->currentMeas, 4);
 
 		periodicCheckFlagCounter += 1;
 		if(periodicCheckFlagCounter >= 10){
 			periodicCheckFlagCounter = 0;
-			//correctOutputVoltage();
+
+			/*UNDER CONSTRUCTION*/
+			// Regulate output voltage
+			correctOutputVoltage();
 		}
     }
 
@@ -1060,13 +1085,15 @@ void handleSetValuesState(void) {
 
     	// BUILD AND SEND REQUEST //
 		if (sm->pwrMode == MODE_APDO) {
+			uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
+			dhandle->currentMeas = correctCurrentMeas(cur);
 			// Compensate voltage for losses on shunt resistors
-			uint32_t compVoltage = compensateVoltage(); // [cV]
+			uint32_t compVoltage = compensateVoltage(dhandle->currentMeas); // [cV]
 			// Find index via USER_SERV_FindSRCIndex() based on requested values
 			int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, compVoltage*10, dhandle->currentSet, dhandle ->selMethod);
 			// Print to debug
 			char _str[70];
-			sprintf(_str,"APDO request: indexSRCPDO= %int, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->currentSet);
+			sprintf(_str,"APDO request: indexSRCPDO= %i, VBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, compVoltage*10, dhandle->currentSet);
 			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 			// Send request to Policy Engine
 			USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, compVoltage*10, dhandle->currentSet);
@@ -1076,7 +1103,7 @@ void handleSetValuesState(void) {
 			int indexSRCPDO = dhandle->selectedProfile +1;
 			// Print to debug
 			char _str[70];
-			sprintf(_str,"APDO request: indexSRCPDO= %int, VBUS= %lu mV, Ibus= %lu mA", indexSRCPDO, 10*dhandle->voltageSet, dhandle->currentSet);
+			sprintf(_str,"APDO request: indexSRCPDO= %i, VBUS= %lu mV, Ibus= %lu mA", indexSRCPDO, 10*dhandle->voltageSet, dhandle->currentSet);
 			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 			// Send request to Policy Engine
 			USBPD_DPM_RequestSRCPDO(0, indexSRCPDO, dhandle->voltageSet*10, dhandle->currentSet);
@@ -1433,7 +1460,7 @@ void updateCurrentOCP(void) {
 // Since it is based on currentMeas, it works only when OUT is enabled.
 // This should give us Uout close to user desired Uset.
 // Characteristic was obtained from PinePower 65W adapter.
-uint32_t compensateVoltage(void) {
+uint32_t compensateVoltage(uint32_t measuredCurrent) {
 	// Using the formula: voltageDrop = 0.2942x * x - 49.8529
 	// To avoid floats, convert to int: (2942 * x - 498530 + 5000) / 10000
 	// The + 5000 ensures proper rounding to nearest integer
@@ -1451,11 +1478,21 @@ uint32_t compensateVoltage(void) {
 	}
 
 	// If corrected value is within limits proceed, else ask for mask Voltage
+	compVoltageV = compVoltage;
 	return (compVoltage > dhandle->voltageMax) ? dhandle->voltageMax : compVoltage;
 }
 
 int32_t roundToNearest20mV(int32_t valueInMv) {
-    return valueInMv - (valueInMv % 20) + (valueInMv % 20 >= 10 ? 20 : 0);
+
+	int32_t sign = (valueInMv < 0) ? -1 : 1;
+	int32_t absValue = abs(valueInMv);
+
+	if (absValue % 20 >= 10 && sign == -1) {
+
+	}
+	int32_t roundedValueInMv = absValue - (absValue % 20) + ( (absValue % 20 >= 10 && sign == -1) ? 20 : 0);
+
+    return sign*roundedValueInMv;
 }
 
 /**
@@ -1464,14 +1501,14 @@ int32_t roundToNearest20mV(int32_t valueInMv) {
   * @retval correctedCurrent [mA]
   */
 int32_t correctCurrentMeas(uint32_t measuredCurrent) {
-	// Using the formula: er = 0.065 * current + 7.5956 (measured on PinePower)
-	// Skew of correction was slightly changed to 0.059, to better match with other adapters
+	// Using the formula: er = 0.0065 * current + 7.5956 (measured on PinePower)
+	// Skew of correction was slightly changed to 0.0059, to better match with other adapters
 	// To avoid floats, convert to int: (59 * current + 75956 + 5000) / 10000
 	// The + 5000 ensures proper rounding to nearest integer
-	const uint32_t a = 59;		// Coefficient: 0.059 * 10000
-	const uint32_t b = 75956;    // Coefficient: 7.9556 * 10000
+	uint32_t a = 59;		// Coefficient: 0.059 * 10000
+	uint32_t b = 75956;    // Coefficient: 7.9556 * 10000
 	int32_t currentError = (a * measuredCurrent + b + 5000) / 10000;
-	int32_t correctedCurrent = measuredCurrent - currentError;
+	int32_t correctedCurrent = (int32_t)measuredCurrent - currentError;
 	if (correctedCurrent > 3){
 		return correctedCurrent;
 	}
@@ -1491,27 +1528,39 @@ int32_t correctCurrentMeas(uint32_t measuredCurrent) {
   * @param  measuredVoltage: Measured voltage on voltage divider with ADC [mV]
   * @retval correctedVoltage: Corrected output voltage [mV]
   */
-int32_t correctVoltageMeas(uint32_t measuredVoltage) {
+int32_t correctVoltageMeas(uint32_t measuredVoltage, uint32_t measuredCurrent) {
 	// Step 1: Current-dependent compensation
 	// Using the formula: er = 0.0721 * current - 17.279 [mV] (measured on PinePower)
 	// Integer implementation: (721 * current - 172790 + 5000) / 10000
-	const uint32_t a = 721;		// Coefficient: 0.0721 * 10000
-	const uint32_t b = 172790;    // Coefficient: 17.279 * 10000
-	int32_t currentError = (a * dhandle->currentMeas - b + 5000) / 10000;
-	int32_t currentCorrectedVoltage = measuredVoltage - currentError;
-	currentCompensatedVoltageV = currentCorrectedVoltage;
+	int32_t a = 721;		// Coefficient: 0.0721 * 10000
+	int32_t b = 172790;    // Coefficient: 17.279 * 10000
+	int32_t voltageLoadLoss;
+	if (measuredCurrent >= 1) {
+		voltageLoadLoss = (a * (int32_t)measuredCurrent - b + 5000) / 10000;
+	}
+	else {
+		voltageLoadLoss = -17; // -b/10000
+	}
+	currentErrorV = voltageLoadLoss;
+	int64_t loadCorrectedVoltage = measuredVoltage - voltageLoadLoss;
+	currentCompensatedVoltageV = loadCorrectedVoltage;
 
 	// Compensation in dependence of voltage
 	// Using the formula: er = 0.00000020x^2 - 0.00989229x + 107.30097708 (measured on PinePower)
 	// To avoid floats, convert to int: (2x^2 - 98923 + 1073009771) / 10000
-	const uint32_t e = 2;   			// Coefficient: 0.0000002 * 10000000
-	const uint32_t f = 98923;		// Coefficient: 0.00989229 * 10000000
-	const uint64_t g = 1073009771;    // Coefficient: 107.30097708 * 10000000
+	int32_t e = 2;   			// Coefficient: 0.0000002 * 10000 = 2/1000
+	int32_t f = 99;		// Coefficient: 0.00989229 * 10000
+	int64_t g = 1073010;    // Coefficient: 107.30097708 * 10000
 
+	int64_t term1 = (e * (loadCorrectedVoltage/100) * loadCorrectedVoltage/10);
+	int64_t term2 = f * loadCorrectedVoltage;
+	int64_t term3 = term1 - term2 + g;
+	int64_t voltageError = term3 / 10000;
+	term1V = term1;
+	term2V = term2;
+	voltageErrorV = voltageError;
 
-	int64_t voltageError = (int32_t)((e * ((int64_t)currentCorrectedVoltage * currentCorrectedVoltage) - (int64_t)f * currentCorrectedVoltage + g) / 10000000);
-
-	int32_t fullyCompensatedVoltage = currentCorrectedVoltage - (int32_t)voltageError;
+	uint32_t fullyCompensatedVoltage = loadCorrectedVoltage - voltageError;
 	fullyCompensatedVoltageV = fullyCompensatedVoltage;
 
 	return fullyCompensatedVoltage;
@@ -1519,30 +1568,29 @@ int32_t correctVoltageMeas(uint32_t measuredVoltage) {
 
 void correctOutputVoltage(void) {
 	if (sm->pwrMode == MODE_APDO && sm->currentState == STATE_ACTIVE) {
-		//uint32_t vol = BSP_PWR_VBUSGetVoltage(0)/10; //divide by 10 to get centivolts since only 4 digit display..
-		//uint32_t cur = BSP_PWR_VBUSGetCurrent(0);
 
-		//dhandle ->currentMeas = cur;
-		//dhandle ->voltageMeas = vol;
+		dhandle->voltageError = fullyCompensatedVoltageV - dhandle->voltageSet*10; // [mV = mV - cV*10]
 
-		dhandle->voltageError = dhandle ->voltageMeas - dhandle->voltageSet; //in cV
-
-		if (abs(dhandle->voltageError) > 3) {
-			uint32_t voltageErrorRounded;
+		if (abs(dhandle->voltageError) > 30) {
 			//round toward zero in 20mV steps
-			if (dhandle->voltageError >= 0) {
-				voltageErrorRounded= (dhandle->voltageError / 2) * 2;  // Floor for positive numbers
-			} else {
-				voltageErrorRounded= ((dhandle->voltageError + 1) / 2) * 2;  // Ceiling for negative numbers
-			}
+			int32_t voltageErrorRounded = roundToNearest20mV(dhandle->voltageError);  // [mV]
+			voltageErrorRoundedV = voltageErrorRounded;
 
-			dhandle->correctedRequestVoltage = dhandle->voltageSet - voltageErrorRounded; //cV
-			uint32_t indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->correctedRequestVoltage*10, dhandle->currentSet, dhandle ->selMethod);
+			dhandle->correctedRequestVoltage = dhandle->voltageSet - voltageErrorRounded/(int32_t)10; // [cV = cV - mV/10]
+
+			if (dhandle->correctedRequestVoltage >= dhandle->voltageMax) {
+				dhandle->correctedRequestVoltage = dhandle->voltageMax;
+			}
+			else if (dhandle->correctedRequestVoltage <= dhandle->voltageMin) {
+				dhandle->correctedRequestVoltage = dhandle->voltageMin;
+			}
+			int indexSRCAPDO = USER_SERV_FindSRCIndex(0, &powerRequestDetails, dhandle->correctedRequestVoltage*10, dhandle->currentSet, dhandle ->selMethod);
 			// Print to debug
-			char _str[110];
-			sprintf(_str,"APDO correction request: indexSRCPDO= %int, setVBUS= %lu mV, measVBUS=%lu mV, corVBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle ->voltageMeas*10, dhandle->correctedRequestVoltage*10, dhandle->currentSet);
+			char _str[100];
+			sprintf(_str,"APDO correction request: indexSRCPDO= %i, setVBUS= %lu mV, corVBUS= %lu mV, Ibus= %lu mA", indexSRCAPDO, 10*dhandle->voltageSet, dhandle->correctedRequestVoltage*10, dhandle->currentSet);
 			USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str, strlen(_str));
 			USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->correctedRequestVoltage*10, dhandle->currentSet);
+
 		}
 	}
 }

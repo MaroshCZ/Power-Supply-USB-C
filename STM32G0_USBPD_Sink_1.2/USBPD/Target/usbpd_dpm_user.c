@@ -352,49 +352,81 @@ void USBPD_DPM_GetDataInfo(uint8_t PortNum, USBPD_CORE_DataInfoType_TypeDef Data
 {
 /* USER CODE BEGIN USBPD_DPM_GetDataInfo */
   /* Check type of information targeted by request */
-  switch(DataId)
-  {
+	switch(DataId)
+	{
 
-  case USBPD_CORE_DATATYPE_SNK_PDO: /*!< Handling of port Sink PDO, requested by get sink capa*/
-  USBPD_PWR_IF_GetPortPDOs(PortNum, DataId, Ptr, Size);
-  *Size *= 4;
-  break;
+	case USBPD_CORE_DATATYPE_SNK_PDO: /*!< Handling of port Sink PDO, requested by get sink capa*/
+	{
+		USBPD_PWR_IF_GetPortPDOs(PortNum, DataId, Ptr, Size);
+		*Size *= 4;
+	}
+	break;
 
-  case USBPD_CORE_PPS_STATUS :
-	  {
+	/* Case Requested voltage value Data information */
+	case USBPD_CORE_DATATYPE_REQ_VOLTAGE :
+	{
+		*Size = 4;
+		(void)memcpy((uint8_t*)Ptr, (uint8_t *)&DPM_Ports[PortNum].DPM_RequestedVoltage, *Size);
+		break;
+	}
+
+	case USBPD_CORE_PPS_STATUS :
+	{
 		/* Get current drawn by sink */
 		USBPD_PPSSDB_TypeDef pps_status = {0};
 
 		/* Disable VBUS & IBUS Measurements */
-		/*
+
 		pps_status.fields.OutputVoltageIn20mVunits  = 0xFFFF;
 		pps_status.fields.OutputCurrentIn50mAunits  = 0xFF;
-		pps_status.fields.RealTimeFlags             = USBPD_PPS_REALTIMEFLAGS_PTF_NOT_SUPPORTED | USBPD_PPS_REALTIMEFLAGS_OMF_DISABLED;*/
+		pps_status.fields.RealTimeFlags             = USBPD_PPS_REALTIMEFLAGS_PTF_NOT_SUPPORTED | USBPD_PPS_REALTIMEFLAGS_OMF_DISABLED;
 
 		*Size = 4;
 		(void)memcpy((uint8_t*)Ptr, (uint8_t *)&pps_status.d32, *Size);
-	  }
-	  break;
-//  case USBPD_CORE_DATATYPE_SNK_PDO:           /*!< Handling of port Sink PDO, requested by get sink capa*/
-    // break;
-//  case USBPD_CORE_EXTENDED_CAPA:              /*!< Source Extended capability message content          */
-    // break;
-//  case USBPD_CORE_DATATYPE_REQ_VOLTAGE:       /*!< Get voltage value requested for BIST tests, expect 5V*/
-//    *Size = 4;
-//    (void)memcpy((uint8_t *)Ptr, (uint8_t *)&DPM_Ports[PortNum].DPM_RequestedVoltage, *Size);
-    // break;
-//  case USBPD_CORE_INFO_STATUS:                /*!< Information status message content                  */
-    // break;
-//  case USBPD_CORE_MANUFACTURER_INFO:          /*!< Retrieve of Manufacturer info message content       */
-    // break;
-//  case USBPD_CORE_BATTERY_STATUS:             /*!< Retrieve of Battery status message content          */
-    // break;
-//  case USBPD_CORE_BATTERY_CAPABILITY:         /*!< Retrieve of Battery capability message content      */
-    // break;
-  default:
-    DPM_USER_DEBUG_TRACE(PortNum, "ADVICE: update USBPD_DPM_GetDataInfo:%d", DataId);
-    break;
-  }
+	}
+	break;
+	/*
+	case USBPD_CORE_EXTENDED_CAPA :
+	{
+		*Size = sizeof(USBPD_SCEDB_TypeDef);
+		memcpy((uint8_t*)Ptr, (uint8_t *)&DPM_USER_Settings[PortNum].DPM_SRCExtendedCapa, *Size);
+	}
+	break;*/
+	case USBPD_CORE_INFO_STATUS :
+	{
+		USBPD_SDB_TypeDef  infostatus = {
+				.InternalTemp = 0,          /*!< Source or Sink internal temperature in degrees centigrade */
+				.PresentInput = 0,          /*!< Present Input                                             */
+				.PresentBatteryInput = 0,   /*!< Present Battery Input                                     */
+				.EventFlags = 0,            /*!< Event Flags                                               */
+				.TemperatureStatus = 0,     /*!< Temperature                                               */
+				.PowerStatus = 0,           /*!< Power Status based on combination of @ref USBPD_SDB_POWER_STATUS*/
+		};
+
+		*Size = sizeof(USBPD_SDB_TypeDef);
+		memcpy((uint8_t *)Ptr, &infostatus, *Size);
+	}
+	break;
+	//  case USBPD_CORE_DATATYPE_SNK_PDO:           /*!< Handling of port Sink PDO, requested by get sink capa*/
+	// break;
+	//  case USBPD_CORE_EXTENDED_CAPA:              /*!< Source Extended capability message content          */
+	// break;
+	//  case USBPD_CORE_DATATYPE_REQ_VOLTAGE:       /*!< Get voltage value requested for BIST tests, expect 5V*/
+	//    *Size = 4;
+	//    (void)memcpy((uint8_t *)Ptr, (uint8_t *)&DPM_Ports[PortNum].DPM_RequestedVoltage, *Size);
+	// break;
+	//  case USBPD_CORE_INFO_STATUS:                /*!< Information status message content                  */
+	// break;
+	//  case USBPD_CORE_MANUFACTURER_INFO:          /*!< Retrieve of Manufacturer info message content       */
+	// break;
+	//  case USBPD_CORE_BATTERY_STATUS:             /*!< Retrieve of Battery status message content          */
+	// break;
+	//  case USBPD_CORE_BATTERY_CAPABILITY:         /*!< Retrieve of Battery capability message content      */
+	// break;
+	default:
+		DPM_USER_DEBUG_TRACE(PortNum, "ADVICE: update USBPD_DPM_GetDataInfo:%d", DataId);
+		break;
+	}
 /* USER CODE END USBPD_DPM_GetDataInfo */
 }
 
@@ -410,54 +442,89 @@ void USBPD_DPM_SetDataInfo(uint8_t PortNum, USBPD_CORE_DataInfoType_TypeDef Data
 {
 /* USER CODE BEGIN USBPD_DPM_SetDataInfo */
   /* Check type of information targeted by request */
-  switch(DataId)
-  {
-  /* Case Received Source PDO values Data information :*/
-    case USBPD_CORE_DATATYPE_RCV_SRC_PDO:         /*!< Storage of Received Source PDO values        */
-       USBPD_USER_SERV_StoreSRCPDO(PortNum, Ptr, Size);
-       USER_SERV_ExtractSRCCapa();
-       break;
+	switch(DataId)
+	{
+	/* Case Received Source PDO values Data information :*/
+	case USBPD_CORE_DATATYPE_RCV_SRC_PDO:         /*!< Storage of Received Source PDO values        */
+		USBPD_USER_SERV_StoreSRCPDO(PortNum, Ptr, Size);
+		USER_SERV_ExtractSRCCapa();
+		break;
+		/* Case Received Request PDO Data information :
+		 */
+		/*
+	case USBPD_CORE_DATATYPE_RCV_REQ_PDO :
+		if (Size == 4)
+		{
+			uint8_t* rdo;
+			rdo = (uint8_t*)&DPM_Ports[PortNum].DPM_RcvRequestDOMsg;
+			(void)memcpy(rdo, Ptr, Size);
+		}
+		break;*/
 
-    case USBPD_CORE_PPS_STATUS :
-	  {
+	case USBPD_CORE_PPS_STATUS :
+	{
 		uint8_t*  ext_capa;
 		ext_capa = (uint8_t*)&DPM_Ports[PortNum].DPM_RcvPPSStatus;
 		memcpy(ext_capa, Ptr, Size);
-	  }
-	  break;
-//  case USBPD_CORE_DATATYPE_RDO_POSITION:      /*!< Reset the PDO position selected by the sink only */
-    // break;
-//  case USBPD_CORE_DATATYPE_RCV_SRC_PDO:       /*!< Storage of Received Source PDO values        */
-    // break;
-//  case USBPD_CORE_DATATYPE_RCV_SNK_PDO:       /*!< Storage of Received Sink PDO values          */
-    // break;
-//  case USBPD_CORE_EXTENDED_CAPA:              /*!< Source Extended capability message content   */
-    // break;
-//  case USBPD_CORE_PPS_STATUS:                 /*!< PPS Status message content                   */
-    // break;
-//  case USBPD_CORE_INFO_STATUS:                /*!< Information status message content           */
-    // break;
-//  case USBPD_CORE_ALERT:                      /*!< Storing of received Alert message content    */
-    // break;
-//  case USBPD_CORE_GET_MANUFACTURER_INFO:      /*!< Storing of received Get Manufacturer info message content */
-    // break;
-//  case USBPD_CORE_GET_BATTERY_STATUS:         /*!< Storing of received Get Battery status message content    */
-    // break;
-//  case USBPD_CORE_GET_BATTERY_CAPABILITY:     /*!< Storing of received Get Battery capability message content*/
-    // break;
-//  case USBPD_CORE_SNK_EXTENDED_CAPA:          /*!< Storing of Sink Extended capability message content       */
-    // break;
-  default:
-    DPM_USER_DEBUG_TRACE(PortNum, "ADVICE: update USBPD_DPM_SetDataInfo:%d", DataId);
-    break;
-  }
-/* USER CODE END USBPD_DPM_SetDataInfo */
+	}
+	break;
+/*
+	case USBPD_CORE_EXTENDED_CAPA :
+	{
+		uint8_t*  ext_capa;
+		ext_capa = (uint8_t*)&DPM_Ports[PortNum].DPM_RcvSRCExtendedCapa;
+		memcpy(ext_capa, Ptr, Size);
+	}
+	break;
+	case USBPD_CORE_INFO_STATUS :
+	{
+		uint8_t* info_status;
+		info_status = (uint8_t*)&DPM_Ports[PortNum].DPM_RcvStatus;
+		memcpy(info_status, Ptr, Size);
+	}
+	break;
+	case USBPD_CORE_ALERT:
+	{
+		uint8_t*  alert;
+		alert = (uint8_t*)&DPM_Ports[PortNum].DPM_RcvAlert.d32;
+		memcpy(alert, Ptr, Size);
+	}
+	break;*/
 
-  /* Forward info to GUI if enabled */
-  if (NULL != DPM_GUI_SaveInfo)
-  {
-    DPM_GUI_SaveInfo(PortNum, DataId, Ptr, Size);
-  }
+
+	//  case USBPD_CORE_DATATYPE_RDO_POSITION:      /*!< Reset the PDO position selected by the sink only */
+	// break;
+	//  case USBPD_CORE_DATATYPE_RCV_SRC_PDO:       /*!< Storage of Received Source PDO values        */
+	// break;
+	//  case USBPD_CORE_DATATYPE_RCV_SNK_PDO:       /*!< Storage of Received Sink PDO values          */
+	// break;
+	//  case USBPD_CORE_EXTENDED_CAPA:              /*!< Source Extended capability message content   */
+	// break;
+	//  case USBPD_CORE_PPS_STATUS:                 /*!< PPS Status message content                   */
+	// break;
+	//  case USBPD_CORE_INFO_STATUS:                /*!< Information status message content           */
+	// break;
+	//  case USBPD_CORE_ALERT:                      /*!< Storing of received Alert message content    */
+	// break;
+	//  case USBPD_CORE_GET_MANUFACTURER_INFO:      /*!< Storing of received Get Manufacturer info message content */
+	// break;
+	//  case USBPD_CORE_GET_BATTERY_STATUS:         /*!< Storing of received Get Battery status message content    */
+	// break;
+	//  case USBPD_CORE_GET_BATTERY_CAPABILITY:     /*!< Storing of received Get Battery capability message content*/
+	// break;
+	//  case USBPD_CORE_SNK_EXTENDED_CAPA:          /*!< Storing of Sink Extended capability message content       */
+	// break;
+	default:
+		DPM_USER_DEBUG_TRACE(PortNum, "ADVICE: update USBPD_DPM_SetDataInfo:%d", DataId);
+		break;
+	}
+	/* USER CODE END USBPD_DPM_SetDataInfo */
+
+	/* Forward info to GUI if enabled */
+	if (NULL != DPM_GUI_SaveInfo)
+	{
+		DPM_GUI_SaveInfo(PortNum, DataId, Ptr, Size);
+	}
 }
 
 /**
