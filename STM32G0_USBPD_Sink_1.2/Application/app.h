@@ -51,6 +51,7 @@ typedef struct {
 
   uint32_t             		voltageMeas;      /*!< Measured output voltage in mV */
   uint32_t              	currentMeas;      /*!< Measured output current in mAmps */
+  uint32_t					voltageMeasCorrected;
 
   int32_t					voltageError;
   uint32_t					correctedRequestVoltage;
@@ -64,6 +65,8 @@ typedef struct {
   uint8_t 					numProfiles;      /*!< Number of avaible profiles on adapter (source)*/
   uint8_t					selectedProfile;  /*!< Index of selected profile*/
   bool 						hasAPDO;          /*!< hasAPDO flag*/
+
+  bool 						requestOngoing;
 
 } SINKData_HandleTypeDef;
 
@@ -255,6 +258,7 @@ int32_t correctVoltageMeas(uint32_t measuredVoltage, uint32_t measuredCurrent);
 void correctOutputVoltage(void);
 void Update_AWD_Thresholds(uint32_t low, uint32_t high, uint32_t adc_watchdog);
 void updateLockLED(void);
+SINKData_HandleTypeDef *getSNK_data(void);
 
 /*Define helper functions for SCPI communication with PC*/
 uint8_t* getUSBbuffer(void);

@@ -269,6 +269,7 @@ void USBPD_DPM_UserTimerCounter(uint8_t PortNum)
   */
 void USBPD_DPM_Notification(uint8_t PortNum, USBPD_NotifyEventValue_TypeDef EventVal)
 {
+  SINKData_HandleTypeDef *snk_handle = getSNK_data();
   /* Forward PE notifications to GUI if enabled */
   if (NULL != DPM_GUI_PostNotificationMessage)
   {
@@ -283,11 +284,12 @@ void USBPD_DPM_Notification(uint8_t PortNum, USBPD_NotifyEventValue_TypeDef Even
     	sprintf(_str,"POWER_EXPLICIT_CONTRACT notification as DPM notif");
     	USBPD_TRACE_Add(USBPD_TRACE_DEBUG, PortNum, 0, (uint8_t*)_str, strlen(_str));
       break;
-//    case USBPD_NOTIFY_REQUEST_ACCEPTED:
-//      break;
+    case USBPD_NOTIFY_REQUEST_ACCEPTED:
+      	 snk_handle -> requestOngoing = true;
+      break;
 //    case USBPD_NOTIFY_REQUEST_REJECTED:
-//    case USBPD_NOTIFY_REQUEST_WAIT:
-//      break;
+    case USBPD_NOTIFY_REQUEST_WAIT:
+      break;
 //    case USBPD_NOTIFY_POWER_SWAP_TO_SNK_DONE:
 //      break;
     case USBPD_NOTIFY_STATE_SNK_READY:
@@ -297,6 +299,7 @@ void USBPD_DPM_Notification(uint8_t PortNum, USBPD_NotifyEventValue_TypeDef Even
 		// Use snprintf to limit the number of characters written
 		int len = snprintf(_str2, sizeof(_str2), "--------Output Enabled--------");
 		USBPD_TRACE_Add(USBPD_TRACE_DEBUG, 0, 0, (uint8_t*)_str2, strlen(_str2));
+		snk_handle -> requestOngoing = false;
       break;
 //    case USBPD_NOTIFY_HARDRESET_RX:
 //    case USBPD_NOTIFY_HARDRESET_TX:

@@ -48,6 +48,7 @@ uint8_t *getUSBbuffer(void) {
 	return usb_buffer;
 }
 
+
 //Initialize button event and time struct
 SystemEvents_TypeDef systemEvents = {0};
 BtnPressTimes_TypeDef btnPressTimes = {0};
@@ -79,7 +80,12 @@ SINKData_HandleTypeDef SNK_data = {
 	.selMethod = PDO_SEL_METHOD_MAX_CUR,
 	.hasAPDO = false,
 	.srcProfiles[0].profileType = UNKNOWN,
+	.requestOngoing = false
 };
+
+SINKData_HandleTypeDef *getSNK_data(void) {
+	return &SNK_data;
+}
 
 // Define the pointer to the struct
 SINKData_HandleTypeDef *dhandle = &SNK_data;
@@ -516,7 +522,7 @@ void handleCOMportstatus(uint8_t host_com_port_open){
 		 //Set COM state to OPEN
 		 sm->comState = STATE_OPEN;
 		 //Set default state timeout to 4000;
-		 sm->timeoutCounter = 4000;
+		 sm->timeoutCounter = 1500;
 
 		 //Drive lock LED
 		 //HAL_GPIO_WritePin(LED_LOCK_GPIO_Port, LED_LOCK_Pin, GPIO_PIN_SET);
@@ -717,8 +723,17 @@ void processUSBCommand(uint8_t* command, uint32_t length)
 	}
     else if (strcmp(cmd_part, "VOUT1?") == 0)
    	{
+    	uint32_t vol = BSP_PWR_VBUSGetVoltage(0); // [mV]
+		uint32_t cur = BSP_PWR_VBUSGetCurrent(0); // [mA]
+
+		//dhandle ->currentMeas = correctCurrentMeas(cur);
+		dhandle ->currentMeas = correctCurrentMeas(cur);
+		dhandle ->voltageMeas = vol;
+
+		//Experimental function
+		dhandle ->voltageMeasCorrected = correctVoltageMeas(dhandle->voltageMeas, dhandle ->currentMeas); //[mV]
     	// Query measured output voltage
-   		snprintf(response, sizeof(response), "Measured output voltage: %lu.%02lu V\r\n", dhandle->voltageMeas / 1000, dhandle->voltageMeas % 1000);
+   		snprintf(response, sizeof(response), "Measured output voltage: %lu.%02lu V\r\n", dhandle ->voltageMeasCorrected / 1000, dhandle->voltageMeasCorrected % 1000);
    	}
     else if (strcmp(cmd_part, "IOUT1?") == 0)
    	{
@@ -846,6 +861,7 @@ void handleIdleState(void) {
 void handleActiveState(void) {
 	// Entry actions (if just entered this state)
     static bool entryDone = false;
+    static bool firstRequestDone = false;
     static int8_t periodicCheckFlagCounter = 0;
 
 
@@ -875,30 +891,39 @@ void handleActiveState(void) {
 
     //Periodic check to display measured values
     if (sm->periodicCheckFlag) {
-		uint32_t vol = BSP_PWR_VBUSGetVoltage(0); // [mV]
-		uint32_t cur = BSP_PWR_VBUSGetCurrent(0); // [mA]
+    	uint32_t vol = BSP_PWR_VBUSGetVoltage(0); // [mV]
+    	uint32_t cur = BSP_PWR_VBUSGetCurrent(0); // [mA]
 
-		//dhandle ->currentMeas = correctCurrentMeas(cur);
-		dhandle ->currentMeas = correctCurrentMeas(cur);
-		dhandle ->voltageMeas = vol;
+    	//dhandle ->currentMeas = correctCurrentMeas(cur);
+    	dhandle ->currentMeas = correctCurrentMeas(cur);
+    	dhandle ->voltageMeas = vol;
 
-		//Experimental function
-		int32_t correctedVoltage = correctVoltageMeas(dhandle->voltageMeas, dhandle ->currentMeas); //[mV]
+    	//Experimental function
+    	dhandle ->voltageMeasCorrected = correctVoltageMeas(dhandle->voltageMeas, dhandle ->currentMeas); //[mV]
 
 
-		//Display output voltage
-		max7219_PrintIspecial(SEGMENT_1, correctedVoltage/10, 3); // divide voltage by 10 to get [cV]
-		//Display output current
-		max7219_PrintIspecial(SEGMENT_2, dhandle ->currentMeas, 4);
+    	//Display output voltage
+    	max7219_PrintIspecial(SEGMENT_1, dhandle ->voltageMeasCorrected/10, 3); // divide voltage by 10 to get [cV]
+    	//Display output current
+    	max7219_PrintIspecial(SEGMENT_2, dhandle ->currentMeas, 4);
 
-		periodicCheckFlagCounter += 1;
-		if(periodicCheckFlagCounter >= 10){
-			periodicCheckFlagCounter = 0;
+    	periodicCheckFlagCounter += 1;
+    	if (!dhandle->requestOngoing) {
+    		if (!firstRequestDone && periodicCheckFlagCounter >= 2){
+    			correctOutputVoltage();
+    			periodicCheckFlagCounter = 0;
+    			firstRequestDone = true;
+    		}
 
-			/*UNDER CONSTRUCTION*/
-			// Regulate output voltage
-			correctOutputVoltage();
-		}
+    		else if(periodicCheckFlagCounter >= 7){
+    			periodicCheckFlagCounter = 0;
+
+    			/*UNDER CONSTRUCTION*/
+    			// Regulate output voltage
+    			correctOutputVoltage();
+    		}
+    	}
+
     }
 
     //=================================================
@@ -907,9 +932,11 @@ void handleActiveState(void) {
     if (sm->outputBtnPressed) {
         sm->currentState = STATE_IDLE;
         entryDone = false;
+        firstRequestDone = false;
     } else if (sm->awdgTriggeredFlag) {
         sm->currentState = STATE_IDLE;
         entryDone = false;
+        firstRequestDone = false;
     } else if (sm->rotaryBtnPressed) {
         sm->currentState = STATE_SET_VALUES;
         if (sm->comState == STATE_CLOSED) {
@@ -917,6 +944,7 @@ void handleActiveState(void) {
 		}
         sm->rotaryBtnPressed = false;
         entryDone = false;
+        firstRequestDone = false;
     }
 
     //=================================================
@@ -1586,6 +1614,9 @@ int32_t correctVoltageMeas(uint32_t measuredVoltage, uint32_t measuredCurrent) {
 }
 
 void correctOutputVoltage(void) {
+	static bool firstEntry = true;
+	static uint32_t voltageSetPrevious;
+
 	if (sm->pwrMode == MODE_APDO && sm->currentState == STATE_ACTIVE) {
 
 		dhandle->voltageError = fullyCompensatedVoltageV - dhandle->voltageSet*10; // [mV = mV - cV*10]
@@ -1595,7 +1626,14 @@ void correctOutputVoltage(void) {
 			int32_t voltageErrorRounded = roundToNearest20mV(dhandle->voltageError);  // [mV]
 			voltageErrorRoundedV = voltageErrorRounded;
 
-			dhandle->correctedRequestVoltage = dhandle->voltageSet - voltageErrorRounded/(int32_t)10; // [cV = cV - mV/10]
+			if (firstEntry || voltageSetPrevious!= dhandle->voltageSet) {
+				dhandle->correctedRequestVoltage += dhandle->voltageSet - voltageSetPrevious; //dhandle->voltageSet - voltageErrorRounded/(int32_t)10; // [cV = cV - mV/10]
+				firstEntry = false;
+			}
+			else {
+				dhandle->correctedRequestVoltage = dhandle->correctedRequestVoltage - voltageErrorRounded/(int32_t)10; // [cV = cV - mV/10]
+			}
+
 
 			if (dhandle->correctedRequestVoltage >= dhandle->voltageMax) {
 				dhandle->correctedRequestVoltage = dhandle->voltageMax;
@@ -1611,6 +1649,8 @@ void correctOutputVoltage(void) {
 			USBPD_DPM_RequestSRCPDO(0, indexSRCAPDO, dhandle->correctedRequestVoltage*10, dhandle->currentSet);
 
 		}
+
+		voltageSetPrevious = dhandle -> voltageSet;
 	}
 }
 
