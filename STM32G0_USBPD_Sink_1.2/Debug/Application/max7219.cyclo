@@ -9,8 +9,10 @@
 ../Application/max7219.c:108:23:mapPosition	3
 ../Application/max7219.c:130:6:max7219_PrintDigit	7
 ../Application/max7219.c:171:16:max7219_PrintItos	9
-../Application/max7219.c:250:16:max7219_PrintNtos	4
-../Application/max7219.c:283:16:max7219_PrintFtos	5
-../Application/max7219.c:326:6:max7219_BlinkDigit	5
-../Application/max7219.c:361:17:getSymbol	1
-../Application/max7219.c:366:17:lcdPow10	2
+../Application/max7219.c:250:16:max7219_PrintIspecial	9
+../Application/max7219.c:326:16:max7219_PrintNtos	4
+../Application/max7219.c:359:16:max7219_PrintFtos	5
+../Application/max7219.c:402:6:max7219_BlinkDigit	5
+../Application/max7219.c:447:6:max7219_BlinkDigit2	2
+../Application/max7219.c:462:17:getSymbol	1
+../Application/max7219.c:467:17:lcdPow10	2

@@ -1,4 +1,0 @@
-../app/app_encoder.c:31:6:app_encoder_init	1
-../app/app_encoder.c:59:6:app_encoder_loop	13
-../app/app_encoder.c:123:6:button_isr	2
-../app/app_encoder.c:145:6:button_timer_isr	1

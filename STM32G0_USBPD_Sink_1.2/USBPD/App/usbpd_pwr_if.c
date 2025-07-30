@@ -139,6 +139,7 @@ USBPD_StatusTypeDef USBPD_PWR_IF_SupplyReady(uint8_t PortNum, USBPD_VSAFE_Status
   }
 
   BSP_USBPD_PWR_VBUSGetVoltage(PortNum, &_voltage);
+
   if (USBPD_VSAFE_0V == Vsafe)
   {
     /* Vsafe0V */
@@ -267,6 +268,7 @@ uint8_t USBPD_PWR_IF_GetVBUSStatus(uint8_t PortNum, USBPD_VBUSPOWER_STATUS Power
   uint8_t _status = USBPD_FALSE;
   uint32_t _vbus = HW_IF_PWR_GetVoltage(PortNum);
 
+  _vbus = 5000;
   switch(PowerTypeStatus)
   {
   case USBPD_PWR_BELOWVSAFE0V :

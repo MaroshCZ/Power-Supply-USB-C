@@ -9,8 +9,10 @@
 ../Application/max7219.c:108:23:mapPosition	16	static
 ../Application/max7219.c:130:6:max7219_PrintDigit	32	static
 ../Application/max7219.c:171:16:max7219_PrintItos	40	static
-../Application/max7219.c:250:16:max7219_PrintNtos	32	static
-../Application/max7219.c:283:16:max7219_PrintFtos	24	static
-../Application/max7219.c:326:6:max7219_BlinkDigit	48	static
-../Application/max7219.c:361:17:getSymbol	16	static
-../Application/max7219.c:366:17:lcdPow10	24	static
+../Application/max7219.c:250:16:max7219_PrintIspecial	40	static
+../Application/max7219.c:326:16:max7219_PrintNtos	32	static
+../Application/max7219.c:359:16:max7219_PrintFtos	24	static
+../Application/max7219.c:402:6:max7219_BlinkDigit	48	static
+../Application/max7219.c:447:6:max7219_BlinkDigit2	32	static
+../Application/max7219.c:462:17:getSymbol	16	static
+../Application/max7219.c:467:17:lcdPow10	24	static

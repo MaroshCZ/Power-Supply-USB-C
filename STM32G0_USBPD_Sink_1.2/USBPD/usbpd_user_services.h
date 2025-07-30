@@ -71,6 +71,7 @@ typedef struct
   USBPD_PPSSDB_TypeDef  DPM_RcvPPSStatus;           /*!< PPS Status received by port partner                         */
   USBPD_SKEDB_TypeDef   DPM_RcvSNKExtendedCapa;     /*!< SNK Extended Capability received by port partner            */
 #endif /* _SNK */
+  USBPD_SCEDB_TypeDef   DPM_RcvSRCExtendedCapa;                  /*!< SRC Extended Capability received by port partner                     */
   uint32_t              DPM_RequestDOMsg;           /*!< Request Power Data Object message to be sent                */
   uint32_t              DPM_RDOPosition;            /*!< RDO Position of requested DO in Source list of capabilities */
   uint32_t              DPM_RDOPositionPrevious;    /*!< RDO Position of requested DO in Source list of capabilities */
@@ -149,6 +150,7 @@ uint32_t USER_SERV_FindSRCIndex(uint32_t PortNum,
 											uint16_t Voltage_mV,
 											uint16_t Current_mA,
 											uint8_t Method);
+void USER_SERV_ExtractSRCCapa(void);
 #endif /* _SNK */
 /* USER CODE BEGIN Private_Variables */
 extern USBPD_HandleTypeDef DPM_Ports[USBPD_PORT_COUNT];

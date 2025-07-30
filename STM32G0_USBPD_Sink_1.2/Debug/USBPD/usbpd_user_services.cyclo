@@ -1,7 +1,8 @@
-../USBPD/usbpd_user_services.c:214:6:USBPD_USER_SERV_StoreSRCPDO	3
-../USBPD/usbpd_user_services.c:244:6:USBPD_USER_SERV_EvaluateCapa	2
-../USBPD/usbpd_user_services.c:314:10:USER_SERV_SNK_EvaluateMatchWithSRCPDO	23
-../USBPD/usbpd_user_services.c:512:10:USER_SERV_FindVoltageIndex	19
-../USBPD/usbpd_user_services.c:652:6:USER_SERV_SNK_BuildRDOfromSelectedPDO	7
-../USBPD/usbpd_user_services.c:767:6:USER_SERV_SNK_BuildRequestedRDO	3
-../USBPD/usbpd_user_services.c:835:10:USER_SERV_FindSRCIndex	13
+../USBPD/usbpd_user_services.c:215:6:USBPD_USER_SERV_StoreSRCPDO	3
+../USBPD/usbpd_user_services.c:238:6:USBPD_USER_SERV_EvaluateCapa	2
+../USBPD/usbpd_user_services.c:308:10:USER_SERV_SNK_EvaluateMatchWithSRCPDO	23
+../USBPD/usbpd_user_services.c:506:10:USER_SERV_FindVoltageIndex	19
+../USBPD/usbpd_user_services.c:646:6:USER_SERV_SNK_BuildRDOfromSelectedPDO	7
+../USBPD/usbpd_user_services.c:765:6:USER_SERV_SNK_BuildRequestedRDO	3
+../USBPD/usbpd_user_services.c:833:10:USER_SERV_FindSRCIndex	21
+../USBPD/usbpd_user_services.c:994:6:USER_SERV_ExtractSRCCapa	1

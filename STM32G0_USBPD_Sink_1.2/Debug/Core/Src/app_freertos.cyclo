@@ -1,0 +1,2 @@
+../Core/Src/app_freertos.c:79:6:app_freertos_create	1
+../Core/Src/app_freertos.c:87:6:DISPReceiverTask	1

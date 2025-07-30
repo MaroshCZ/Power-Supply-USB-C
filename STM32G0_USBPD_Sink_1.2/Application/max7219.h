@@ -11,6 +11,7 @@
 #include "main.h"
 #include "stdbool.h"
 #include "app.h"
+#include "stdlib.h"
 
 #define NUMBER_OF_DIGITS	8
 #define SPI_PORT			hspi2
@@ -62,6 +63,15 @@ typedef enum {
 	SEGMENT_1 = 1, SEGMENT_2 = 2
 }MAX7219_Segments;
 
+typedef enum {
+	DEC_P_4 = 4, DEC_P_3 = 3, DEC_P_2 = 2, DEC_P_1 = 1
+}MAX7219_DecimalPoint;
+
+typedef enum {
+	BLINK_DIGIT = 0x00,
+	DISP_DIGITS = 0x01
+}MAX7219_EventType;
+
 void max7219_Init(uint8_t intensivity);
 void max7219_SetIntensivity(uint8_t intensivity);
 void max7219_Clean(void);
@@ -72,7 +82,9 @@ void max7219_Decode_On(void);
 void max7219_Decode_Off(void);
 void max7219_PrintDigit(MAX7219_Segments segment, MAX7219_Digits position, MAX7219_Numeric numeric, bool point);
 void max7219_BlinkDigit(MAX7219_Segments segment, int *valuePtr, uint8_t n, uint32_t ms, uint8_t decimal_position);
+void max7219_BlinkDigit2(MAX7219_Segments segment, int value, uint8_t n, uint8_t decimal_position, bool state);
 MAX7219_Digits max7219_PrintItos(MAX7219_Segments segment, MAX7219_Digits position, int value, uint8_t decimal_position);
+MAX7219_Digits max7219_PrintIspecial(MAX7219_Segments segment, int value, uint8_t decimal_position);
 MAX7219_Digits max7219_PrintNtos(MAX7219_Segments segment, MAX7219_Digits position, uint32_t value, uint8_t n);
 MAX7219_Digits max7219_PrintFtos(MAX7219_Segments segment, MAX7219_Digits position, float value, uint8_t n);
 

@@ -238,6 +238,82 @@ MAX7219_Digits max7219_PrintItos(MAX7219_Segments segment, MAX7219_Digits positi
 
 	return position;
 }
+
+/**
+  * @brief  Function to display integer value with possibility to print decimal point
+  * @param  segment: Specify which segment (1/2) should be used
+  * @param  value: Numeric value to be displayed
+  * @param  decimal_position: Place of decimal point
+  * @retval MAX7219_Digits: current cursor position
+  */
+
+MAX7219_Digits max7219_PrintIspecial(MAX7219_Segments segment, int value, uint8_t decimal_position)
+{
+	max7219_SendData(REG_DECODE_MODE, 0xFF);
+
+	int32_t i;
+    int8_t num_digits = 0;
+
+
+	//Get number of non-zero digits
+	i = 1;
+	while ((abs(value) / i) > 9)
+	{
+		i *= 10;
+		num_digits++;
+	}
+	num_digits++;
+
+	int position = num_digits;
+
+	//Handle negative numbers
+	if (value < 0)
+	{
+		if(position > 0)
+		{
+			max7219_SendData(position, MINUS);
+			position--;
+		}
+		value = -value;
+	}
+
+
+	//Print leading zeros and check for decimal point
+	for (int j= 4; j > num_digits; j--) {
+		if(j == decimal_position) {
+			max7219_PrintDigit(segment, j, 0, true);
+		}
+		else {
+			max7219_PrintDigit(segment, j, 0, false);
+		}
+	}
+
+
+	//Print each number and decimal point
+	while (i > 0)
+	{
+		if(position > 0)
+		{	//If current number position is decimal point, print also decimal point
+			if(position == decimal_position) {
+				max7219_PrintDigit(segment, position, (value % (i * 10)) / i, true);
+			}
+			else {
+				max7219_PrintDigit(segment, position, (value % (i * 10)) / i, false);
+			}
+			position--;
+		}
+
+		i /= 10;
+
+	}
+
+	max7219_SendData(REG_DECODE_MODE, decodeMode);
+
+	return position;
+}
+
+
+
 /**
   * @brief  Function to print number of INT type with a fixed number of digits
   * @param  segment: Specify which segment (1/2) should be used
@@ -356,6 +432,31 @@ void max7219_BlinkDigit(MAX7219_Segments segment, int *valuePtr, uint8_t n, uint
 	//Delay
 	blinkTimer = HAL_GetTick() + blinkDelay;
 	while (HAL_GetTick() < blinkTimer);
+}
+
+/**
+  * @brief  Function to blink a digit on specific position
+  * @param  segment: Specify which segment (1/2) should be used
+  * @param  value: value
+  * @param  n: Digit which should be blinked
+  * @param  decimal_position: place of decimal point
+  * @param  show_digit: specifies if digit has to be blanked or printed
+  * @retval None
+  */
+
+void max7219_BlinkDigit2(MAX7219_Segments segment, int value, uint8_t n, uint8_t decimal_position, bool show_digit) {
+	uint16_t blinkDigit = n; // Digit to blink (0-3)
+	uint8_t digit;
+	bool showDecimal = blinkDigit == decimal_position;
+	//Erase digit
+	if (!show_digit) {
+		//Print the BLANK and also decimal point
+		max7219_PrintDigit(segment, blinkDigit, BLANK, showDecimal);
+
+	} else {
+		// Reprint whole number
+		max7219_PrintIspecial(segment, value, decimal_position);
+	}
 }
 
 static uint16_t getSymbol(uint8_t number)

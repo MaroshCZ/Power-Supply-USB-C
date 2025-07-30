@@ -45,7 +45,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "usbpd_def.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -72,17 +72,25 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define VDDA_APPLI 3300
-#define DB_OUT_Pin GPIO_PIN_4
-#define DB_OUT_GPIO_Port GPIOA
+#define HighZ_Pin GPIO_PIN_0
+#define HighZ_GPIO_Port GPIOA
+#define FLT_IN_TCPP_Pin GPIO_PIN_1
+#define FLT_IN_TCPP_GPIO_Port GPIOA
+#define OCP_DAC_LIMIT_Pin GPIO_PIN_4
+#define OCP_DAC_LIMIT_GPIO_Port GPIOA
 #define VSENSE_Pin GPIO_PIN_5
 #define VSENSE_GPIO_Port GPIOA
+#define OCP_ADC_I_Pin GPIO_PIN_6
+#define OCP_ADC_I_GPIO_Port GPIOA
 #define ISENSE_Pin GPIO_PIN_7
 #define ISENSE_GPIO_Port GPIOA
 #define SW2_DEBUG_BTN_Pin GPIO_PIN_4
 #define SW2_DEBUG_BTN_GPIO_Port GPIOC
 #define SW2_DEBUG_BTN_EXTI_IRQn EXTI4_15_IRQn
-#define CC1_G4_Pin GPIO_PIN_0
-#define CC1_G4_GPIO_Port GPIOB
+#define LED_LOCK_Pin GPIO_PIN_5
+#define LED_LOCK_GPIO_Port GPIOC
+#define DB_OUT_Pin GPIO_PIN_0
+#define DB_OUT_GPIO_Port GPIOB
 #define SW3_OFF_ON_Pin GPIO_PIN_1
 #define SW3_OFF_ON_GPIO_Port GPIOB
 #define SW3_OFF_ON_EXTI_IRQn EXTI0_1_IRQn
@@ -100,6 +108,14 @@ void Error_Handler(void);
 #define ENC_TOGGLE_UNITS_EXTI_IRQn EXTI4_15_IRQn
 #define CC2_G4_Pin GPIO_PIN_4
 #define CC2_G4_GPIO_Port GPIOB
+#define LED_USER_Pin GPIO_PIN_5
+#define LED_USER_GPIO_Port GPIOB
+#define OCP_ALERT_Pin GPIO_PIN_6
+#define OCP_ALERT_GPIO_Port GPIOB
+#define OCP_ALERT_EXTI_IRQn EXTI4_15_IRQn
+#define OCP_ALERT2_Pin GPIO_PIN_7
+#define OCP_ALERT2_GPIO_Port GPIOB
+#define OCP_ALERT2_EXTI_IRQn EXTI4_15_IRQn
 #define OCP_RESET_Pin GPIO_PIN_8
 #define OCP_RESET_GPIO_Port GPIOB
 #define RELAY_ON_OFF_Pin GPIO_PIN_10

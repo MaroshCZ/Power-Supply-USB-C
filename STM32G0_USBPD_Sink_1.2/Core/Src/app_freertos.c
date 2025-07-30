@@ -24,16 +24,41 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "max7219.h"
+#include "cmsis_os2.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+
+typedef struct {
+	MAX7219_EventType event;    	     // Type of event
+    MAX7219_Segments segment;		     // Segment number
+    int32_t value;         			     // Numeric value (e.g., voltage, current)
+    MAX7219_DecimalPoint decimal_pos;    // Decimal point position
+} DISPMessage_t;
+
+#define DISP_QUEUE_MESSAGE_MAX_SIZE      sizeof(DISPMessage_t)
+#define DISP_QUEUE_PRIORITY              osPriorityLow
+#define DISP_QUEUE_SIZE            		 50
+
+
+/* Definitions for Receiver */
+osThreadId_t DISPReceiveMsg;
+const osThreadAttr_t DISPReceiveMsg_attributes = {
+  .name = "DISPReceiveMsg",
+  .priority = (osPriority_t) osPriorityLow,
+  .stack_size = 256 * 4
+};
+
+osMessageQueueId_t DISPQueue;
+const osMessageQueueAttr_t DISPQueue_attributes = {
+  .name = "DISPQueue"
+};
 
 /* USER CODE END PD */
 
@@ -49,6 +74,29 @@
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
+void DISPReceiverTask(void * argument);
+
+void app_freertos_create() {
+    /* Create Message Queue */
+    DISPQueue = osMessageQueueNew(DISP_QUEUE_SIZE, DISP_QUEUE_MESSAGE_MAX_SIZE, &DISPQueue_attributes);
+
+    /* Create Receiver Task */
+    DISPReceiveMsg = osThreadNew(DISPReceiverTask, DISPQueue, &DISPReceiveMsg_attributes); // second argument is queue handle
+}
+
+void DISPReceiverTask(void *argument) {
+    osMessageQueueId_t queue = (osMessageQueueId_t) argument; // Cast to correct type
+    DISPMessage_t msg;
+
+    for (;;) {
+        if (osMessageQueueGet(queue, &msg, NULL, osWaitForever) == osOK) {
+            // Process received message
+            // Example: Update display based on received message
+            //max7219_PrintIspecial(msg.segment, msg.value, msg.decimal_pos);
+        }
+        osDelay(200); // Adjust delay as needed
+    }
+}
 
 /* USER CODE END FunctionPrototypes */
 

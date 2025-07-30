@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2024 STMicroelectronics.
+  * Copyright (c) 2025 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -22,7 +22,7 @@
 #include "usbd_cdc_if.h"
 
 /* USER CODE BEGIN INCLUDE */
-
+#include "app.h"
 /* USER CODE END INCLUDE */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -49,7 +49,6 @@
   */
 
 /* USER CODE BEGIN PRIVATE_TYPES */
-extern uint8_t usb_buffer[64];
 /* USER CODE END PRIVATE_TYPES */
 
 /**
@@ -228,7 +227,10 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
     break;
 
     case CDC_SET_CONTROL_LINE_STATE:
+    	 USBD_SetupReqTypedef *req = (USBD_SetupReqTypedef *)pbuf;
+    	 uint8_t host_com_port_open = (req->wValue & 0x0001) ? 1 : 0;
 
+    	 handleCOMportstatus(host_com_port_open);
     break;
 
     case CDC_SEND_BREAK:
@@ -264,6 +266,7 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
   USBD_CDC_SetRxBuffer(&hUsbDeviceFS, &Buf[0]);
   USBD_CDC_ReceivePacket(&hUsbDeviceFS);
 
+  uint8_t* usb_buffer = getUSBbuffer();
   memset(usb_buffer, '\0', 64);  // clear the usb_buffer
   uint8_t len = (uint8_t)*Len;
   memcpy(usb_buffer, Buf, len);  // copy received data to the usb_buffer
@@ -273,7 +276,6 @@ static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 
   //Clear the Buf to avoid residual data
   memset(Buf, '\0', len);
-
   return (USBD_OK);
   /* USER CODE END 6 */
 }
